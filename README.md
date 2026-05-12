@@ -16,11 +16,12 @@
 
 ## Navigation
 
-The left sidebar contains five main sections:
+The left sidebar contains six main sections:
 
 | Section | Purpose |
 |---|---|
 | **🪣 Collect** | Rapid-capture inbox for any thought, task, or to-do |
+| **💡 Ideas** | Capture ideas and develop them into tasks, projects, or meetings |
 | **Dashboard** | Overview of projects, KPIs, and upcoming tasks |
 | **Calendar** | Monthly, weekly, and daily calendar views |
 | **All Tasks** | Full filterable task list grouped by date |
@@ -35,11 +36,25 @@ Click the **New ▾** button in the top bar to create a Task, Project, or Schedu
 The Collect page is a frictionless capture inbox — dump anything here without worrying about where it belongs yet.
 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
-- Each captured item can be processed into a **Task**, **Project**, or **Meeting** using the action buttons on the card.
+- Each captured item can be processed into a **Task**, **Project**, **Meeting**, or **Idea** using the action buttons on the card.
+- Sending an item to **Idea** transfers it silently to the Ideas page — no form opens, and the card is marked "→ Ideas".
 - Filter the list by: **All · To Process · Completed · Converted**
 - Use the **Empty Bucket** button to step through all unprocessed items one by one in a focused review modal.
 - Items marked as completed stay visible under the Completed filter.
 - Processed (converted) items are shown faded under the Converted filter and can be cleared in bulk.
+
+---
+
+## Ideas
+
+The Ideas page is a dedicated space for capturing sparks of inspiration before they're ready to become action items.
+
+- Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
+- Ideas can also arrive here from the Collect page via the **Idea** action button on any captured item.
+- Each idea can be developed into a **Task**, **Project**, or **Meeting** using the action buttons on the card.
+- Mark an idea as **Developed** to indicate it has been thought through without converting it yet.
+- Filter the list by: **All · To Develop · Developed · Converted**
+- The sidebar badge shows the count of ideas still waiting to be developed.
 
 ---
 

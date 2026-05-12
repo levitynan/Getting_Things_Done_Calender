@@ -290,6 +290,8 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .process-btn-project:hover{background:var(--color-blue);color:white}
 .process-btn-meeting{background:var(--color-purple-highlight);color:var(--color-purple);border-color:var(--color-purple-highlight)}
 .process-btn-meeting:hover{background:var(--color-purple);color:white}
+.process-btn-idea{background:var(--color-gold-highlight);color:var(--color-gold);border-color:var(--color-gold-highlight)}
+.process-btn-idea:hover{background:var(--color-gold);color:white}
 .process-btn-delete{background:transparent;color:var(--color-text-faint);border-color:var(--color-divider);margin-left:auto}
 .process-btn-delete:hover{background:var(--color-error-highlight);color:var(--color-error);border-color:var(--color-error-highlight)}
 
@@ -398,13 +400,18 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       Collect
       <span id="bucket-badge" style="margin-left:auto;background:var(--color-gold);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
     </div>
-    <div class="nav-item" onclick="navigate('dashboard')">
+    <div class="nav-item" id="nav-ideas" onclick="navigate('ideas')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>
+      Ideas
+      <span id="idea-badge" style="margin-left:auto;background:var(--color-gold);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
+    </div>
+    <div class="nav-item" id="nav-dashboard" onclick="navigate('dashboard')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
     </div>
-    <div class="nav-item" onclick="navigate('calendar')">
+    <div class="nav-item" id="nav-calendar" onclick="navigate('calendar')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar
     </div>
-    <div class="nav-item" onclick="navigate('tasks')">
+    <div class="nav-item" id="nav-tasks" onclick="navigate('tasks')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>All Tasks
     </div>
     <div class="nav-section-label">Projects</div>
@@ -509,6 +516,45 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <button class="btn btn-ghost" onclick="clearProcessed()" id="clear-processed-btn" style="font-size:var(--text-xs);display:none">Clear processed</button>
   </div>
   <div id="bucket-list"></div>
+</div>
+
+<div class="view" id="view-ideas">
+  <div class="bucket-hero">
+    <div class="bucket-hero-text">
+      <h2>💡 Ideas</h2>
+      <p>Capture every idea as it sparks. When you're ready, develop each one into a task, project, or meeting.</p>
+    </div>
+    <div class="bucket-stats">
+      <div class="bucket-stat"><div class="bucket-stat-num" id="istat-total">0</div><div class="bucket-stat-label">captured</div></div>
+      <div class="bucket-stat"><div class="bucket-stat-num" id="istat-pending">0</div><div class="bucket-stat-label">to develop</div></div>
+      <div class="bucket-stat"><div class="bucket-stat-num" id="istat-developed">0</div><div class="bucket-stat-label">developed</div></div>
+      <div class="bucket-stat"><div class="bucket-stat-num" id="istat-done">0</div><div class="bucket-stat-label">converted</div></div>
+    </div>
+  </div>
+  <div class="capture-bar">
+    <div class="capture-input-wrap">
+      <textarea class="capture-input" id="idea-capture-input" rows="2" onkeydown="captureIdeaKeydown(event)" placeholder="What's your idea? Capture it here… (Enter to add, Shift+Enter for new line)"></textarea>
+      <div class="capture-hint">Press <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Enter</kbd> to capture &nbsp;·&nbsp; <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Shift+Enter</kbd> for new line</div>
+    </div>
+    <button class="btn btn-primary" onclick="captureIdea()" style="align-self:flex-start;margin-top:1px;background:var(--color-gold);border-color:var(--color-gold)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Capture
+    </button>
+  </div>
+  <div class="tag-chips" id="idea-tag-chips">
+    <div class="tag-chip active" data-itag="all" onclick="setIdeaFilter(this,'all')">All</div>
+    <div class="tag-chip" data-itag="pending" onclick="setIdeaFilter(this,'pending')">&#x23F3; To Develop</div>
+    <div class="tag-chip" data-itag="developed" onclick="setIdeaFilter(this,'developed')">&#x2714; Developed</div>
+    <div class="tag-chip" data-itag="processed" onclick="setIdeaFilter(this,'processed')">&#x1F4C2; Converted</div>
+  </div>
+  <div class="process-banner" id="idea-banner" style="display:none">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div><strong id="idea-banner-count"></strong> <span>ideas waiting to be developed into tasks, projects, or meetings.</span></div>
+  </div>
+  <div class="bucket-controls" style="margin-top:var(--space-4)">
+    <span class="bucket-controls-label" id="idea-list-label">Captured ideas</span>
+    <button class="btn btn-ghost" onclick="clearIdeaProcessed()" id="clear-idea-processed-btn" style="font-size:var(--text-xs);display:none">Clear processed</button>
+  </div>
+  <div id="idea-list"></div>
 </div>
 
 <div class="view" id="view-dashboard">
@@ -711,11 +757,12 @@ function loadFromStorage() {
         projects: saved.projects || DEFAULT_STATE.projects,
         tasks:    saved.tasks    || DEFAULT_STATE.tasks,
         meetings: saved.meetings || [],
-        bucket:   saved.bucket   || []
+        bucket:   saved.bucket   || [],
+        ideas:    saved.ideas    || []
       };
     }
   } catch(e) { console.warn('TaskCal: could not load saved data', e); }
-  return { ...DEFAULT_STATE, meetings: [], bucket: [] };
+  return { ...DEFAULT_STATE, meetings: [], bucket: [], ideas: [] };
 }
 
 let _toastTimer=null;
@@ -725,7 +772,8 @@ function saveToStorage() {
       projects: state.projects,
       tasks:    state.tasks,
       meetings: state.meetings,
-      bucket:   state.bucket
+      bucket:   state.bucket,
+      ideas:    state.ideas
     }));
     const t=document.getElementById('save-toast');
     if(t){t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
@@ -734,12 +782,14 @@ function saveToStorage() {
 
 const _persisted = loadFromStorage();
 if (!Array.isArray(_persisted.bucket)) _persisted.bucket = [];
+if (!Array.isArray(_persisted.ideas))  _persisted.ideas  = [];
 
 let state = {
   projects: _persisted.projects,
   tasks:    _persisted.tasks,
   meetings: _persisted.meetings,
   bucket:   _persisted.bucket,
+  ideas:    _persisted.ideas,
   calView:'month',
   calYear:TODAY.getFullYear(), calMonth:TODAY.getMonth(),
   calWeekStart: null,
@@ -821,11 +871,14 @@ function navigate(view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   state.currentView=view;
-  const titles={bucket:'Collect',dashboard:'Dashboard',calendar:'Calendar',tasks:'All Tasks'};
+  const titles={bucket:'Collect',ideas:'Ideas',dashboard:'Dashboard',calendar:'Calendar',tasks:'All Tasks'};
   document.getElementById('topbar-title').textContent=titles[view]||view;
   if(view==='calendar') renderCalendar();
   if(view==='tasks') renderTasks();
   if(view==='dashboard') renderDashboard();
+  if(view==='ideas') renderIdeaView();
+  const navEl=document.getElementById('nav-'+view);
+  if(navEl) navEl.classList.add('active');
   renderSidebar();
 }
 
@@ -1358,13 +1411,16 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 function refreshView(){
-  // Always keep bucket badge fresh
   const _bp = (state.bucket||[]).filter(b=>!b.processed&&!b.completed).length;
   const _bb = document.getElementById('bucket-badge');
   if(_bb){_bb.textContent=_bp;_bb.style.display=_bp>0?'inline-flex':'none';}
+  const _ip = (state.ideas||[]).filter(b=>!b.processed&&!b.developed).length;
+  const _ib = document.getElementById('idea-badge');
+  if(_ib){_ib.textContent=_ip;_ib.style.display=_ip>0?'inline-flex':'none';}
   if(state.currentView==='dashboard') renderDashboard();
   else if(state.currentView==='calendar') renderCalendar();
   else if(state.currentView==='tasks'||state.currentView.startsWith('project-')) renderTasks();
+  else if(state.currentView==='ideas') renderIdeaView();
 }
 
 // ===== THEME =====
@@ -1568,14 +1624,25 @@ function editBucketText(id, newText) {
   if (item) { item.text = newText; saveToStorage(); }
 }
 
-// Convert a bucket item → pre-fill the new task/project/meeting modal
+// Convert a bucket item → pre-fill the new task/project/meeting modal, or transfer to Ideas
 function processAs(id, type) {
   const item = state.bucket.find(b => b.id === id);
   if (!item) return;
 
-  // Mark processed immediately
   item.processed = true;
   item.processedAs = type;
+
+  if (type === 'idea') {
+    state.ideas.unshift({
+      id: 'i' + Date.now(),
+      text: item.text,
+      created: new Date().toISOString(),
+      developed: false,
+      processed: false,
+      processedAs: null
+    });
+  }
+
   saveToStorage();
   renderBucketView();
 
@@ -1669,8 +1736,8 @@ function renderBucketList() {
   container.innerHTML = items.map(item => {
     const d = new Date(item.created);
     const dateStr = d.toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const typeColors = {task:'var(--color-primary)',project:'var(--color-blue)',meeting:'var(--color-purple)'};
-    const typeLabels = {task:'→ Task',project:'→ Project',meeting:'→ Meeting'};
+    const typeColors = {task:'var(--color-primary)',project:'var(--color-blue)',meeting:'var(--color-purple)',idea:'var(--color-gold)'};
+    const typeLabels = {task:'→ Task',project:'→ Project',meeting:'→ Meeting',idea:'→ Ideas'};
     const tagHtml = item.processed && item.processedAs
       ? `<span class="bucket-item-tag" style="color:${typeColors[item.processedAs]}">${typeLabels[item.processedAs]}</span>` : '';
 
@@ -1704,6 +1771,9 @@ function renderBucketList() {
             </button>
             <button class="process-btn process-btn-meeting" onclick="processAs('${item.id}','meeting')">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Meeting
+            </button>
+            <button class="process-btn process-btn-idea" onclick="processAs('${item.id}','idea')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>Idea
             </button>
             ` : `
             <button class="process-btn process-btn-uncomplete" onclick="toggleBucketComplete('${item.id}')">
@@ -1872,6 +1942,200 @@ function reviewDiscard(id) {
   renderReviewStep();
 }
 
+// ===== IDEAS =====
+let ideaFilter = 'all';
+
+function captureIdea() {
+  const inp = document.getElementById('idea-capture-input');
+  const text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  const item = {
+    id: 'i' + Date.now(),
+    text,
+    created: new Date().toISOString(),
+    developed: false,
+    processed: false,
+    processedAs: null
+  };
+  state.ideas.unshift(item);
+  inp.value = '';
+  inp.style.height = '';
+  inp.focus();
+  saveToStorage();
+  renderIdeaView();
+}
+
+function captureIdeaKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); captureIdea(); }
+}
+
+function setIdeaFilter(el, tag) {
+  ideaFilter = tag;
+  document.querySelectorAll('#idea-tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderIdeaList();
+}
+
+function clearIdeaProcessed() {
+  if (!confirm('Remove all developed and converted ideas?')) return;
+  state.ideas = state.ideas.filter(b => !b.processed && !b.developed);
+  saveToStorage();
+  renderIdeaView();
+}
+
+function deleteIdeaItem(id) {
+  state.ideas = state.ideas.filter(b => b.id !== id);
+  saveToStorage();
+  renderIdeaView();
+}
+
+function toggleIdeaDeveloped(id) {
+  const item = state.ideas.find(b => b.id === id);
+  if (!item) return;
+  item.developed = !item.developed;
+  saveToStorage();
+  renderIdeaView();
+}
+
+function editIdeaText(id, newText) {
+  const item = state.ideas.find(b => b.id === id);
+  if (item) { item.text = newText; saveToStorage(); }
+}
+
+function processIdeaAs(id, type) {
+  const item = state.ideas.find(b => b.id === id);
+  if (!item) return;
+  item.processed = true;
+  item.processedAs = type;
+  saveToStorage();
+  renderIdeaView();
+  if (type === 'task')    openTaskModal(null, null, item.text);
+  else if (type === 'project') openProjectModal(null, item.text);
+  else if (type === 'meeting') openMeetingModal(null, null, null, item.text);
+}
+
+function renderIdeaView() {
+  const total     = state.ideas.length;
+  const processed = state.ideas.filter(b => b.processed).length;
+  const developed = state.ideas.filter(b => b.developed && !b.processed).length;
+  const pending   = state.ideas.filter(b => !b.processed && !b.developed).length;
+
+  document.getElementById('istat-total').textContent     = total;
+  document.getElementById('istat-pending').textContent   = pending;
+  document.getElementById('istat-developed').textContent = developed;
+  document.getElementById('istat-done').textContent      = processed;
+
+  const badge = document.getElementById('idea-badge');
+  if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline-flex' : 'none'; }
+
+  const banner = document.getElementById('idea-banner');
+  if (banner) {
+    if (pending >= 3) {
+      banner.style.display = 'flex';
+      document.getElementById('idea-banner-count').textContent = pending;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  const cpBtn = document.getElementById('clear-idea-processed-btn');
+  if (cpBtn) cpBtn.style.display = (processed > 0 || developed > 0) ? 'inline-flex' : 'none';
+
+  renderIdeaList();
+}
+
+function renderIdeaList() {
+  const container = document.getElementById('idea-list');
+  if (!container) return;
+
+  let items = [...state.ideas];
+  if (ideaFilter === 'pending')   items = items.filter(b => !b.processed && !b.developed);
+  if (ideaFilter === 'developed') items = items.filter(b => b.developed && !b.processed);
+  if (ideaFilter === 'processed') items = items.filter(b => b.processed);
+
+  const label = document.getElementById('idea-list-label');
+  if (label) {
+    const counts = {
+      all:       state.ideas.length,
+      pending:   state.ideas.filter(b=>!b.processed&&!b.developed).length,
+      developed: state.ideas.filter(b=>b.developed&&!b.processed).length,
+      processed: state.ideas.filter(b=>b.processed).length
+    };
+    const names = {all:'All captured ideas', pending:'To develop', developed:'Developed ideas', processed:'Converted ideas'};
+    label.textContent = `${names[ideaFilter]} (${counts[ideaFilter]})`;
+  }
+
+  if (items.length === 0) {
+    const emptyMsgs = {
+      all:       ['💡','No ideas yet','Start capturing ideas above. Any spark of inspiration belongs here.'],
+      pending:   ['✅','All ideas developed!','Every idea has been developed or converted — great work!'],
+      developed: ['🎉','No developed ideas','Mark ideas done as you think them through.'],
+      processed: ['📂','Nothing converted yet','Use Task / Project / Meeting buttons to convert ideas into action.']
+    };
+    const [ei,et,ep] = emptyMsgs[ideaFilter]||emptyMsgs.all;
+    container.innerHTML = `<div class="bucket-empty">
+      <div class="bucket-empty-icon">${ei}</div>
+      <h3>${et}</h3>
+      <p>${ep}</p>
+    </div>`;
+    return;
+  }
+
+  const typeColors = {task:'var(--color-primary)',project:'var(--color-blue)',meeting:'var(--color-purple)'};
+  const typeLabels = {task:'→ Task',project:'→ Project',meeting:'→ Meeting'};
+
+  container.innerHTML = items.map(item => {
+    const d = new Date(item.created);
+    const dateLabel = d.toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const tagHtml = item.processed && item.processedAs
+      ? `<span class="bucket-item-tag" style="color:${typeColors[item.processedAs]}">${typeLabels[item.processedAs]}</span>` : '';
+
+    const isDeveloped = !!item.developed && !item.processed;
+    const isProcessed = !!item.processed;
+    const isLocked    = isDeveloped || isProcessed;
+
+    return `<div class="bucket-item${isProcessed?' processed':''}${isDeveloped?' completed':''}" id="iitem-${item.id}">
+      ${isProcessed ? '<div class="bucket-processed-badge">↗</div>' : ''}
+      ${isDeveloped ? '<div class="bucket-completed-badge">✓</div>' : ''}
+      <div class="bucket-item-header">
+        <div class="bucket-item-body">
+          <div class="bucket-item-text" contenteditable="${isLocked?'false':'true'}"
+               onblur="editIdeaText('${item.id}', this.textContent.trim())"
+               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
+          >${item.text}</div>
+          <div class="bucket-item-meta">
+            <span class="bucket-item-date">${dateLabel}</span>
+            ${tagHtml}
+          </div>
+          ${!isProcessed ? `<div class="bucket-actions">
+            ${!isDeveloped ? `
+            <button class="process-btn process-btn-complete" onclick="toggleIdeaDeveloped('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Developed
+            </button>
+            <button class="process-btn process-btn-task" onclick="processIdeaAs('${item.id}','task')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Task
+            </button>
+            <button class="process-btn process-btn-project" onclick="processIdeaAs('${item.id}','project')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Project
+            </button>
+            <button class="process-btn process-btn-meeting" onclick="processIdeaAs('${item.id}','meeting')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Meeting
+            </button>
+            ` : `
+            <button class="process-btn process-btn-uncomplete" onclick="toggleIdeaDeveloped('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Undo
+            </button>
+            `}
+            <button class="process-btn process-btn-delete" onclick="deleteIdeaItem('${item.id}')" title="Discard" style="margin-left:auto">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Discard
+            </button>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ===== CLEAR DATA =====
 function clearAllData(){
   if(!confirm('Reset all tasks, projects and meetings to defaults? This cannot be undone.')) return;
@@ -1881,6 +2145,7 @@ function clearAllData(){
   state.tasks    = d.tasks.map(t=>({...t}));
   state.meetings = [];
   state.bucket   = [];
+  state.ideas    = [];
   saveToStorage();
   navigate('dashboard');
 }
@@ -1888,6 +2153,8 @@ function clearAllData(){
 // ===== INIT =====
 renderSidebar();
 renderDashboard();
+// seed initial badges
+refreshView();
 </script>
 <div class="save-toast" id="save-toast">✓ Saved</div>
 
