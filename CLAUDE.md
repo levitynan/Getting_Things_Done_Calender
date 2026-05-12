@@ -85,3 +85,20 @@ Light/dark mode uses CSS custom properties on the `<html>` element (`data-theme=
 ### Badges
 
 The sidebar badges on Collect and Ideas show the count of unprocessed/undeveloped items. They are updated in `refreshView()` and `renderBucketView()` / `renderIdeaView()`. Always call `refreshView()` after any mutation that could change these counts.
+
+### CSV Import / Export
+
+`openDataModal()` renders the Import / Export modal dynamically from current `state` counts and attaches it to `#data-modal`. The modal is opened via the spreadsheet-grid icon in the topbar.
+
+`exportCSV(type)` — builds a CSV string via `_toCSV()` and triggers a download. Supported types and their column sets:
+
+| Type | Columns |
+|---|---|
+| `tasks` | `id, name, project_id, priority, due, time, recur, recurEnd, notes, done` |
+| `projects` | `id, name, desc, color, start, end` |
+| `bucket` | `id, text, created, completed, processed, processedAs` |
+| `ideas` | `id, text, created, developed, processed, processedAs` |
+
+`importCSV(type, input)` — reads the selected file with `FileReader`, parses it via `_parseCSV()`, and upserts rows into `state` by ID (existing ID → update in place; unknown ID → append). After merging it calls `saveToStorage()`, `refreshView()`, `renderSidebar()`, and re-opens the modal to refresh counts. Import feedback is shown via the save toast.
+
+Private helpers: `_csvEscape()`, `_toCSV()`, `_downloadCSV()`, `_parseCSV()` — prefixed with `_` to distinguish them from public app functions.

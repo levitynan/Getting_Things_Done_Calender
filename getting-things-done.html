@@ -384,6 +384,17 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .kpi-card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.07);border-radius:var(--radius-lg);padding:var(--space-4)}
 .kpi-value{font-size:var(--text-xl);font-weight:800;letter-spacing:-.03em;font-family:var(--font-mono)}
 .kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-1)}
+
+/* ===== DATA IMPORT / EXPORT MODAL ===== */
+.data-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-4) 0;border-bottom:1px solid var(--color-divider)}
+.data-row:last-child{border-bottom:none;padding-bottom:0}
+.data-row-label{display:flex;align-items:center;gap:var(--space-3)}
+.data-row-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.data-row-name{font-size:var(--text-sm);font-weight:700}
+.data-row-count{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px}
+.data-row-actions{display:flex;gap:var(--space-2);flex-shrink:0}
+.import-label{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;cursor:pointer;border:1px solid var(--color-border);background:transparent;color:var(--color-text-muted);white-space:nowrap;transition:background var(--transition-interactive),color var(--transition-interactive)}
+.import-label:hover{background:var(--color-surface-offset);color:var(--color-text)}
 </style>
 </head>
 <body>
@@ -432,6 +443,9 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
   <div class="topbar">
     <span class="topbar-title" id="topbar-title">Dashboard</span>
     <div class="topbar-actions">
+      <button class="btn btn-ghost btn-icon" onclick="openDataModal()" title="Import / Export CSV">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+      </button>
       <button class="btn btn-ghost btn-icon" onclick="exportICS()" title="Export .ics">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
@@ -1452,6 +1466,212 @@ function exportICS(){
 function escICS(s){return(s||'').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');}
 
 
+// ===== CSV IMPORT / EXPORT =====
+function openDataModal() {
+  const counts = {
+    tasks:    state.tasks.length,
+    projects: state.projects.length,
+    bucket:   state.bucket.length,
+    ideas:    state.ideas.length
+  };
+  const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
+  const rows = [
+    { type:'tasks',    label:'Tasks',    sub: plural(counts.tasks,'task'),
+      bg:'var(--color-primary-highlight)', fg:'var(--color-primary)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' },
+    { type:'projects', label:'Projects', sub: plural(counts.projects,'project'),
+      bg:'var(--color-blue-highlight)', fg:'var(--color-blue)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' },
+    { type:'bucket',   label:'Collect',  sub: plural(counts.bucket,'item'),
+      bg:'var(--color-gold-highlight)', fg:'var(--color-gold)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-35 12 12)"><path d="M8 10h8l-1.5 9h-5z"/><line x1="7" y1="10" x2="17" y2="10"/><path d="M10 10 Q12 7 14 10"/></g></svg>' },
+    { type:'ideas',    label:'Ideas',    sub: plural(counts.ideas,'idea'),
+      bg:'var(--color-orange-highlight)', fg:'var(--color-orange)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>' }
+  ];
+  document.getElementById('data-modal-body').innerHTML = rows.map(r => `
+    <div class="data-row">
+      <div class="data-row-label">
+        <div class="data-row-icon" style="background:${r.bg};color:${r.fg}">${r.icon}</div>
+        <div>
+          <div class="data-row-name">${r.label}</div>
+          <div class="data-row-count">${r.sub}</div>
+        </div>
+      </div>
+      <div class="data-row-actions">
+        <button class="btn btn-ghost" onclick="exportCSV('${r.type}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export
+        </button>
+        <label class="import-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 14 12 9 17 14"/><line x1="12" y1="9" x2="12" y2="21"/></svg>Import
+          <input type="file" accept=".csv" style="display:none" onchange="importCSV('${r.type}',this)">
+        </label>
+      </div>
+    </div>`).join('');
+  document.getElementById('data-modal').classList.add('open');
+}
+
+function _csvEscape(val) {
+  const s = String(val == null ? '' : val);
+  return /[,"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function _toCSV(headers, rows) {
+  return [headers, ...rows].map(r => r.map(_csvEscape).join(',')).join('\r\n');
+}
+
+function _downloadCSV(filename, csv) {
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function _parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { field += c; }
+    } else {
+      if      (c === '"') { inQuotes = true; }
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i+1] === '\n') i++;
+        row.push(field); field = '';
+        rows.push(row); row = [];
+      } else { field += c; }
+    }
+  }
+  row.push(field);
+  if (row.some(f => f)) rows.push(row);
+  return rows;
+}
+
+function exportCSV(type) {
+  let csv, filename;
+  if (type === 'tasks') {
+    csv = _toCSV(
+      ['id','name','project_id','priority','due','time','recur','recurEnd','notes','done'],
+      state.tasks.map(t => [t.id, t.name, t.project||'', t.priority||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.done?'true':'false'])
+    );
+    filename = 'taskcal-tasks.csv';
+  } else if (type === 'projects') {
+    csv = _toCSV(
+      ['id','name','desc','color','start','end'],
+      state.projects.map(p => [p.id, p.name, p.desc||'', p.color||'', p.start||'', p.end||''])
+    );
+    filename = 'taskcal-projects.csv';
+  } else if (type === 'bucket') {
+    csv = _toCSV(
+      ['id','text','created','completed','processed','processedAs'],
+      state.bucket.map(b => [b.id, b.text, b.created||'', b.completed?'true':'false', b.processed?'true':'false', b.processedAs||''])
+    );
+    filename = 'taskcal-collect.csv';
+  } else if (type === 'ideas') {
+    csv = _toCSV(
+      ['id','text','created','developed','processed','processedAs'],
+      state.ideas.map(i => [i.id, i.text, i.created||'', i.developed?'true':'false', i.processed?'true':'false', i.processedAs||''])
+    );
+    filename = 'taskcal-ideas.csv';
+  }
+  _downloadCSV(filename, csv);
+}
+
+function importCSV(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const rows = _parseCSV(e.target.result.trim());
+    if (rows.length < 2) { alert('CSV appears empty — no data rows found.'); return; }
+    const headers = rows[0];
+    const col = h => headers.indexOf(h);
+    const bool = v => v === 'true';
+    let added = 0, updated = 0;
+
+    rows.slice(1).forEach(r => {
+      if (type === 'tasks') {
+        if (!r[col('name')]) return;
+        const item = {
+          id:       r[col('id')]        || 't'+Date.now()+Math.floor(Math.random()*9999),
+          name:     r[col('name')]      || '',
+          project:  r[col('project_id')]|| '',
+          priority: r[col('priority')] || 'medium',
+          due:      r[col('due')]       || '',
+          time:     r[col('time')]      || '',
+          recur:    r[col('recur')]     || 'none',
+          recurEnd: r[col('recurEnd')]  || '',
+          notes:    r[col('notes')]     || '',
+          done:     bool(r[col('done')])
+        };
+        const xi = state.tasks.findIndex(t => t.id === item.id);
+        if (xi !== -1) { state.tasks[xi] = item; updated++; } else { state.tasks.push(item); added++; }
+
+      } else if (type === 'projects') {
+        if (!r[col('name')]) return;
+        const item = {
+          id:    r[col('id')]   || 'p'+Date.now()+Math.floor(Math.random()*9999),
+          name:  r[col('name')]|| '',
+          desc:  r[col('desc')]|| '',
+          color: r[col('color')]||'#01696f',
+          start: r[col('start')]||'',
+          end:   r[col('end')]  ||''
+        };
+        const xi = state.projects.findIndex(p => p.id === item.id);
+        if (xi !== -1) { state.projects[xi] = item; updated++; } else { state.projects.push(item); added++; }
+
+      } else if (type === 'bucket') {
+        if (!r[col('text')]) return;
+        const item = {
+          id:          r[col('id')]          || 'b'+Date.now()+Math.floor(Math.random()*9999),
+          text:        r[col('text')]        || '',
+          created:     r[col('created')]     || new Date().toISOString(),
+          completed:   bool(r[col('completed')]),
+          processed:   bool(r[col('processed')]),
+          processedAs: r[col('processedAs')] || null
+        };
+        const xi = state.bucket.findIndex(b => b.id === item.id);
+        if (xi !== -1) { state.bucket[xi] = item; updated++; } else { state.bucket.unshift(item); added++; }
+
+      } else if (type === 'ideas') {
+        if (!r[col('text')]) return;
+        const item = {
+          id:          r[col('id')]          || 'i'+Date.now()+Math.floor(Math.random()*9999),
+          text:        r[col('text')]        || '',
+          created:     r[col('created')]     || new Date().toISOString(),
+          developed:   bool(r[col('developed')]),
+          processed:   bool(r[col('processed')]),
+          processedAs: r[col('processedAs')] || null
+        };
+        const xi = state.ideas.findIndex(b => b.id === item.id);
+        if (xi !== -1) { state.ideas[xi] = item; updated++; } else { state.ideas.unshift(item); added++; }
+      }
+    });
+
+    saveToStorage();
+    refreshView();
+    renderSidebar();
+    input.value = '';
+    openDataModal(); // refresh counts in modal
+
+    const parts = [added && `${added} added`, updated && `${updated} updated`].filter(Boolean).join(', ');
+    const t = document.getElementById('save-toast');
+    if (t) {
+      t.textContent = `✓ Imported: ${parts}`;
+      t.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => { t.classList.remove('show'); t.textContent = '✓ Saved'; }, 3000);
+    }
+  };
+  reader.readAsText(file);
+}
+
+
 // ===== NEW-ENTRY DROPDOWN =====
 function toggleNewDropdown(e){
   e.stopPropagation();
@@ -2157,6 +2377,17 @@ renderDashboard();
 refreshView();
 </script>
 <div class="save-toast" id="save-toast">✓ Saved</div>
+
+<!-- ===== DATA IMPORT / EXPORT MODAL ===== -->
+<div class="modal-overlay" id="data-modal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <span class="modal-title">Import / Export Data</span>
+      <button class="btn-icon" onclick="closeModal('data-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="data-modal-body"></div>
+  </div>
+</div>
 
 <!-- ===== EMPTY BUCKET REVIEW MODAL ===== -->
 <div class="review-overlay" id="review-overlay">

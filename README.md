@@ -27,7 +27,11 @@ The left sidebar contains six main sections:
 | **All Tasks** | Full filterable task list grouped by date |
 | **Projects** | One nav item per project (listed below All Tasks) |
 
-Click the **New ▾** button in the top bar to create a Task, Project, or Scheduled Meeting from anywhere in the app.
+The top bar contains two utility buttons alongside **New ▾**:
+- **⊞ (grid icon)** — opens the Import / Export CSV modal
+- **↓ (download icon)** — exports a `.ics` calendar file
+
+Click **New ▾** to create a Task, Project, or Scheduled Meeting from anywhere in the app.
 
 ---
 
@@ -164,12 +168,29 @@ The Dashboard shows:
 
 ## Exporting to a Calendar
 
-Click the **download icon** (↓) in the top bar to export a `.ics` file covering the current month ±1–3 months. The file includes all tasks and meetings with their recurrence rules.
+Click the **↓ download icon** in the top bar to export a `.ics` file covering the current month ±1–3 months. The file includes all tasks and meetings with their recurrence rules.
 
 Import the `.ics` file into:
 - **Google Calendar** — Settings → Import
 - **Apple Calendar** — File → Import
 - **Outlook** — File → Open & Export → Import/Export
+
+---
+
+## Import / Export CSV
+
+Click the **⊞ grid icon** in the top bar to open the Import / Export modal. Each data type can be exported and imported independently.
+
+| Export file | Contents |
+|---|---|
+| `taskcal-tasks.csv` | All tasks with recurrence, priority, project, and completion state |
+| `taskcal-projects.csv` | All projects with colour, dates, and description |
+| `taskcal-collect.csv` | All Collect items with processing state |
+| `taskcal-ideas.csv` | All Ideas items with development and processing state |
+
+**Importing** merges by ID — rows whose ID already exists are updated in place; new IDs are appended. Re-importing an export will not create duplicates. A toast notification confirms how many rows were added and updated.
+
+CSV files can be opened and edited in Excel, Google Sheets, or any text editor before re-importing.
 
 ---
 
@@ -193,7 +214,7 @@ All data is stored in your browser's `localStorage` under the key `taskcal-v1`. 
 - Clearing browser site data will delete everything.
 - The app works fully offline.
 
-**Recommended backup:** Export a `.ics` file regularly via the download button.
+**Recommended backup:** Export CSV files via the ⊞ grid icon, or export a `.ics` file via the ↓ download icon. CSV exports capture all data including Collect and Ideas items that `.ics` does not include.
 
 ---
 
