@@ -395,9 +395,61 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .data-row-actions{display:flex;gap:var(--space-2);flex-shrink:0}
 .import-label{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;cursor:pointer;border:1px solid var(--color-border);background:transparent;color:var(--color-text-muted);white-space:nowrap;transition:background var(--transition-interactive),color var(--transition-interactive)}
 .import-label:hover{background:var(--color-surface-offset);color:var(--color-text)}
+
+/* ===== STARTUP SCREEN ===== */
+@keyframes startupFadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.startup-screen{position:fixed;inset:0;background:var(--color-bg);z-index:400;display:flex;flex-direction:column;padding:var(--space-5) clamp(var(--space-6),6vw,var(--space-16));transition:opacity .25s ease,transform .25s cubic-bezier(.16,1,.3,1)}
+.startup-screen.exit{opacity:0;transform:translateY(-8px);pointer-events:none}
+.startup-bar{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.startup-brand{display:flex;align-items:center;gap:var(--space-3)}
+.startup-brand-name{font-size:var(--text-sm);font-weight:700;letter-spacing:-.01em}
+.startup-open-btn{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);font-weight:600;color:var(--color-text-faint);background:none;border:none;cursor:pointer;padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);transition:color var(--transition-interactive),background var(--transition-interactive)}
+.startup-open-btn:hover{color:var(--color-text);background:var(--color-surface-offset)}
+.startup-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:600px;width:100%;margin:0 auto;animation:startupFadeIn .4s cubic-bezier(.16,1,.3,1) .05s both}
+.startup-textarea{width:100%;padding:var(--space-4) var(--space-5);font-size:var(--text-lg);font-family:var(--font-body);line-height:1.6;border:2px solid var(--color-divider);border-radius:var(--radius-xl);background:var(--color-surface);color:var(--color-text);resize:none;transition:border-color var(--transition-interactive),box-shadow var(--transition-interactive)}
+.startup-textarea:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 4px var(--color-primary-highlight)}
+.startup-textarea::placeholder{color:var(--color-text-faint)}
+.startup-hint{font-size:var(--text-xs);color:var(--color-text-faint);align-self:flex-end;margin-top:var(--space-2)}
+.startup-recents{width:100%;margin-top:var(--space-8)}
+.startup-recents-label{font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-3)}
+.startup-recent-item{display:flex;gap:var(--space-3);align-items:baseline;padding:var(--space-2) 0;border-bottom:1px solid var(--color-divider);font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.5}
+.startup-recent-item:last-child{border-bottom:none}
+.startup-recent-dot{color:var(--color-primary);flex-shrink:0;font-size:10px}
 </style>
 </head>
 <body>
+
+<!-- ===== STARTUP SCREEN ===== -->
+<div class="startup-screen" id="startup-screen">
+  <div class="startup-bar">
+    <div class="startup-brand">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <span class="startup-brand-name">TaskCal</span>
+    </div>
+    <button class="startup-open-btn" onclick="closeStartup()">
+      Open full app
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <div class="startup-body">
+    <textarea class="startup-textarea" id="startup-textarea" rows="3"
+      placeholder="What's on your mind?"
+      onkeydown="startupKeydown(event)"></textarea>
+    <div class="startup-hint">
+      <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Enter</kbd>
+      to capture &nbsp;·&nbsp;
+      <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Shift+Enter</kbd>
+      for new line &nbsp;·&nbsp;
+      <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Esc</kbd>
+      to open app
+    </div>
+    <div class="startup-recents" id="startup-recents"></div>
+  </div>
+</div>
+
 <aside class="sidebar">
   <div class="sidebar-header">
     <div class="logo-mark">
@@ -2370,11 +2422,55 @@ function clearAllData(){
   navigate('dashboard');
 }
 
+// ===== STARTUP SCREEN =====
+function renderStartupRecents() {
+  const el = document.getElementById('startup-recents');
+  if (!el) return;
+  const recent = state.bucket.slice(0, 7);
+  if (!recent.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="startup-recents-label">Just captured</div>` +
+    recent.map(item =>
+      `<div class="startup-recent-item"><span class="startup-recent-dot">▸</span><span>${item.text}</span></div>`
+    ).join('');
+}
+
+function startupKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); startupCapture(); }
+  if (e.key === 'Escape') closeStartup();
+}
+
+function startupCapture() {
+  const inp = document.getElementById('startup-textarea');
+  const text = inp.value.trim();
+  if (!text) return;
+  state.bucket.unshift({
+    id: 'b' + Date.now(),
+    text,
+    created: new Date().toISOString(),
+    completed: false,
+    processed: false,
+    processedAs: null
+  });
+  inp.value = '';
+  saveToStorage();
+  renderStartupRecents();
+}
+
+function closeStartup() {
+  const s = document.getElementById('startup-screen');
+  if (!s || s.classList.contains('exit')) return;
+  s.classList.add('exit');
+  setTimeout(() => { s.style.display = 'none'; }, 270);
+  navigate('bucket');
+}
+
 // ===== INIT =====
 renderSidebar();
 renderDashboard();
 // seed initial badges
 refreshView();
+renderStartupRecents();
+setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
 </script>
 <div class="save-toast" id="save-toast">✓ Saved</div>
 
