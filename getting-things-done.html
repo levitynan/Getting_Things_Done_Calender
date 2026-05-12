@@ -482,6 +482,9 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
   </nav>
   <div class="sidebar-footer">
 
+    <div class="nav-item" onclick="showStartup()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>Quick Capture
+    </div>
     <div class="nav-item" onclick="toggleTheme()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Toggle Theme
     </div>
@@ -2462,6 +2465,16 @@ function closeStartup() {
   s.classList.add('exit');
   setTimeout(() => { s.style.display = 'none'; }, 270);
   navigate('bucket');
+}
+
+function showStartup() {
+  const s = document.getElementById('startup-screen');
+  if (!s) return;
+  s.style.display = 'flex';
+  s.offsetHeight; // force reflow so transition plays
+  s.classList.remove('exit');
+  renderStartupRecents();
+  setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
 }
 
 // ===== INIT =====

@@ -86,6 +86,17 @@ Light/dark mode uses CSS custom properties on the `<html>` element (`data-theme=
 
 The sidebar badges on Collect and Ideas show the count of unprocessed/undeveloped items. They are updated in `refreshView()` and `renderBucketView()` / `renderIdeaView()`. Always call `refreshView()` after any mutation that could change these counts.
 
+### Startup Screen
+
+On every page load a full-screen overlay (`#startup-screen`, `z-index:400`) is shown before the sidebar and main layout. It provides a distraction-free capture surface that feeds directly into `state.bucket`.
+
+- `startupCapture()` — creates a bucket item and calls `renderStartupRecents()` to update the live list; does not call `renderBucketView()` (that happens after the screen is dismissed)
+- `closeStartup()` — adds the `.exit` class (CSS fade+slide), waits 270 ms, hides the element, then calls `navigate('bucket')`
+- `renderStartupRecents()` — renders the last 7 bucket items below the textarea; called on init and after each capture
+- Keyboard: `Enter` captures, `Shift+Enter` newline, `Esc` dismisses
+
+The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
+
 ### CSV Import / Export
 
 `openDataModal()` renders the Import / Export modal dynamically from current `state` counts and attaches it to `#data-modal`. The modal is opened via the spreadsheet-grid icon in the topbar.

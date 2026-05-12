@@ -35,6 +35,19 @@ Click **New ▾** to create a Task, Project, or Scheduled Meeting from anywhere 
 
 ---
 
+## Startup Screen
+
+When the app loads, a full-screen minimalist capture screen appears before anything else. It is designed to get thoughts out of your head immediately, with no distractions.
+
+- Type anything and press **Enter** to capture it — the item goes straight into Collect.
+- **Shift+Enter** adds a new line within the same item.
+- Captured items appear in a "Just captured" list below the input as you add them.
+- Press **Esc** or click **Open full app →** to dismiss the screen and go to the Collect page.
+
+The startup screen appears on every page load and is dismissed for the rest of that session once closed. You can return to it at any time using the **Quick Capture** button at the bottom of the sidebar.
+
+---
+
 ## Collect (Inbox)
 
 The Collect page is a frictionless capture inbox — dump anything here without worrying about where it belongs yet.
