@@ -798,20 +798,9 @@ const TODAY = new Date();
 
 // ── DEFAULTS (shown on first launch) ──
 const DEFAULT_STATE = {
-  projects:[
-    {id:'p1',name:'ESP32 Firmware',desc:'BLE and ESP-NOW communication firmware',color:'#01696f',start:'2026-05-01',end:'2026-07-31'},
-    {id:'p2',name:'PCB Design',desc:'Laser etched copper PCB prototypes',color:'#7a39bb',start:'2026-05-01',end:'2026-06-30'},
-    {id:'p3',name:'Soccer Coaching',desc:'Under-7 team planning and drills',color:'#da7101',start:'2026-04-01',end:'2026-08-31'},
-  ],
-  tasks:[
-    {id:'t1',name:'Test BLE pairing',project:'p1',priority:'high',due:'2026-05-14',time:'09:00',recur:'none',recurEnd:'',notes:'',done:false},
-    {id:'t2',name:'Update ESP-NOW broadcast',project:'p1',priority:'medium',due:'2026-05-20',time:'10:00',recur:'weekly',recurEnd:'2026-07-20',notes:'',done:false},
-    {id:'t3',name:'Review Gerber files',project:'p2',priority:'high',due:'2026-05-13',time:'',recur:'none',recurEnd:'',notes:'',done:false},
-    {id:'t4',name:'Training session drill planning',project:'p3',priority:'low',due:'2026-05-15',time:'17:00',recur:'weekly',recurEnd:'2026-08-28',notes:'',done:false},
-    {id:'t5',name:'Order load cell components',project:'p1',priority:'medium',due:'2026-05-16',time:'',recur:'none',recurEnd:'',notes:'',done:false},
-    {id:'t6',name:'Submit Altium design review',project:'p2',priority:'high',due:'2026-05-18',time:'10:00',recur:'none',recurEnd:'',notes:'',done:false},
-  ],
-  meetings:[]
+  projects: [],
+  tasks:    [],
+  meetings: []
 };
 
 // ── PERSISTENCE ──
