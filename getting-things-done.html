@@ -272,7 +272,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 /* Bucket item card */
 .bucket-item{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.08);border-radius:var(--radius-xl);padding:var(--space-4) var(--space-5);transition:box-shadow var(--transition-interactive),transform var(--transition-interactive);position:relative}
 .bucket-item:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.bucket-item.processed{opacity:.45;pointer-events:none}
+.bucket-item.processed{opacity:.45}
 .bucket-item-header{display:flex;align-items:flex-start;gap:var(--space-3)}
 .bucket-item-body{flex:1;min-width:0}
 .bucket-item-text{font-size:var(--text-base);font-weight:500;line-height:1.5;margin-bottom:var(--space-1);word-break:break-word}
@@ -1403,6 +1403,7 @@ function saveTask(){
   const name=document.getElementById('task-name').value.trim();
   if(!name){document.getElementById('task-name').focus();return;}
   const editId=document.getElementById('task-edit-id').value;
+  const existing=editId?state.tasks.find(t=>t.id===editId):null;
   const task={
     id:editId||'t'+Date.now(),name,
     project:document.getElementById('task-project').value,
@@ -1412,17 +1413,20 @@ function saveTask(){
     recur:selectedRecur,
     recurEnd:document.getElementById('task-recur-end').value,
     notes:document.getElementById('task-notes').value,
-    done:editId?(state.tasks.find(t=>t.id===editId)?.done||false):false
+    done:existing?.done||false,
+    completedAt:existing?.completedAt||null,
+    created:existing?.created||new Date().toISOString()
   };
   if(editId){const idx=state.tasks.findIndex(t=>t.id===editId);if(idx!==-1)state.tasks[idx]=task;}
   else state.tasks.push(task);
+  if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='task';}_pendingBucketId=null;}
   closeModal('task-modal');
   saveToStorage();
   refreshView();
 }
 
 function deleteTask(id){ state.tasks=state.tasks.filter(t=>t.id!==id); saveToStorage(); refreshView(); }
-function toggleTask(id){ const t=state.tasks.find(x=>x.id===id); if(t){t.done=!t.done;saveToStorage();refreshView();} }
+function toggleTask(id){ const t=state.tasks.find(x=>x.id===id); if(t){t.done=!t.done;t.completedAt=t.done?new Date().toISOString():null;saveToStorage();refreshView();} }
 function selectRecur(el){
   selectedRecur=el.dataset.recur;
   document.querySelectorAll('.recur-btn').forEach(b=>b.classList.remove('active'));
@@ -1460,14 +1464,15 @@ function saveProject(){
   const editId=document.getElementById('project-edit-id').value;
   const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),color:selectedColor,start:document.getElementById('project-start').value,end:document.getElementById('project-end').value};
   if(editId){const idx=state.projects.findIndex(p=>p.id===editId);if(idx!==-1)state.projects[idx]=proj;}else state.projects.push(proj);
+  if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='project';}_pendingBucketId=null;}
   closeModal('project-modal'); saveToStorage(); refreshView(); renderSidebar();
 }
 function selectSwatch(el){ selectedColor=el.dataset.color; document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); el.classList.add('active'); }
 
 // ===== UTILS =====
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+function closeModal(id){ document.getElementById(id).classList.remove('open'); _pendingBucketId=null; }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));});
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);}));
 function refreshView(){
   const _bp = (state.bucket||[]).filter(b=>!b.processed&&!b.completed).length;
   const _bb = document.getElementById('bucket-badge');
@@ -1599,9 +1604,10 @@ function _parseCSV(text) {
 function exportCSV(type) {
   let csv, filename;
   if (type === 'tasks') {
+    const projMap = Object.fromEntries(state.projects.map(p=>[p.id,p.name]));
     csv = _toCSV(
-      ['id','name','project_id','priority','due','time','recur','recurEnd','notes','done'],
-      state.tasks.map(t => [t.id, t.name, t.project||'', t.priority||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.done?'true':'false'])
+      ['id','name','project_id','project_name','priority','due','time','recur','recurEnd','notes','done','completedAt','created'],
+      state.tasks.map(t => [t.id, t.name, t.project||'', projMap[t.project]||'', t.priority||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.done?'true':'false', t.completedAt||'', t.created||''])
     );
     filename = 'taskcal-tasks.csv';
   } else if (type === 'projects') {
@@ -1642,16 +1648,18 @@ function importCSV(type, input) {
       if (type === 'tasks') {
         if (!r[col('name')]) return;
         const item = {
-          id:       r[col('id')]        || 't'+Date.now()+Math.floor(Math.random()*9999),
-          name:     r[col('name')]      || '',
-          project:  r[col('project_id')]|| '',
-          priority: r[col('priority')] || 'medium',
-          due:      r[col('due')]       || '',
-          time:     r[col('time')]      || '',
-          recur:    r[col('recur')]     || 'none',
-          recurEnd: r[col('recurEnd')]  || '',
-          notes:    r[col('notes')]     || '',
-          done:     bool(r[col('done')])
+          id:          r[col('id')]          || 't'+Date.now()+Math.floor(Math.random()*9999),
+          name:        r[col('name')]        || '',
+          project:     r[col('project_id')]  || '',
+          priority:    r[col('priority')]    || 'medium',
+          due:         r[col('due')]         || '',
+          time:        r[col('time')]        || '',
+          recur:       r[col('recur')]       || 'none',
+          recurEnd:    r[col('recurEnd')]    || '',
+          notes:       r[col('notes')]       || '',
+          done:        bool(r[col('done')]),
+          completedAt: r[col('completedAt')] || null,
+          created:     r[col('created')]     || new Date().toISOString()
         };
         const xi = state.tasks.findIndex(t => t.id === item.id);
         if (xi !== -1) { state.tasks[xi] = item; updated++; } else { state.tasks.push(item); added++; }
@@ -1816,6 +1824,7 @@ function saveMeeting() {
   } else {
     state.meetings.push(meeting);
   }
+  if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='meeting';}_pendingBucketId=null;}
   closeModal('meeting-modal');
   saveToStorage();
   refreshView();
@@ -1825,6 +1834,7 @@ function deleteMeeting(id) { state.meetings = state.meetings.filter(m => m.id !=
 
 // ===== COLLECTION BUCKET =====
 let bucketFilter = 'all';
+let _pendingBucketId = null; // set when a bucket item opens a modal; cleared on save or cancel
 
 function captureItem() {
   const inp = document.getElementById('capture-input');
@@ -1893,10 +1903,10 @@ function processAs(id, type) {
   const item = state.bucket.find(b => b.id === id);
   if (!item) return;
 
-  item.processed = true;
-  item.processedAs = type;
-
   if (type === 'idea') {
+    // Silent transfer — no modal, so mark processed immediately
+    item.processed = true;
+    item.processedAs = 'idea';
     state.ideas.unshift({
       id: 'i' + Date.now(),
       text: item.text,
@@ -1905,18 +1915,16 @@ function processAs(id, type) {
       processed: false,
       processedAs: null
     });
+    saveToStorage();
+    renderBucketView();
+    return;
   }
 
-  saveToStorage();
-  renderBucketView();
-
-  if (type === 'task') {
-    openTaskModal(null, null, item.text);
-  } else if (type === 'project') {
-    openProjectModal(null, item.text);
-  } else if (type === 'meeting') {
-    openMeetingModal(null, null, null, item.text);
-  }
+  // For task/project/meeting: defer marking processed until the modal is saved
+  _pendingBucketId = id;
+  if (type === 'task')         openTaskModal(null, null, item.text);
+  else if (type === 'project') openProjectModal(null, item.text);
+  else if (type === 'meeting') openMeetingModal(null, null, null, item.text);
 }
 
 function renderBucketView() {
@@ -2047,13 +2055,29 @@ function renderBucketList() {
             <button class="process-btn process-btn-delete" onclick="deleteBucketItem('${item.id}')" title="Discard" style="margin-left:auto">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Discard
             </button>
-          </div>` : ''}
+          </div>` : `<div class="bucket-actions">
+            <button class="process-btn process-btn-uncomplete" onclick="undoBucketProcess('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Undo
+            </button>
+          </div>`}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
+function undoBucketProcess(id) {
+  const item = state.bucket.find(b => b.id === id);
+  if (!item || !item.processed) return;
+  if (item.processedAs === 'idea') {
+    const idx = state.ideas.findIndex(i => i.text === item.text && !i.processed);
+    if (idx !== -1) state.ideas.splice(idx, 1);
+  }
+  item.processed = false;
+  item.processedAs = null;
+  saveToStorage();
+  renderBucketView();
+}
 
 
 // ===== EMPTY BUCKET REVIEW =====
@@ -2266,16 +2290,27 @@ function editIdeaText(id, newText) {
   if (item) { item.text = newText; saveToStorage(); }
 }
 
-function processIdeaAs(id, type) {
+function moveIdeaToCollect(id) {
   const item = state.ideas.find(b => b.id === id);
   if (!item) return;
   item.processed = true;
-  item.processedAs = type;
+  item.processedAs = 'collect';
+  state.bucket.unshift({ id:'b'+Date.now(), text:item.text, created:new Date().toISOString(), completed:false, processed:false, processedAs:null });
   saveToStorage();
   renderIdeaView();
-  if (type === 'task')    openTaskModal(null, null, item.text);
-  else if (type === 'project') openProjectModal(null, item.text);
-  else if (type === 'meeting') openMeetingModal(null, null, null, item.text);
+}
+
+function undoIdeaProcess(id) {
+  const item = state.ideas.find(b => b.id === id);
+  if (!item || !item.processed) return;
+  if (item.processedAs === 'collect') {
+    const idx = state.bucket.findIndex(b => b.text === item.text && !b.processed);
+    if (idx !== -1) state.bucket.splice(idx, 1);
+  }
+  item.processed = false;
+  item.processedAs = null;
+  saveToStorage();
+  renderIdeaView();
 }
 
 function renderIdeaView() {
@@ -2334,7 +2369,7 @@ function renderIdeaList() {
       all:       ['💡','No ideas yet','Start capturing ideas above. Any spark of inspiration belongs here.'],
       pending:   ['✅','All ideas developed!','Every idea has been developed or converted — great work!'],
       developed: ['🎉','No developed ideas','Mark ideas done as you think them through.'],
-      processed: ['📂','Nothing converted yet','Use Task / Project / Meeting buttons to convert ideas into action.']
+      processed: ['📂','Nothing moved yet','Use the Collect button to move ideas back to your inbox.']
     };
     const [ei,et,ep] = emptyMsgs[ideaFilter]||emptyMsgs.all;
     container.innerHTML = `<div class="bucket-empty">
@@ -2345,14 +2380,11 @@ function renderIdeaList() {
     return;
   }
 
-  const typeColors = {task:'var(--color-primary)',project:'var(--color-blue)',meeting:'var(--color-purple)'};
-  const typeLabels = {task:'→ Task',project:'→ Project',meeting:'→ Meeting'};
-
   container.innerHTML = items.map(item => {
     const d = new Date(item.created);
     const dateLabel = d.toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const tagHtml = item.processed && item.processedAs
-      ? `<span class="bucket-item-tag" style="color:${typeColors[item.processedAs]}">${typeLabels[item.processedAs]}</span>` : '';
+    const tagHtml = item.processed && item.processedAs === 'collect'
+      ? `<span class="bucket-item-tag" style="color:var(--color-blue)">→ Collect</span>` : '';
 
     const isDeveloped = !!item.developed && !item.processed;
     const isProcessed = !!item.processed;
@@ -2376,24 +2408,22 @@ function renderIdeaList() {
             <button class="process-btn process-btn-complete" onclick="toggleIdeaDeveloped('${item.id}')">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Developed
             </button>
-            <button class="process-btn process-btn-task" onclick="processIdeaAs('${item.id}','task')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Task
-            </button>
-            <button class="process-btn process-btn-project" onclick="processIdeaAs('${item.id}','project')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Project
-            </button>
-            <button class="process-btn process-btn-meeting" onclick="processIdeaAs('${item.id}','meeting')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Meeting
-            </button>
             ` : `
             <button class="process-btn process-btn-uncomplete" onclick="toggleIdeaDeveloped('${item.id}')">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Undo
             </button>
             `}
+            <button class="process-btn process-btn-idea" onclick="moveIdeaToCollect('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l9 6 9-6"/><path d="M3 6v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6"/></svg>Collect
+            </button>
             <button class="process-btn process-btn-delete" onclick="deleteIdeaItem('${item.id}')" title="Discard" style="margin-left:auto">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Discard
             </button>
-          </div>` : ''}
+          </div>` : `<div class="bucket-actions">
+            <button class="process-btn process-btn-uncomplete" onclick="undoIdeaProcess('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Undo
+            </button>
+          </div>`}
         </div>
       </div>
     </div>`;

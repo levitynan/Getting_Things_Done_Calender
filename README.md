@@ -55,6 +55,7 @@ The Collect page is a frictionless capture inbox — dump anything here without 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
 - Each captured item can be processed into a **Task**, **Project**, **Meeting**, or **Idea** using the action buttons on the card.
 - Sending an item to **Idea** transfers it silently to the Ideas page — no form opens, and the card is marked "→ Ideas".
+- Converted items show an **Undo** button — clicking it reverses the conversion. For items sent to Ideas, the corresponding idea is also removed.
 - Filter the list by: **All · To Process · Completed · Converted**
 - Use the **Empty Bucket** button to step through all unprocessed items one by one in a focused review modal.
 - Items marked as completed stay visible under the Completed filter.
@@ -68,8 +69,9 @@ The Ideas page is a dedicated space for capturing sparks of inspiration before t
 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
 - Ideas can also arrive here from the Collect page via the **Idea** action button on any captured item.
-- Each idea can be developed into a **Task**, **Project**, or **Meeting** using the action buttons on the card.
-- Mark an idea as **Developed** to indicate it has been thought through without converting it yet.
+- Mark an idea as **Developed** to indicate it has been thought through without acting on it yet.
+- When an idea is ready to act on, use the **Collect** button to move it back to the Collect inbox, where it can then be converted into a Task, Project, or Meeting.
+- Ideas moved to Collect are marked "→ Collect" and show an **Undo** button — clicking it removes the corresponding Collect entry and restores the idea.
 - Filter the list by: **All · To Develop · Developed · Converted**
 - The sidebar badge shows the count of ideas still waiting to be developed.
 
@@ -196,7 +198,7 @@ Click the **⊞ grid icon** in the top bar to open the Import / Export modal. Ea
 
 | Export file | Contents |
 |---|---|
-| `taskcal-tasks.csv` | All tasks with recurrence, priority, project, and completion state |
+| `taskcal-tasks.csv` | All tasks — includes project ID and name, priority, recurrence, notes, completion state, completion timestamp, and creation timestamp |
 | `taskcal-projects.csv` | All projects with colour, dates, and description |
 | `taskcal-collect.csv` | All Collect items with processing state |
 | `taskcal-ideas.csv` | All Ideas items with development and processing state |

@@ -50,7 +50,7 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 
 | Entity | Key fields | Notes |
 |---|---|---|
-| Task | `id, name, project, priority, due, time, recur, recurEnd, done` | `recur` is one of `none/daily/weekdays/weekly/biweekly/monthly` |
+| Task | `id, name, project, priority, due, time, recur, recurEnd, notes, done, completedAt, created` | `recur` is one of `none/daily/weekdays/weekly/biweekly/monthly`; `completedAt` is ISO timestamp set/cleared by `toggleTask()` |
 | Project | `id, name, desc, color, start, end` | `color` is a hex string; used to tint badges and calendar events |
 | Meeting | `id, name, date, startTime, endTime, location, project, recur, recurEnd, attendees, type:'meeting'` | Shares calendar rendering with tasks via `isMeeting` flag |
 | Bucket item | `id, text, created, completed, processed, processedAs` | `processedAs` is `task/project/meeting/idea` |
@@ -73,6 +73,41 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 ### Collect → Ideas Transfer
 
 When a bucket item is processed as `'idea'`, `processAs()` both marks the bucket item processed (`processedAs: 'idea'`) and pushes a new entry into `state.ideas`. No modal opens — it is a silent transfer.
+
+### Undoing a Collect Conversion
+
+Processed bucket items (`.bucket-item.processed`) render an **Undo** button instead of the normal action row. Clicking it calls `undoBucketProcess(id)`:
+
+- For `processedAs === 'idea'`: finds the first matching unprocessed idea in `state.ideas` by text and removes it, then clears the bucket item's `processed` / `processedAs` flags.
+- For `task / project / meeting`: clears the flags only — the created entity is kept (there is no reference back to it to remove).
+
+The `.bucket-item.processed` CSS rule has no `pointer-events:none` so the Undo button remains clickable.
+
+### Ideas → Collect Transfer
+
+Ideas cannot be converted to Task / Project / Meeting directly. Instead, the **Collect** button on each idea card calls `moveIdeaToCollect(id)`:
+
+- Marks the idea `processed: true, processedAs: 'collect'`
+- Pushes a new bucket item with the same text into `state.bucket`
+- No modal opens — it is a silent transfer
+
+### Undoing an Ideas → Collect Transfer
+
+Processed idea items render an **Undo** button. Clicking it calls `undoIdeaProcess(id)`:
+
+- For `processedAs === 'collect'`: finds the first matching unprocessed bucket item by text and removes it, then clears the idea's `processed` / `processedAs` flags.
+- The idea item's `developed` state is preserved through the undo.
+
+### Collect → Task / Project / Meeting (deferred processing)
+
+When a bucket item is processed as `'task'`, `'project'`, or `'meeting'`, the item is **not** marked processed immediately. Instead:
+
+1. `_pendingBucketId` is set to the bucket item's ID
+2. The relevant modal opens pre-filled with the item's text
+3. On **save** (`saveTask` / `saveProject` / `saveMeeting`), the bucket item is marked `processed: true` with the correct `processedAs` type, then `_pendingBucketId` is cleared before `saveToStorage()` is called
+4. On **cancel** (Cancel button, Escape, or backdrop click), `closeModal()` clears `_pendingBucketId` and the bucket item is left untouched
+
+`closeModal(id)` always clears `_pendingBucketId`. The Escape key and backdrop click handlers call `closeModal(m.id)` rather than removing the class directly, so the clear is guaranteed on all cancel paths.
 
 ### Modals
 
@@ -105,7 +140,7 @@ The overlay is dismissed for the rest of the session via `closeStartup()` (sets 
 
 | Type | Columns |
 |---|---|
-| `tasks` | `id, name, project_id, priority, due, time, recur, recurEnd, notes, done` |
+| `tasks` | `id, name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
 | `projects` | `id, name, desc, color, start, end` |
 | `bucket` | `id, text, created, completed, processed, processedAs` |
 | `ideas` | `id, text, created, developed, processed, processedAs` |
