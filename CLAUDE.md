@@ -111,7 +111,7 @@ When a bucket item is processed as `'task'`, `'project'`, or `'meeting'`, the it
 
 ### Modals
 
-All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.open`. They are opened via `openTaskModal(editId?)`, `openProjectModal(editId?)`, `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?)`. Pressing Escape or clicking the backdrop closes any open modal.
+All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.open`. They are opened via `openTaskModal(editId?, prefillName?)`, `openProjectModal(editId?, prefillDesc?)`, `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?)`. Prefill parameters are only applied when `editId` is null/undefined (new items). Pressing Escape or clicking the backdrop closes any open modal.
 
 ### Theming
 
@@ -144,6 +144,7 @@ Sheet names and columns:
 |---|---|
 | `Tasks` | `id, name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
 | `Projects` | `id, name, desc, color, start, end` |
+| `Meetings` | `id, name, date, startTime, endTime, location, project_id, project_name, recur, recurEnd, attendees, notes` |
 | `Collect` | `id, text, created, completed, processed, processedAs` |
 | `Ideas` | `id, text, created, developed, processed, processedAs` |
 
@@ -159,8 +160,11 @@ Sheet names and columns:
 |---|---|
 | `tasks` | `id, name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
 | `projects` | `id, name, desc, color, start, end` |
+| `meetings` | `id, name, date, startTime, endTime, location, project_id, project_name, recur, recurEnd, attendees, notes` |
 | `bucket` | `id, text, created, completed, processed, processedAs` |
 | `ideas` | `id, text, created, developed, processed, processedAs` |
+
+`attendees` is serialised as a pipe-separated string (`Alice|Bob|Carol`) in both CSV and xlsx; on import it is split back into an array.
 
 `importCSV(type, input)` — reads the selected file with `FileReader`, parses it via `_parseCSV()`, and upserts rows into `state` by ID (existing ID → update in place; unknown ID → append). After merging it calls `saveToStorage()`, `refreshView()`, `renderSidebar()`, and re-opens the modal to refresh counts. Import feedback is shown via the save toast.
 

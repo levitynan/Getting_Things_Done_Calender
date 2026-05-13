@@ -204,6 +204,7 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 |---|---|
 | **Tasks** | All tasks — project ID and name, priority, recurrence, notes, completion state, timestamps |
 | **Projects** | All projects with colour, dates, and description |
+| **Meetings** | All meetings — date, times, location, attendees, recurrence, notes |
 | **Collect** | All Collect items with processing state |
 | **Ideas** | All Ideas items with development and processing state |
 
@@ -219,6 +220,7 @@ Each data type can also be exported and imported independently as a `.csv` file:
 |---|---|
 | `taskcal-tasks.csv` | Tasks |
 | `taskcal-projects.csv` | Projects |
+| `taskcal-meetings.csv` | Meetings (attendees as pipe-separated values) |
 | `taskcal-collect.csv` | Collect items |
 | `taskcal-ideas.csv` | Ideas |
 

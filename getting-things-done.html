@@ -1365,7 +1365,7 @@ function renderDayView(){
 // ===== TASK CRUD =====
 let selectedRecur='none';
 
-function openTaskModal(editId){
+function openTaskModal(editId, prefillName){
   const pm=document.getElementById('task-project');
   pm.innerHTML='<option value="">No Project</option>'+state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   if(editId){
@@ -1383,7 +1383,7 @@ function openTaskModal(editId){
   } else {
     document.getElementById('task-modal-title').textContent='New Task';
     document.getElementById('task-edit-id').value='';
-    document.getElementById('task-name').value='';
+    document.getElementById('task-name').value=prefillName||'';
     document.getElementById('task-project').value='';
     document.getElementById('task-priority').value='medium';
     document.getElementById('task-due').value='';
@@ -1438,7 +1438,7 @@ function selectRecur(el){
 
 // ===== PROJECT CRUD =====
 let selectedColor='#01696f';
-function openProjectModal(editId){
+function openProjectModal(editId, prefillDesc){
   if(editId){
     const p=state.projects.find(x=>x.id===editId); if(!p) return;
     document.getElementById('project-modal-title').textContent='Edit Project';
@@ -1452,7 +1452,7 @@ function openProjectModal(editId){
     document.getElementById('project-modal-title').textContent='New Project';
     document.getElementById('project-edit-id').value='';
     document.getElementById('project-name').value='';
-    document.getElementById('project-desc').value='';
+    document.getElementById('project-desc').value=prefillDesc||'';
     document.getElementById('project-start').value='';
     document.getElementById('project-end').value='';
     selectedColor='#01696f';
@@ -1523,7 +1523,8 @@ function openDataModal() {
     tasks:    state.tasks.length,
     projects: state.projects.length,
     bucket:   state.bucket.length,
-    ideas:    state.ideas.length
+    ideas:    state.ideas.length,
+    meetings: (state.meetings||[]).length
   };
   const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
   const rows = [
@@ -1533,6 +1534,9 @@ function openDataModal() {
     { type:'projects', label:'Projects', sub: plural(counts.projects,'project'),
       bg:'var(--color-blue-highlight)', fg:'var(--color-blue)',
       icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' },
+    { type:'meetings', label:'Meetings', sub: plural(counts.meetings,'meeting'),
+      bg:'var(--color-purple-highlight)', fg:'var(--color-purple)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
     { type:'bucket',   label:'Collect',  sub: plural(counts.bucket,'item'),
       bg:'var(--color-gold-highlight)', fg:'var(--color-gold)',
       icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-35 12 12)"><path d="M8 10h8l-1.5 9h-5z"/><line x1="7" y1="10" x2="17" y2="10"/><path d="M10 10 Q12 7 14 10"/></g></svg>' },
@@ -1549,7 +1553,7 @@ function openDataModal() {
         </div>
         <div>
           <div class="data-row-name">All data</div>
-          <div class="data-row-count">Tasks · Projects · Collect · Ideas</div>
+          <div class="data-row-count">Tasks · Projects · Meetings · Collect · Ideas</div>
         </div>
       </div>
       <div class="data-row-actions">
@@ -1653,6 +1657,13 @@ function exportCSV(type) {
       state.ideas.map(i => [i.id, i.text, i.created||'', i.developed?'true':'false', i.processed?'true':'false', i.processedAs||''])
     );
     filename = 'taskcal-ideas.csv';
+  } else if (type === 'meetings') {
+    const projMap = Object.fromEntries(state.projects.map(p=>[p.id,p.name]));
+    csv = _toCSV(
+      ['id','name','date','startTime','endTime','location','project_id','project_name','recur','recurEnd','attendees','notes'],
+      (state.meetings||[]).map(m => [m.id, m.name, m.date||'', m.startTime||'', m.endTime||'', m.location||'', m.project||'', projMap[m.project]||'', m.recur||'', m.recurEnd||'', (m.attendees||[]).join('|'), m.notes||''])
+    );
+    filename = 'taskcal-meetings.csv';
   }
   _downloadCSV(filename, csv);
 }
@@ -1727,6 +1738,26 @@ function importCSV(type, input) {
         };
         const xi = state.ideas.findIndex(b => b.id === item.id);
         if (xi !== -1) { state.ideas[xi] = item; updated++; } else { state.ideas.unshift(item); added++; }
+
+      } else if (type === 'meetings') {
+        if (!r[col('name')]) return;
+        const item = {
+          id:        r[col('id')]        || 'm'+Date.now()+Math.floor(Math.random()*9999),
+          name:      r[col('name')]      || '',
+          date:      r[col('date')]      || '',
+          startTime: r[col('startTime')] || '',
+          endTime:   r[col('endTime')]   || '',
+          location:  r[col('location')]  || '',
+          project:   r[col('project_id')]|| '',
+          recur:     r[col('recur')]     || 'none',
+          recurEnd:  r[col('recurEnd')]  || '',
+          attendees: (r[col('attendees')]||'').split('|').filter(Boolean),
+          notes:     r[col('notes')]     || '',
+          type:      'meeting'
+        };
+        if (!state.meetings) state.meetings = [];
+        const xi = state.meetings.findIndex(m => m.id === item.id);
+        if (xi !== -1) { state.meetings[xi] = item; updated++; } else { state.meetings.push(item); added++; }
       }
     });
 
@@ -1773,6 +1804,10 @@ function exportXLSX() {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
     state.ideas.map(i => ({ id: i.id, text: i.text, created: i.created||'', developed: i.developed?'true':'false', processed: i.processed?'true':'false', processedAs: i.processedAs||'' }))
   ), 'Ideas');
+
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+    (state.meetings||[]).map(m => ({ id: m.id, name: m.name, date: m.date||'', startTime: m.startTime||'', endTime: m.endTime||'', location: m.location||'', project_id: m.project||'', project_name: projMap[m.project]||'', recur: m.recur||'', recurEnd: m.recurEnd||'', attendees: (m.attendees||[]).join('|'), notes: m.notes||'' }))
+  ), 'Meetings');
 
   XLSX.writeFile(wb, 'taskcal-data.xlsx');
 }
@@ -1840,6 +1875,29 @@ function importXLSX(input) {
         };
         const xi = state.ideas.findIndex(i => i.id === item.id);
         if (xi !== -1) { state.ideas[xi] = item; updated++; } else { state.ideas.unshift(item); added++; }
+      });
+    }
+
+    if (wb.SheetNames.includes('Meetings')) {
+      if (!state.meetings) state.meetings = [];
+      XLSX.utils.sheet_to_json(wb.Sheets['Meetings']).forEach(r => {
+        if (!r.name) return;
+        const item = {
+          id:        String(r.id||'m'+Date.now()+Math.floor(Math.random()*9999)),
+          name:      String(r.name||''),
+          date:      String(r.date||''),
+          startTime: String(r.startTime||''),
+          endTime:   String(r.endTime||''),
+          location:  String(r.location||''),
+          project:   String(r.project_id||''),
+          recur:     String(r.recur||'none'),
+          recurEnd:  String(r.recurEnd||''),
+          attendees: String(r.attendees||'').split('|').filter(Boolean),
+          notes:     String(r.notes||''),
+          type:      'meeting'
+        };
+        const xi = state.meetings.findIndex(m => m.id === item.id);
+        if (xi !== -1) { state.meetings[xi] = item; updated++; } else { state.meetings.push(item); added++; }
       });
     }
 
@@ -2057,7 +2115,7 @@ function processAs(id, type) {
 
   // For task/project/meeting: defer marking processed until the modal is saved
   _pendingBucketId = id;
-  if (type === 'task')         openTaskModal(null, null, item.text);
+  if (type === 'task')         openTaskModal(null, item.text);
   else if (type === 'project') openProjectModal(null, item.text);
   else if (type === 'meeting') openMeetingModal(null, null, null, item.text);
 }
@@ -2335,7 +2393,7 @@ function reviewConvert(id, type) {
   renderReviewStep();
   // Open the corresponding form modal on top of the review screen
   // (review stays open underneath; user saves/cancels and returns)
-  if (type === 'task')    openTaskModal(null, null, null, item ? item.text : '');
+  if (type === 'task')    openTaskModal(null, item ? item.text : '');
   if (type === 'project') openProjectModal(null, item ? item.text : '');
   if (type === 'meeting') openMeetingModal(null, null, null, item ? item.text : '');
 }
