@@ -132,9 +132,26 @@ On every page load a full-screen overlay (`#startup-screen`, `z-index:400`) is s
 
 The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
 
+### Excel (.xlsx) Import / Export
+
+`exportXLSX()` — uses SheetJS (loaded from jsDelivr CDN) to build a workbook with four sheets and triggers download as `taskcal-data.xlsx`.
+
+`importXLSX(input)` — reads the selected `.xlsx` file as an ArrayBuffer, parses it with `XLSX.read()`, then processes whichever of the four named sheets are present, upserting rows by ID into `state`. Calls `saveToStorage()`, `refreshView()`, `renderSidebar()`, re-opens the modal, and shows a toast with added/updated counts.
+
+Sheet names and columns:
+
+| Sheet | Columns |
+|---|---|
+| `Tasks` | `id, name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
+| `Projects` | `id, name, desc, color, start, end` |
+| `Collect` | `id, text, created, completed, processed, processedAs` |
+| `Ideas` | `id, text, created, developed, processed, processedAs` |
+
+`project_name` in the Tasks sheet is derived at export time from `state.projects`; on import it is ignored (the `project_id` column drives the join). Both export and import guard against `XLSX` being undefined (CDN not loaded) and alert the user.
+
 ### CSV Import / Export
 
-`openDataModal()` renders the Import / Export modal dynamically from current `state` counts and attaches it to `#data-modal`. The modal is opened via the spreadsheet-grid icon in the topbar.
+`openDataModal()` renders the Import / Export modal dynamically from current `state` counts and attaches it to `#data-modal`. The modal is opened via the spreadsheet-grid icon in the topbar. The modal shows the Excel section first, then individual CSV rows below.
 
 `exportCSV(type)` — builds a CSV string via `_toCSV()` and triggers a download. Supported types and their column sets:
 

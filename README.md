@@ -192,16 +192,35 @@ Import the `.ics` file into:
 
 ---
 
-## Import / Export CSV
+## Import / Export
 
-Click the **⊞ grid icon** in the top bar to open the Import / Export modal. Each data type can be exported and imported independently.
+Click the **⊞ grid icon** in the top bar to open the Import / Export modal.
+
+### Excel (.xlsx)
+
+Export or import all data in a single `.xlsx` file. Each data type lives on its own sheet:
+
+| Sheet | Contents |
+|---|---|
+| **Tasks** | All tasks — project ID and name, priority, recurrence, notes, completion state, timestamps |
+| **Projects** | All projects with colour, dates, and description |
+| **Collect** | All Collect items with processing state |
+| **Ideas** | All Ideas items with development and processing state |
+
+The exported file (`taskcal-data.xlsx`) can be opened and edited directly in Excel or Google Sheets. Re-importing merges by ID — existing rows are updated, new rows are appended.
+
+> **Note:** The Excel feature requires an internet connection on first load to fetch the SheetJS library from a CDN. Subsequent loads use the browser cache.
+
+### CSV (individual files)
+
+Each data type can also be exported and imported independently as a `.csv` file:
 
 | Export file | Contents |
 |---|---|
-| `taskcal-tasks.csv` | All tasks — includes project ID and name, priority, recurrence, notes, completion state, completion timestamp, and creation timestamp |
-| `taskcal-projects.csv` | All projects with colour, dates, and description |
-| `taskcal-collect.csv` | All Collect items with processing state |
-| `taskcal-ideas.csv` | All Ideas items with development and processing state |
+| `taskcal-tasks.csv` | Tasks |
+| `taskcal-projects.csv` | Projects |
+| `taskcal-collect.csv` | Collect items |
+| `taskcal-ideas.csv` | Ideas |
 
 **Importing** merges by ID — rows whose ID already exists are updated in place; new IDs are appended. Re-importing an export will not create duplicates. A toast notification confirms how many rows were added and updated.
 
@@ -235,8 +254,8 @@ All data is stored in your browser's `localStorage` under the key `taskcal-v1`. 
 
 ## Technical Notes
 
-- Single `.html` file — no build tools, no dependencies, no network requests.
-- Fonts loaded from Google Fonts CDN (requires internet on first load; cached thereafter).
+- Single `.html` file — no build tools, no package manager.
+- Fonts loaded from Google Fonts CDN; SheetJS loaded from jsDelivr CDN. Both require internet on first load and are cached by the browser thereafter. All other features (tasks, calendar, CSV) work fully offline.
 - Compatible with Chrome 90+, Edge 90+, Firefox 88+, Safari 14+.
 - Tested at desktop (1280px+) and mobile (375px). Fully responsive.
 - Light and dark mode via CSS custom properties (`data-theme` attribute on `<html>`).
