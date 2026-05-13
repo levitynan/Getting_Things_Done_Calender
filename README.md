@@ -20,12 +20,12 @@ The left sidebar contains six main sections:
 
 | Section | Purpose |
 |---|---|
-| **🪣 Collect** | Rapid-capture inbox for any thought, task, or to-do |
-| **💡 Ideas** | Capture ideas and develop them into tasks, projects, or meetings |
 | **Dashboard** | Overview of projects, KPIs, and upcoming tasks |
+| **🪣 Collect** | Rapid-capture inbox for any thought, task, or to-do |
+| **All Tasks** | Task list organised into area columns (Work, Life, University, custom) |
+| **💡 Ideas** | Capture ideas and develop them into tasks, projects, or meetings |
 | **Calendar** | Monthly, weekly, and daily calendar views |
-| **All Tasks** | Full filterable task list grouped by date |
-| **Projects** | One nav item per project (listed below All Tasks) |
+| **Projects** | One nav item per project (listed below Calendar) |
 
 The top bar contains two utility buttons alongside **New ▾**:
 - **⊞ (grid icon)** — opens the Import / Export CSV modal
@@ -77,6 +77,14 @@ The Ideas page is a dedicated space for capturing sparks of inspiration before t
 
 ---
 
+## Areas
+
+Tasks and projects can be assigned to an **area**: **Work**, **Life**, or **University**. You can also create custom areas at any time by choosing **＋ New area…** from any Area dropdown.
+
+The All Tasks page displays a separate column for each area. Tasks with no area (or an unrecognised area) appear in an **Other** column, which is only shown when such tasks exist. Click **Add task** inside any column to open the task form with that area pre-filled.
+
+---
+
 ## Tasks
 
 ### Creating a Task
@@ -86,24 +94,19 @@ Click **New ▾ → Task**, or click any day on the calendar to open the task fo
 | Field | Notes |
 |---|---|
 | **Title** | Required |
+| **Area** | Work / Life / University / custom |
 | **Project** | Optional — assign to an existing project |
 | **Priority** | Low / Medium / High |
 | **Due Date** | Date picker |
 | **Due Time** | Optional time |
-| **Recurrence** | None / Daily / Weekdays / Weekly / Bi-weekly / Monthly |
-| **Recur Until** | Optional end date for recurring tasks |
 | **Notes** | Free-text notes field |
-
-### Recurring Tasks
-
-Choosing any recurrence option other than **None** generates recurring instances automatically across the calendar and All Tasks views. Each instance appears independently on its due date. Set a **Recur Until** date to stop the series at a specific point; leave it blank for an indefinite series.
 
 ### Managing Tasks
 
 - **Check** the circle on any task card to mark it done (strikethrough applied).
 - **Edit** (pencil icon) to reopen the task form.
 - **Delete** (bin icon) to remove the task permanently.
-- Completed tasks remain visible but styled as done — they are not hidden.
+- Completed tasks remain visible but styled as done and sorted below uncompleted tasks in each column.
 
 ---
 
@@ -118,6 +121,7 @@ Click **New ▾ → Project**.
 | Field | Notes |
 |---|---|
 | **Name** | Required |
+| **Area** | Work / Life / University / custom |
 | **Description** | Optional summary |
 | **Start / End Date** | Optional date range |
 | **Colour** | Pick from 8 colour swatches |
@@ -125,6 +129,10 @@ Click **New ▾ → Project**.
 ### Project View
 
 Click a project name in the sidebar to switch to its filtered task list, showing only tasks belonging to that project. The Dashboard shows a card for each project with a progress bar, task count, and date range.
+
+### Completing a Project
+
+Click the **circle icon** in the top-right of any project card on the Dashboard to mark the project complete. Completed projects are greyed out on the Dashboard and shown with a strikethrough in the sidebar. Click the icon again to reactivate the project.
 
 ---
 

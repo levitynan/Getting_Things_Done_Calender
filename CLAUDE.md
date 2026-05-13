@@ -30,17 +30,25 @@ state = {
 
 State is persisted entirely to `localStorage` under the key `taskcal_data` via `saveToStorage()` / `loadFromStorage()`. Every mutation must call `saveToStorage()` followed by the appropriate render function.
 
+### Areas
+
+`state.areas` is an array of `{id, name}` objects. The defaults (Work, Life, University) are seeded from `DEFAULT_STATE.areas` and persisted. Users can add custom areas at any time via the "＋ New area…" option in any Area dropdown — `handleAreaSelect(el)` detects this sentinel value, prompts for a name, pushes to `state.areas`, saves, and rebuilds the dropdown. `_populateAreaSelect(el)` populates any `<select>` with the current areas list plus the add-new option.
+
+The Tasks page renders a horizontal column per area (`renderTasks`). Each column shows tasks whose `area` field matches, with an inline "Add task" button that calls `openTaskModalForArea(areaId)` → `openTaskModal(null, null, areaId)` to pre-fill the Area field. Tasks with no area or an unknown area ID appear in an "Other" column (only rendered when such tasks exist).
+
 ### Navigation
 
 `navigate(view)` is the single entry point for switching pages. It:
 1. Removes `.active` from all `.view` divs and `.nav-item` elements
 2. Shows `#view-{view}` and highlights `#nav-{view}`
-3. Calls the matching render function (`renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, `renderBucketView` is called on init)
+3. Calls the matching render function: `renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, or `renderBucketView`
 4. Sets `state.currentView`
+
+Sidebar order: Dashboard → Collect → All Tasks → Ideas → Calendar → Projects.
 
 `navigateProject(id)` is a special case that reuses `view-tasks` with a project filter applied.
 
-`refreshView()` re-renders whichever view is currently active — call this after any state mutation that happens outside a full navigate (e.g. toggling a task done from a modal).
+`refreshView()` re-renders whichever view is currently active — call this after any state mutation that happens outside a full navigate (e.g. toggling a task done from a modal). Handles all five views including `bucket`.
 
 ### Render Pattern
 
@@ -50,8 +58,9 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 
 | Entity | Key fields | Notes |
 |---|---|---|
-| Task | `id, name, project, priority, due, time, recur, recurEnd, notes, done, completedAt, created` | `recur` is one of `none/daily/weekdays/weekly/biweekly/monthly`; `completedAt` is ISO timestamp set/cleared by `toggleTask()` |
-| Project | `id, name, desc, color, start, end` | `color` is a hex string; used to tint badges and calendar events |
+| Task | `id, name, area, project, priority, due, time, notes, done, completedAt, created` | `area` is an ID reference to `state.areas`; recurrence fields (`recur`, `recurEnd`) are hardcoded to `'none'`/`''` (removed from modal); `completedAt` is ISO timestamp set/cleared by `toggleTask()` |
+| Project | `id, name, desc, area, color, start, end, completed` | `area` is an ID reference to `state.areas`; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()` |
+| Area | `id, name` | Stored in `state.areas`; defaults are Work, Life, University; user can add custom areas via the "＋ New area…" option in any Area dropdown |
 | Meeting | `id, name, date, startTime, endTime, location, project, recur, recurEnd, attendees, type:'meeting'` | Shares calendar rendering with tasks via `isMeeting` flag |
 | Bucket item | `id, text, created, completed, processed, processedAs` | `processedAs` is `task/project/meeting/idea` |
 | Idea item | `id, text, created, developed, processed, processedAs` | Mirror of bucket; `developed` ≡ bucket's `completed` |
@@ -111,7 +120,7 @@ When a bucket item is processed as `'task'`, `'project'`, or `'meeting'`, the it
 
 ### Modals
 
-All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.open`. They are opened via `openTaskModal(editId?, prefillName?)`, `openProjectModal(editId?, prefillDesc?)`, `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?)`. Prefill parameters are only applied when `editId` is null/undefined (new items). Pressing Escape or clicking the backdrop closes any open modal.
+All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.open`. They are opened via `openTaskModal(editId?, prefillName?, prefillArea?)`, `openProjectModal(editId?, prefillName?)`, `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?)`. Prefill parameters are only applied when `editId` is null/undefined (new items). Pressing Escape or clicking the backdrop closes any open modal.
 
 ### Theming
 
@@ -132,9 +141,21 @@ On every page load a full-screen overlay (`#startup-screen`, `z-index:400`) is s
 
 The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
 
+### renderTasks sorting
+
+`renderTasks()` sorts each area column so completed tasks appear below uncompleted: `tasks.sort((a,b)=>a.done===b.done?(a.due||'').localeCompare(b.due||''):a.done?1:-1)`.
+
+### Collect list sorting
+
+`renderBucketList()` when `bucketFilter === 'all'` sorts so processed/completed items appear below unprocessed: `items.sort((a,b) => (!!a.processed||!!a.completed) - (!!b.processed||!!b.completed))`.
+
+### Project completion
+
+`toggleProjectComplete(id)` flips `p.completed`, saves, calls `refreshView()` and `renderSidebar()`. Completed projects are greyed out (`.project-card.completed { opacity:.45; filter:grayscale(.4) }`) and shown with strikethrough in the sidebar. The `completed` flag is preserved through edits in `saveProject()`.
+
 ### Excel (.xlsx) Import / Export
 
-`exportXLSX()` — uses SheetJS (loaded from jsDelivr CDN) to build a workbook with four sheets and triggers download as `taskcal-data.xlsx`.
+`exportXLSX()` — uses SheetJS (loaded from jsDelivr CDN) to build a workbook with five sheets and triggers download as `taskcal-data.xlsx`.
 
 `importXLSX(input)` — reads the selected `.xlsx` file as an ArrayBuffer, parses it with `XLSX.read()`, then processes whichever of the four named sheets are present, upserting rows by ID into `state`. Calls `saveToStorage()`, `refreshView()`, `renderSidebar()`, re-opens the modal, and shows a toast with added/updated counts.
 
