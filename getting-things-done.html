@@ -486,11 +486,13 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       Ideas
       <span id="idea-badge" style="margin-left:auto;background:var(--color-gold);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
     </div>
+    <div class="nav-item" id="nav-projects" onclick="navigate('projects')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects
+    </div>
+    <div id="sidebar-projects"></div>
     <div class="nav-item" id="nav-calendar" onclick="navigate('calendar')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar
     </div>
-    <div class="nav-section-label">Projects</div>
-    <div id="sidebar-projects"></div>
   </nav>
   <div class="sidebar-footer">
 
@@ -646,6 +648,17 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         <h2 class="section-heading">Upcoming Tasks</h2>
         <div id="upcoming-tasks-list"></div>
       </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="view" id="view-projects">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4)">
+        <h2 class="section-heading" style="margin:0">Projects</h2>
+        <button class="btn btn-primary" onclick="openProjectModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Project
+        </button>
+      </div>
+      <div id="project-list-projects"></div>
     </div>
 
     <!-- CALENDAR -->
@@ -940,13 +953,14 @@ function navigate(view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   state.currentView=view;
-  const titles={bucket:'Collect',ideas:'Ideas',dashboard:'Dashboard',calendar:'Calendar',tasks:'All Tasks'};
+  const titles={bucket:'Collect',ideas:'Ideas',dashboard:'Dashboard',calendar:'Calendar',tasks:'All Tasks',projects:'Projects'};
   document.getElementById('topbar-title').textContent=titles[view]||view;
   if(view==='calendar') renderCalendar();
   if(view==='tasks') renderTasks();
   if(view==='dashboard') renderDashboard();
   if(view==='ideas') renderIdeaView();
   if(view==='bucket') renderBucketView();
+  if(view==='projects') renderProjectsView();
   const navEl=document.getElementById('nav-'+view);
   if(navEl) navEl.classList.add('active');
   renderSidebar();
@@ -1010,6 +1024,32 @@ function renderDashboard(){
   const upcomingDiv=document.getElementById('upcoming-tasks-list');
   const sorted=upcoming7.sort((a,b)=>a.instanceDate.localeCompare(b.instanceDate)).slice(0,8);
   upcomingDiv.innerHTML=sorted.length?sorted.map(t=>renderTaskItem(t,pm)).join(''):`<div class="empty-state" style="padding:var(--space-8)"><div class="empty-state-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>All clear!</h3><p>No upcoming tasks in the next 7 days.</p></div>`;
+}
+
+// ===== PROJECTS VIEW =====
+function renderProjectsView(){
+  const projDiv=document.getElementById('project-list-projects');
+  if(!projDiv) return;
+  if(!state.projects.length){
+    projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your tasks.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
+    return;
+  }
+  projDiv.innerHTML=`<div class="projects-grid">${state.projects.map(p=>{
+    const pt=state.tasks.filter(t=>t.project===p.id);
+    const pd=pt.filter(t=>t.done).length;
+    const pct=pt.length?Math.round(100*pd/pt.length):0;
+    const doneIcon=p.completed
+      ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+      :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
+    return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
+      <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px"></div><span class="project-card-title">${p.name}</span>
+        <button class="btn-icon" style="margin-left:auto;opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
+        <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      </div>
+      <div class="project-card-desc">${p.desc||'No description'}</div>
+      <div class="project-meta"><span class="badge badge-teal">${pt.length} tasks</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+      <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
+    </div>`;}).join('')}</div>`;
 }
 
 // ===== TASK LIST =====
@@ -1532,6 +1572,7 @@ function refreshView(){
   else if(state.currentView==='tasks'||state.currentView.startsWith('project-')) renderTasks();
   else if(state.currentView==='ideas') renderIdeaView();
   else if(state.currentView==='bucket') renderBucketView();
+  else if(state.currentView==='projects') renderProjectsView();
 }
 
 // ===== THEME =====

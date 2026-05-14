@@ -41,10 +41,10 @@ The Tasks page renders a horizontal column per area (`renderTasks`). Each column
 `navigate(view)` is the single entry point for switching pages. It:
 1. Removes `.active` from all `.view` divs and `.nav-item` elements
 2. Shows `#view-{view}` and highlights `#nav-{view}`
-3. Calls the matching render function: `renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, or `renderBucketView`
+3. Calls the matching render function: `renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, `renderBucketView`, or `renderProjectsView`
 4. Sets `state.currentView`
 
-Sidebar order: Dashboard → Collect → All Tasks → Ideas → Calendar → Projects.
+Sidebar order: Dashboard → Collect → All Tasks → Ideas → Projects → [individual project items] → Calendar.
 
 `navigateProject(id)` is a special case that reuses `view-tasks` with a project filter applied.
 
@@ -76,6 +76,7 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | `view-bucket` | `nav-bucket` | `renderBucketView()` + `renderBucketList()` |
 | `view-ideas` | `nav-ideas` | `renderIdeaView()` + `renderIdeaList()` |
 | `view-dashboard` | `nav-dashboard` | `renderDashboard()` |
+| `view-projects` | `nav-projects` | `renderProjectsView()` — project cards grid with completion toggle and edit; same card layout as Dashboard |
 | `view-calendar` | `nav-calendar` | `renderCalendar()` → `renderMonthView/WeekView/DayView()` |
 | `view-tasks` | `nav-tasks` | `renderTasks()` |
 
