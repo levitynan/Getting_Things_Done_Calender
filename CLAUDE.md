@@ -146,11 +146,17 @@ On every page load a full-screen overlay (`#startup-screen`, `z-index:400`) is s
 
 The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
 
+### Task age tint
+
+`_ageTint(createdISO, done)` returns an inline `background: hsla(...)` style for incomplete tasks older than one week. Hue shifts from yellow-orange (week 1) toward red (week 4+); alpha increases by 0.06 per week, capped at 0.28. Applied as an inline style on the `.task-item` div in `renderTaskItem`. Done tasks receive no tint. Each task card also shows an "Added [date]" label from `t.created`.
+
 ### renderTasks sorting and layout
 
-`renderTasks()` sorts tasks so completed appear below uncompleted: `tasks.sort((a,b)=>a.done===b.done?(a.due||'').localeCompare(b.due||''):a.done?1:-1)`.
+`_sortTasks(tasks, sortBy)` handles all sorting — done tasks always sink to the bottom, then within each group sorts by: `'due'` (ascending, no-date last), `'priority'` (High→Low), `'created'` (oldest first), or `'name'` (A-Z). The sort is chosen via `#task-sort-filter` select in the tasks header.
 
-When a project filter is active (`pf` is non-empty — set by `navigateProject()` or the dropdown), tasks render as a flat list with no area columns. Area columns are only shown in the unfiltered All Tasks view.
+`renderTasks()` renders the All Tasks page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add task" button. An "Other" column collects tasks with no recognised area.
+
+When an area filter is active (`af` is non-empty — set by the All Areas dropdown), only that area's column is shown. All areas are shown when the filter is empty.
 
 ### Collect list sorting
 

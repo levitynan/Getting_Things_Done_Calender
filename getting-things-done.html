@@ -684,9 +684,16 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <!-- TASKS -->
     <div class="view" id="view-tasks">
       <div class="tasks-header">
-        <select class="select" style="width:auto" id="task-project-filter" onchange="renderTasks()"><option value="">All Projects</option></select>
+        <select class="select" style="width:auto" id="task-area-filter" onchange="renderTasks()"><option value="">All Areas</option></select>
         <select class="select" style="width:auto" id="task-status-filter" onchange="renderTasks()">
           <option value="">All Status</option><option value="pending">Pending</option><option value="done">Done</option>
+        </select>
+        <select class="select" style="width:auto" id="task-sort-filter" onchange="renderTasks()">
+          <option value="due">Sort: Due Date</option>
+          <option value="priority">Sort: Priority</option>
+          <option value="created">Sort: Oldest First</option>
+          <option value="created-desc">Sort: Newest First</option>
+          <option value="name">Sort: Name</option>
         </select>
       </div>
       <div id="task-list"></div>
@@ -970,7 +977,6 @@ function navigateProject(id){
   document.getElementById('view-tasks').classList.add('active');
   const proj=state.projects.find(p=>p.id===id);
   document.getElementById('topbar-title').textContent=proj?proj.name:'Tasks';
-  document.getElementById('task-project-filter').value=id;
   renderTasks();
 }
 
@@ -1094,27 +1100,40 @@ function renderProjectsView(){
 }
 
 // ===== TASK LIST =====
+function _sortTasks(tasks, sortBy){
+  const prioVal={high:3,medium:2,low:1};
+  return tasks.sort((a,b)=>{
+    if(a.done!==b.done) return a.done?1:-1;
+    if(sortBy==='priority') return (prioVal[b.priority]||0)-(prioVal[a.priority]||0);
+    if(sortBy==='created') return (a.created||'').localeCompare(b.created||'');
+    if(sortBy==='created-desc') return (b.created||'').localeCompare(a.created||'');
+    if(sortBy==='name') return a.name.localeCompare(b.name);
+    // default: due date, no-date tasks last
+    if(!a.due&&!b.due) return 0;
+    if(!a.due) return 1;
+    if(!b.due) return -1;
+    return a.due.localeCompare(b.due);
+  });
+}
+
 function renderTasks(){
   const pm=getProjectMap();
-  const sel=document.getElementById('task-project-filter');
-  sel.innerHTML='<option value="">All Projects</option>'+state.projects.map(p=>`<option value="${p.id}" ${sel.value===p.id?'selected':''}>${p.name}</option>`).join('');
-  const pf=document.getElementById('task-project-filter').value;
+  const areaFilter=document.getElementById('task-area-filter');
+  areaFilter.innerHTML='<option value="">All Areas</option>'+(state.areas||[]).map(a=>`<option value="${a.id}" ${areaFilter.value===a.id?'selected':''}>${a.name}</option>`).join('');
+  const af=areaFilter.value;
   const sf=document.getElementById('task-status-filter').value;
+  const sortBy=document.getElementById('task-sort-filter')?.value||'due';
   let tasks=[...state.tasks];
-  if(pf) tasks=tasks.filter(t=>t.project===pf);
+  if(af) tasks=tasks.filter(t=>t.area===af);
   if(sf==='pending') tasks=tasks.filter(t=>!t.done);
   if(sf==='done') tasks=tasks.filter(t=>t.done);
-  tasks.sort((a,b)=>a.done===b.done?(a.due||'').localeCompare(b.due||''):a.done?1:-1);
+  _sortTasks(tasks,sortBy);
   const container=document.getElementById('task-list');
   if(!tasks.length){container.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>No tasks found</h3><p>Add a task to get started.</p><button class="btn btn-primary" onclick="openTaskModal()">Add Task</button></div>`;return;}
-  if(pf){
-    container.innerHTML=tasks.map(t=>renderTaskItem(t,pm)).join('');
-    return;
-  }
   const areas=state.areas||[];
   const areaIds=new Set(areas.map(a=>a.id));
-  const columns=areas.map(a=>({id:a.id,name:a.name,tasks:tasks.filter(t=>t.area===a.id)}));
-  const unassigned=tasks.filter(t=>!t.area||!areaIds.has(t.area));
+  let columns=af?[{id:af,name:areas.find(a=>a.id===af)?.name||'Tasks',tasks}]:areas.map(a=>({id:a.id,name:a.name,tasks:tasks.filter(t=>t.area===a.id)}));
+  const unassigned=af?[]:tasks.filter(t=>!t.area||!areaIds.has(t.area));
   if(unassigned.length) columns.push({id:'',name:'Other',tasks:unassigned});
   container.innerHTML=`<div class="task-columns">${columns.map(col=>`<div class="task-column">
     <div class="task-column-header">
@@ -1156,12 +1175,23 @@ function renderMeetingItem(m,pm){
   </div>`;
 }
 
+function _ageTint(createdISO, done){
+  if(done||!createdISO) return '';
+  const weeks=Math.floor((Date.now()-new Date(createdISO))/604800000);
+  if(weeks<1) return '';
+  const hue=Math.max(0,55-weeks*14);
+  const alpha=Math.min(weeks*0.06,0.28);
+  return `background:hsla(${hue},90%,50%,${alpha});`;
+}
+
 function renderTaskItem(t,pm){
   if(t.isMeeting||t.type==='meeting') return renderMeetingItem(t,pm);
   const proj=pm[t.project];
   const isOverdue=t.due&&t.due<dateStr(TODAY)&&!t.done;
   const instanceDate=t.instanceDate||t.due;
-  return `<div class="task-item">
+  const tint=_ageTint(t.created,t.done);
+  const createdLabel=t.created?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">Added ${formatDate(t.created.slice(0,10))}</span>`:'';
+  return `<div class="task-item" style="${tint}">
     <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')"></div>
     <div class="task-info">
       <div class="task-title ${t.done?'done':''}">${t.name}${t.recur&&t.recur!=='none'?' <span style="color:var(--color-primary);font-size:10px">↻</span>':''}</div>
@@ -1170,6 +1200,7 @@ function renderTaskItem(t,pm){
         ${proj?`<span class="badge" style="background:${proj.color}22;color:${proj.color}">${proj.name}</span>`:''}
         ${priorityBadge(t.priority)}
         ${t.recur&&t.recur!=='none'?`<span class="task-recur">${recurLabel(t.recur)}</span>`:''}
+        ${createdLabel}
       </div>
     </div>
     <div class="task-actions">
