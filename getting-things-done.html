@@ -489,7 +489,6 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="nav-item" id="nav-projects" onclick="navigate('projects')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects
     </div>
-    <div id="sidebar-projects"></div>
     <div class="nav-item" id="nav-calendar" onclick="navigate('calendar')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar
     </div>
@@ -705,7 +704,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="modal-body">
       <input type="hidden" id="task-edit-id">
       <div class="form-group"><label>Task Name *</label><input type="text" class="input" id="task-name" placeholder="e.g. Write project report"></div>
-      <div class="form-group"><label>Area</label><select class="select" id="task-area" onchange="handleAreaSelect(this)"></select></div>
+      <div class="form-group"><label>Area</label><select class="select" id="task-area" onchange="handleAreaSelect(this);_filterTaskProjects()"></select></div>
       <div class="form-row">
         <div class="form-group"><label>Project</label><select class="select" id="task-project"><option value="">No Project</option></select></div>
         <div class="form-group"><label>Priority</label><select class="select" id="task-priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
@@ -963,7 +962,6 @@ function navigate(view){
   if(view==='projects') renderProjectsView();
   const navEl=document.getElementById('nav-'+view);
   if(navEl) navEl.classList.add('active');
-  renderSidebar();
 }
 
 function navigateProject(id){
@@ -973,17 +971,7 @@ function navigateProject(id){
   const proj=state.projects.find(p=>p.id===id);
   document.getElementById('topbar-title').textContent=proj?proj.name:'Tasks';
   document.getElementById('task-project-filter').value=id;
-  renderTasks(); renderSidebar();
-}
-
-// ===== SIDEBAR =====
-function renderSidebar(){
-  const c=document.getElementById('sidebar-projects');
-  c.innerHTML=state.projects.map(p=>`
-    <div class="nav-item ${state.currentView==='project-'+p.id?'active':''}" onclick="navigateProject('${p.id}')" style="${p.completed?'opacity:.4':''}">
-      <div class="project-dot" style="background:${p.color}"></div>
-      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${p.completed?'text-decoration:line-through':''}">${p.name}</span>
-    </div>`).join('')+(state.projects.length===0?'<div style="padding:var(--space-2) var(--space-3);font-size:var(--text-xs);color:var(--color-text-faint)">No projects yet</div>':'');
+  renderTasks();
 }
 
 // ===== DASHBOARD =====
@@ -1027,29 +1015,82 @@ function renderDashboard(){
 }
 
 // ===== PROJECTS VIEW =====
+const _expandedProjects=new Set();
+function toggleProjectExpand(id,e){
+  e.stopPropagation();
+  _expandedProjects.has(id)?_expandedProjects.delete(id):_expandedProjects.add(id);
+  renderProjectsView();
+}
 function renderProjectsView(){
   const projDiv=document.getElementById('project-list-projects');
   if(!projDiv) return;
-  if(!state.projects.length){
+  if(!state.projects.length&&!state.tasks.length){
     projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your tasks.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
     return;
   }
-  projDiv.innerHTML=`<div class="projects-grid">${state.projects.map(p=>{
+  function cardHtml(p){
     const pt=state.tasks.filter(t=>t.project===p.id);
     const pd=pt.filter(t=>t.done).length;
     const pct=pt.length?Math.round(100*pd/pt.length):0;
+    const expanded=_expandedProjects.has(p.id);
     const doneIcon=p.completed
       ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
       :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
+    const chevron=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;transform:rotate(${expanded?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>`;
+    const taskList=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
+      pt.length?pt.map(t=>`<div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+        <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
+        <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
+        ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
+      </div>`).join('')
+      :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No tasks yet</div>`
+    }</div>`:'';
     return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
       <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px"></div><span class="project-card-title">${p.name}</span>
-        <button class="btn-icon" style="margin-left:auto;opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
+        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} tasks" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
+        <button class="btn-icon" style="opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
         <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
       <div class="project-card-desc">${p.desc||'No description'}</div>
       <div class="project-meta"><span class="badge badge-teal">${pt.length} tasks</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
       <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
-    </div>`;}).join('')}</div>`;
+      ${taskList}
+    </div>`;
+  }
+  function unassignedCardHtml(uid,tasks){
+    const expanded=_expandedProjects.has(uid);
+    const chevron=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;transform:rotate(${expanded?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>`;
+    const done=tasks.filter(t=>t.done).length;
+    const taskList=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
+      tasks.map(t=>`<div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+        <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
+        <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
+        ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
+      </div>`).join('')
+    }</div>`:'';
+    return `<div class="project-card" style="border-style:dashed">
+      <div class="project-card-header"><span class="project-card-title" style="color:var(--color-text-muted)">No Project</span>
+        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} tasks" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
+      </div>
+      <div class="project-meta"><span class="badge badge-teal">${tasks.length} tasks</span><span class="badge badge-success">${done} done</span></div>
+      ${taskList}
+    </div>`;
+  }
+  const areas=state.areas||[];
+  const areaIds=new Set(areas.map(a=>a.id));
+  const sections=areas.map(a=>{
+    const projects=state.projects.filter(p=>p.area===a.id);
+    const loose=state.tasks.filter(t=>t.area===a.id&&!t.project);
+    return {name:a.name,areaId:a.id,projects,loose};
+  }).filter(s=>s.projects.length||s.loose.length);
+  const unassignedProjects=state.projects.filter(p=>!p.area||!areaIds.has(p.area));
+  const unassignedLoose=state.tasks.filter(t=>(!t.area||!areaIds.has(t.area))&&!t.project);
+  if(unassignedProjects.length||unassignedLoose.length) sections.push({name:'Other',areaId:'other',projects:unassignedProjects,loose:unassignedLoose});
+  projDiv.innerHTML=sections.map(s=>`
+    <div style="margin-bottom:var(--space-6)">
+      <h2 class="section-heading">${s.name}</h2>
+      <div class="projects-grid">${s.loose.length?unassignedCardHtml('unassigned-'+s.areaId,s.loose):''}${s.projects.map(cardHtml).join('')}</div>
+    </div>`).join('');
 }
 
 // ===== TASK LIST =====
@@ -1066,6 +1107,10 @@ function renderTasks(){
   tasks.sort((a,b)=>a.done===b.done?(a.due||'').localeCompare(b.due||''):a.done?1:-1);
   const container=document.getElementById('task-list');
   if(!tasks.length){container.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>No tasks found</h3><p>Add a task to get started.</p><button class="btn btn-primary" onclick="openTaskModal()">Add Task</button></div>`;return;}
+  if(pf){
+    container.innerHTML=tasks.map(t=>renderTaskItem(t,pm)).join('');
+    return;
+  }
   const areas=state.areas||[];
   const areaIds=new Set(areas.map(a=>a.id));
   const columns=areas.map(a=>({id:a.id,name:a.name,tasks:tasks.filter(t=>t.area===a.id)}));
@@ -1430,8 +1475,6 @@ function renderDayView(){
 
 // ===== TASK CRUD =====
 function openTaskModal(editId, prefillName, prefillArea){
-  const pm=document.getElementById('task-project');
-  pm.innerHTML='<option value="">No Project</option>'+state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   _populateAreaSelect(document.getElementById('task-area'));
   if(editId){
     const t=state.tasks.find(x=>x.id===editId); if(!t) return;
@@ -1439,6 +1482,7 @@ function openTaskModal(editId, prefillName, prefillArea){
     document.getElementById('task-edit-id').value=editId;
     document.getElementById('task-name').value=t.name;
     document.getElementById('task-area').value=t.area||'';
+    _filterTaskProjects();
     document.getElementById('task-project').value=t.project||'';
     document.getElementById('task-priority').value=t.priority||'medium';
     document.getElementById('task-due').value=t.due||'';
@@ -1449,6 +1493,7 @@ function openTaskModal(editId, prefillName, prefillArea){
     document.getElementById('task-edit-id').value='';
     document.getElementById('task-name').value=prefillName||'';
     document.getElementById('task-area').value=prefillArea||'';
+    _filterTaskProjects();
     document.getElementById('task-project').value='';
     document.getElementById('task-priority').value='medium';
     document.getElementById('task-due').value='';
@@ -1490,7 +1535,29 @@ function saveTask(){
 }
 
 function deleteTask(id){ state.tasks=state.tasks.filter(t=>t.id!==id); saveToStorage(); refreshView(); }
-function toggleTask(id){ const t=state.tasks.find(x=>x.id===id); if(t){t.done=!t.done;t.completedAt=t.done?new Date().toISOString():null;saveToStorage();refreshView();} }
+function toggleTask(id){
+  const t=state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.done=!t.done;
+  t.completedAt=t.done?new Date().toISOString():null;
+  saveToStorage();
+  refreshView();
+  if(t.done) showFollowupModal(t);
+}
+let _followupTask=null;
+function showFollowupModal(task){
+  _followupTask=task;
+  document.getElementById('followup-task-name').textContent=task.name;
+  document.getElementById('followup-modal').classList.add('open');
+}
+function followupAction(type){
+  const task=_followupTask;
+  closeModal('followup-modal');
+  if(!task) return;
+  if(type==='task') openTaskModal(null,'',task.area||'');
+  else if(type==='meeting') openMeetingModal(null,null,null,task.name);
+  else if(type==='project') openProjectModal(null,task.name);
+}
 // ===== PROJECT CRUD =====
 let selectedColor='#01696f';
 function openProjectModal(editId, prefillName){
@@ -1525,13 +1592,13 @@ function saveProject(){
   const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:document.getElementById('project-end').value,completed:editId?(state.projects.find(p=>p.id===editId)?.completed||false):false};
   if(editId){const idx=state.projects.findIndex(p=>p.id===editId);if(idx!==-1)state.projects[idx]=proj;}else state.projects.push(proj);
   if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='project';}_pendingBucketId=null;}
-  closeModal('project-modal'); saveToStorage(); refreshView(); renderSidebar();
+  closeModal('project-modal'); saveToStorage(); refreshView();
 }
 function selectSwatch(el){ selectedColor=el.dataset.color; document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); el.classList.add('active'); }
 
 function toggleProjectComplete(id){
   const p=state.projects.find(x=>x.id===id); if(!p) return;
-  p.completed=!p.completed; saveToStorage(); refreshView(); renderSidebar();
+  p.completed=!p.completed; saveToStorage(); refreshView();
 }
 
 function _populateAreaSelect(el) {
@@ -1539,6 +1606,15 @@ function _populateAreaSelect(el) {
   el.innerHTML = '<option value="">No Area</option>' +
     (state.areas||[]).map(a => `<option value="${a.id}">${a.name}</option>`).join('') +
     '<option value="__new__">＋ New area…</option>';
+}
+
+function _filterTaskProjects() {
+  const areaId = document.getElementById('task-area').value;
+  const pm = document.getElementById('task-project');
+  const current = pm.value;
+  const projects = areaId ? state.projects.filter(p => p.area === areaId) : state.projects;
+  pm.innerHTML = '<option value="">No Project</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  if (projects.find(p => p.id === current)) pm.value = current;
 }
 
 function handleAreaSelect(el) {
@@ -1850,7 +1926,6 @@ function importCSV(type, input) {
 
     saveToStorage();
     refreshView();
-    renderSidebar();
     input.value = '';
     openDataModal(); // refresh counts in modal
 
@@ -1988,7 +2063,7 @@ function importXLSX(input) {
       });
     }
 
-    saveToStorage(); refreshView(); renderSidebar();
+    saveToStorage(); refreshView();
     input.value = '';
     openDataModal();
     const parts = [added && `${added} added`, updated && `${updated} updated`].filter(Boolean).join(', ');
@@ -2778,7 +2853,6 @@ function showStartup() {
 }
 
 // ===== INIT =====
-renderSidebar();
 renderDashboard();
 // seed initial badges
 refreshView();
@@ -2795,6 +2869,33 @@ setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
       <button class="btn-icon" onclick="closeModal('data-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body" id="data-modal-body"></div>
+  </div>
+</div>
+
+<!-- ===== TASK COMPLETE FOLLOW-UP MODAL ===== -->
+<div class="modal-overlay" id="followup-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <span class="modal-title">Task complete 🎉</span>
+      <button class="btn-icon" onclick="closeModal('followup-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:var(--space-4);color:var(--color-text-muted);font-size:var(--text-sm)">Did completing <strong id="followup-task-name" style="color:var(--color-text)"></strong> create something new?</p>
+      <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+        <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('task')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>New Task
+        </button>
+        <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('meeting')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>New Meeting
+        </button>
+        <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('project')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Turn into Project
+        </button>
+        <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3);color:var(--color-text-faint)" onclick="closeModal('followup-modal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Nothing, I'm done
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 

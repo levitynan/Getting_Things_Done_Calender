@@ -44,9 +44,9 @@ The Tasks page renders a horizontal column per area (`renderTasks`). Each column
 3. Calls the matching render function: `renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, `renderBucketView`, or `renderProjectsView`
 4. Sets `state.currentView`
 
-Sidebar order: Dashboard → Collect → All Tasks → Ideas → Projects → [individual project items] → Calendar.
+Sidebar order: Dashboard → Collect → All Tasks → Ideas → Projects → Calendar.
 
-`navigateProject(id)` is a special case that reuses `view-tasks` with a project filter applied.
+`navigateProject(id)` is a special case that reuses `view-tasks` with a project filter applied. It is called from project cards in the Projects view and Dashboard — there are no individual project items in the sidebar.
 
 `refreshView()` re-renders whichever view is currently active — call this after any state mutation that happens outside a full navigate (e.g. toggling a task done from a modal). Handles all five views including `bucket`.
 
@@ -76,7 +76,7 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | `view-bucket` | `nav-bucket` | `renderBucketView()` + `renderBucketList()` |
 | `view-ideas` | `nav-ideas` | `renderIdeaView()` + `renderIdeaList()` |
 | `view-dashboard` | `nav-dashboard` | `renderDashboard()` |
-| `view-projects` | `nav-projects` | `renderProjectsView()` — project cards grid with completion toggle and edit; same card layout as Dashboard |
+| `view-projects` | `nav-projects` | `renderProjectsView()` — projects grouped into area rows; each area row also includes a dashed "No Project" card for tasks in that area with no project (`loose` tasks); an "Other" row collects unassigned projects and tasks; every card has a chevron that expands an inline task list via `_expandedProjects` Set + `toggleProjectExpand(id, e)`; "No Project" cards use key `'unassigned-'+areaId` |
 | `view-calendar` | `nav-calendar` | `renderCalendar()` → `renderMonthView/WeekView/DayView()` |
 | `view-tasks` | `nav-tasks` | `renderTasks()` |
 
@@ -123,13 +123,17 @@ When a bucket item is processed as `'task'`, `'project'`, or `'meeting'`, the it
 
 All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.open`. They are opened via `openTaskModal(editId?, prefillName?, prefillArea?)`, `openProjectModal(editId?, prefillName?)`, `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?)`. Prefill parameters are only applied when `editId` is null/undefined (new items). Pressing Escape or clicking the backdrop closes any open modal.
 
+### Task completion follow-up
+
+`toggleTask(id)` shows `#followup-modal` whenever a task is marked done. The modal asks if completing the task created something new — options are **New Task**, **New Meeting**, **Turn into Project**, or **Nothing**. `_followupTask` holds the completed task object. `followupAction(type)` closes the modal and opens the relevant create modal: `openTaskModal(null,'',task.area)`, `openMeetingModal(null,null,null,task.name)`, or `openProjectModal(null,task.name)`.
+
 ### Theming
 
 Light/dark mode uses CSS custom properties on the `<html>` element (`data-theme="light|dark"`). The full palette of `--color-*` variables is defined in `:root` (light) and `[data-theme="dark"]`. Always use these variables — never hardcode colours in new CSS or inline styles.
 
 ### Badges
 
-The sidebar badges on Collect and Ideas show the count of unprocessed/undeveloped items. They are updated in `refreshView()` and `renderBucketView()` / `renderIdeaView()`. Always call `refreshView()` after any mutation that could change these counts.
+The sidebar badges on Collect and Ideas show the count of unprocessed/undeveloped items. They are updated in `refreshView()`, `renderBucketView()`, and `renderIdeaView()`. Always call `refreshView()` after any mutation that could change these counts.
 
 ### Startup Screen
 
@@ -142,9 +146,11 @@ On every page load a full-screen overlay (`#startup-screen`, `z-index:400`) is s
 
 The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
 
-### renderTasks sorting
+### renderTasks sorting and layout
 
-`renderTasks()` sorts each area column so completed tasks appear below uncompleted: `tasks.sort((a,b)=>a.done===b.done?(a.due||'').localeCompare(b.due||''):a.done?1:-1)`.
+`renderTasks()` sorts tasks so completed appear below uncompleted: `tasks.sort((a,b)=>a.done===b.done?(a.due||'').localeCompare(b.due||''):a.done?1:-1)`.
+
+When a project filter is active (`pf` is non-empty — set by `navigateProject()` or the dropdown), tasks render as a flat list with no area columns. Area columns are only shown in the unfiltered All Tasks view.
 
 ### Collect list sorting
 
@@ -152,7 +158,7 @@ The overlay is dismissed for the rest of the session via `closeStartup()` (sets 
 
 ### Project completion
 
-`toggleProjectComplete(id)` flips `p.completed`, saves, calls `refreshView()` and `renderSidebar()`. Completed projects are greyed out (`.project-card.completed { opacity:.45; filter:grayscale(.4) }`) and shown with strikethrough in the sidebar. The `completed` flag is preserved through edits in `saveProject()`.
+`toggleProjectComplete(id)` flips `p.completed`, saves, and calls `refreshView()`. Completed projects are greyed out (`.project-card.completed { opacity:.45; filter:grayscale(.4) }`) on the Dashboard and Projects view. The `completed` flag is preserved through edits in `saveProject()`.
 
 ### Excel (.xlsx) Import / Export
 
