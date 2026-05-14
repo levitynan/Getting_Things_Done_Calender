@@ -120,7 +120,12 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .badge-success{background:var(--color-success-highlight);color:var(--color-success)}
 
 /* TASKS */
-.tasks-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);gap:var(--space-2);flex-wrap:wrap}
+.tasks-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);gap:var(--space-4);flex-wrap:wrap}
+.tasks-stats{display:flex;gap:var(--space-3);align-items:center}
+.tasks-filters{display:flex;gap:var(--space-2);flex-wrap:wrap}
+/* PROJECTS */
+.projects-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);gap:var(--space-4);flex-wrap:wrap}
+.projects-stats{display:flex;gap:var(--space-3);align-items:center}
 .task-group{margin-bottom:var(--space-6)}
 .task-group-title{font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-2);padding:var(--space-2) 0;border-bottom:1px solid var(--color-divider)}
 .task-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.07);border-radius:var(--radius-lg);margin-bottom:var(--space-2);transition:box-shadow var(--transition-interactive)}
@@ -392,7 +397,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .empty-state p{font-size:var(--text-sm);max-width:36ch;margin-bottom:var(--space-6)}
 .section-heading{font-size:var(--text-lg);font-weight:700;letter-spacing:-.02em;margin-bottom:var(--space-4)}
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-4);margin-bottom:var(--space-6)}
-.kpi-card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.07);border-radius:var(--radius-lg);padding:var(--space-4)}
+.kpi-card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.07);border-radius:var(--radius-lg);padding:var(--space-4);flex:0 0 auto;min-width:160px}
 .kpi-value{font-size:var(--text-xl);font-weight:800;letter-spacing:-.03em;font-family:var(--font-mono)}
 .kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-1)}
 
@@ -480,14 +485,19 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     </div>
     <div class="nav-item" id="nav-tasks" onclick="navigate('tasks')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>All Tasks
+      <div style="margin-left:auto;display:flex;gap:var(--space-1);align-items:center">
+        <span id="tasks-badge" style="background:var(--color-primary);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
+        <span id="tasks-completed-badge" style="background:var(--color-success);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
+      </div>
+    </div>
+    <div class="nav-item" id="nav-projects" onclick="navigate('projects')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects
+      <span id="projects-badge" style="margin-left:auto;background:#a855f7;color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
     </div>
     <div class="nav-item" id="nav-ideas" onclick="navigate('ideas')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>
       Ideas
       <span id="idea-badge" style="margin-left:auto;background:var(--color-gold);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
-    </div>
-    <div class="nav-item" id="nav-projects" onclick="navigate('projects')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects
     </div>
     <div class="nav-item" id="nav-calendar" onclick="navigate('calendar')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar
@@ -651,8 +661,13 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 
     <!-- PROJECTS -->
     <div class="view" id="view-projects">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4)">
-        <h2 class="section-heading" style="margin:0">Projects</h2>
+      <div class="projects-header">
+        <div class="projects-stats">
+          <div class="kpi-card">
+            <div class="kpi-value" style="color:#a855f7" id="project-stat-total">0</div>
+            <div class="kpi-label">Projects</div>
+          </div>
+        </div>
         <button class="btn btn-primary" onclick="openProjectModal()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Project
         </button>
@@ -684,22 +699,57 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <!-- TASKS -->
     <div class="view" id="view-tasks">
       <div class="tasks-header">
-        <select class="select" style="width:auto" id="task-area-filter" onchange="renderTasks()"><option value="">All Areas</option></select>
-        <select class="select" style="width:auto" id="task-status-filter" onchange="renderTasks()">
-          <option value="">All Status</option><option value="pending">Pending</option><option value="done">Done</option>
-        </select>
-        <select class="select" style="width:auto" id="task-sort-filter" onchange="renderTasks()">
-          <option value="due">Sort: Due Date</option>
-          <option value="priority">Sort: Priority</option>
-          <option value="created">Sort: Oldest First</option>
-          <option value="created-desc">Sort: Newest First</option>
-          <option value="name">Sort: Name</option>
-        </select>
+        <div class="tasks-stats">
+          <div class="kpi-card">
+            <div class="kpi-value" style="color:var(--color-primary)" id="task-stat-total">0</div>
+            <div class="kpi-label">Total Tasks</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" style="color:var(--color-success)" id="task-stat-completed">0</div>
+            <div class="kpi-label">Completed</div>
+          </div>
+        </div>
+        <div class="tasks-filters">
+          <select class="select" style="width:auto" id="task-area-filter" onchange="renderTasks()"><option value="">All Areas</option></select>
+          <select class="select" style="width:auto" id="task-status-filter" onchange="renderTasks()">
+            <option value="">All Status</option><option value="pending">Pending</option><option value="done">Done</option>
+          </select>
+          <select class="select" style="width:auto" id="task-sort-filter" onchange="renderTasks()">
+            <option value="due">Sort: Due Date</option>
+            <option value="priority">Sort: Priority</option>
+            <option value="created">Sort: Oldest First</option>
+            <option value="created-desc">Sort: Newest First</option>
+            <option value="name">Sort: Name</option>
+          </select>
+        </div>
       </div>
       <div id="task-list"></div>
     </div>
   </div>
 </main>
+
+<!-- Bucket Done Modal -->
+<div class="modal-overlay" id="bucket-done-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">Mark as Done</span>
+      <button class="btn-icon" onclick="closeModal('bucket-done-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bucket-done-id">
+      <div class="form-group">
+        <label>Item</label>
+        <div id="bucket-done-text" style="font-size:var(--text-sm);color:var(--color-text-muted);padding:var(--space-2) 0"></div>
+      </div>
+      <div class="form-group"><label>Area <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label><select class="select" id="bucket-done-area" onchange="handleAreaSelect(this);_filterBucketDoneProjects()"></select></div>
+      <div class="form-group"><label>Project <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label><select class="select" id="bucket-done-project"><option value="">No Project</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('bucket-done-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBucketDone()">Mark Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- Task Modal -->
 <div class="modal-overlay" id="task-modal">
@@ -989,8 +1039,8 @@ function renderDashboard(){
   const upcoming7=expandTasksRange(new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()),addDays(TODAY,7));
   const overdue=state.tasks.filter(t=>!t.done&&t.due&&t.due<today).length;
   document.getElementById('kpi-row').innerHTML=`
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--color-primary)">${state.projects.length}</div><div class="kpi-label">Projects</div></div>
-    <div class="kpi-card"><div class="kpi-value">${total}</div><div class="kpi-label">Total Tasks</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:#a855f7">${state.projects.length}</div><div class="kpi-label">Projects</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--color-primary)">${total}</div><div class="kpi-label">Total Tasks</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-success)">${done}</div><div class="kpi-label">Completed</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-error)">${overdue}</div><div class="kpi-label">Overdue</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-warning)">${upcoming7.length}</div><div class="kpi-label">Next 7 Days</div></div>`;
@@ -1028,6 +1078,7 @@ function toggleProjectExpand(id,e){
   renderProjectsView();
 }
 function renderProjectsView(){
+  document.getElementById('project-stat-total').textContent=state.projects.length;
   const projDiv=document.getElementById('project-list-projects');
   if(!projDiv) return;
   if(!state.projects.length&&!state.tasks.length){
@@ -1118,6 +1169,10 @@ function _sortTasks(tasks, sortBy){
 
 function renderTasks(){
   const pm=getProjectMap();
+  const totalTasks=state.tasks.length;
+  const completedTasks=state.tasks.filter(t=>t.done).length;
+  document.getElementById('task-stat-total').textContent=totalTasks;
+  document.getElementById('task-stat-completed').textContent=completedTasks;
   const areaFilter=document.getElementById('task-area-filter');
   areaFilter.innerHTML='<option value="">All Areas</option>'+(state.areas||[]).map(a=>`<option value="${a.id}" ${areaFilter.value===a.id?'selected':''}>${a.name}</option>`).join('');
   const af=areaFilter.value;
@@ -1674,6 +1729,15 @@ function refreshView(){
   const _ip = (state.ideas||[]).filter(b=>!b.processed&&!b.developed).length;
   const _ib = document.getElementById('idea-badge');
   if(_ib){_ib.textContent=_ip;_ib.style.display=_ip>0?'inline-flex':'none';}
+  const _tp = (state.tasks||[]).length;
+  const _tb = document.getElementById('tasks-badge');
+  if(_tb){_tb.textContent=_tp;_tb.style.display=_tp>0?'inline-flex':'none';}
+  const _tc = (state.tasks||[]).filter(t=>t.done).length;
+  const _tcb = document.getElementById('tasks-completed-badge');
+  if(_tcb){_tcb.textContent=_tc;_tcb.style.display=_tc>0?'inline-flex':'none';}
+  const _pp = (state.projects||[]).length;
+  const _pb = document.getElementById('projects-badge');
+  if(_pb){_pb.textContent=_pp;_pb.style.display=_pp>0?'inline-flex':'none';}
   if(state.currentView==='dashboard') renderDashboard();
   else if(state.currentView==='calendar') renderCalendar();
   else if(state.currentView==='tasks'||state.currentView.startsWith('project-')) renderTasks();
@@ -2270,11 +2334,47 @@ function deleteBucketItem(id) {
   renderBucketView();
 }
 
+function openBucketDoneModal(id) {
+  const item = state.bucket.find(b => b.id === id);
+  if (!item) return;
+  document.getElementById('bucket-done-id').value = id;
+  document.getElementById('bucket-done-text').textContent = item.text;
+  const areaEl = document.getElementById('bucket-done-area');
+  _populateAreaSelect(areaEl);
+  areaEl.value = item.area || '';
+  _filterBucketDoneProjects();
+  document.getElementById('bucket-done-project').value = item.project || '';
+  document.getElementById('bucket-done-modal').classList.add('open');
+}
+
+function _filterBucketDoneProjects() {
+  const areaVal = document.getElementById('bucket-done-area').value;
+  const sel = document.getElementById('bucket-done-project');
+  const prev = sel.value;
+  const projects = areaVal
+    ? state.projects.filter(p => p.area === areaVal)
+    : state.projects;
+  sel.innerHTML = '<option value="">No Project</option>' +
+    projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  if (projects.find(p => p.id === prev)) sel.value = prev;
+}
+
+function saveBucketDone() {
+  const id = document.getElementById('bucket-done-id').value;
+  const item = state.bucket.find(b => b.id === id);
+  if (!item) return;
+  item.completed = true;
+  item.area = document.getElementById('bucket-done-area').value || undefined;
+  item.project = document.getElementById('bucket-done-project').value || undefined;
+  closeModal('bucket-done-modal');
+  saveToStorage();
+  renderBucketView();
+}
+
 function toggleBucketComplete(id) {
   const item = state.bucket.find(b => b.id === id);
   if (!item) return;
   item.completed = !item.completed;
-  // If marking complete, clear any processed state so user sees it cleanly
   saveToStorage();
   renderBucketView();
 }
@@ -2403,23 +2503,30 @@ function renderBucketList() {
     const isCompleted = !!item.completed && !item.processed;
     const isProcessed = !!item.processed;
     const isLocked = isCompleted || isProcessed;
+    const doneArea = item.area ? (state.areas||[]).find(a=>a.id===item.area) : null;
+    const doneProject = item.project ? state.projects.find(p=>p.id===item.project) : null;
+    const doneBadges = isCompleted ? [
+      doneArea ? `<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">${doneArea.name}</span>` : '',
+      doneProject ? `<span class="badge" style="background:${doneProject.color}22;color:${doneProject.color}">${doneProject.name}</span>` : ''
+    ].join('') : '';
 
     return `<div class="bucket-item${isProcessed ? ' processed' : ''}${isCompleted ? ' completed' : ''}" id="bitem-${item.id}">
       ${isProcessed ? '<div class="bucket-processed-badge">↗</div>' : ''}
       ${isCompleted ? '<div class="bucket-completed-badge">✓</div>' : ''}
       <div class="bucket-item-header">
         <div class="bucket-item-body">
-          <div class="bucket-item-text" contenteditable="${isLocked ? 'false' : 'true'}" 
+          <div class="bucket-item-text" contenteditable="${isLocked ? 'false' : 'true'}"
                onblur="editBucketText('${item.id}', this.textContent.trim())"
                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
           >${item.text}</div>
           <div class="bucket-item-meta">
             <span class="bucket-item-date">${dateStr}</span>
             ${tagHtml}
+            ${doneBadges}
           </div>
           ${!isProcessed ? `<div class="bucket-actions">
             ${!isCompleted ? `
-            <button class="process-btn process-btn-complete" onclick="toggleBucketComplete('${item.id}')">
+            <button class="process-btn process-btn-complete" onclick="openBucketDoneModal('${item.id}')">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Done
             </button>
             <button class="process-btn process-btn-task" onclick="processAs('${item.id}','task')">

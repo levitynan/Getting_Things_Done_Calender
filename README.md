@@ -54,6 +54,7 @@ The Collect page is a frictionless capture inbox — dump anything here without 
 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
 - Each captured item can be processed into a **Task**, **Project**, **Meeting**, or **Idea** using the action buttons on the card.
+- Clicking **Done** opens a small modal where you can optionally assign an **Area** and **Project** before marking the item complete. Completed items display the assigned area and project as colour-coded badges.
 - Sending an item to **Idea** transfers it silently to the Ideas page — no form opens, and the card is marked "→ Ideas".
 - Converted items show an **Undo** button — clicking it reverses the conversion. For items sent to Ideas, the corresponding idea is also removed.
 - Filter the list by: **All · To Process · Completed · Converted**
@@ -81,7 +82,13 @@ The Ideas page is a dedicated space for capturing sparks of inspiration before t
 
 Tasks and projects can be assigned to an **area**: **Work**, **Life**, or **University**. You can also create custom areas at any time by choosing **＋ New area…** from any Area dropdown.
 
+### All Tasks Page
+
 The All Tasks page displays a separate column for each area. Tasks with no area (or an unrecognised area) appear in an **Other** column, which is only shown when such tasks exist. Click **Add task** inside any column to open the task form with that area pre-filled.
+
+The page header displays:
+- **Left side:** KPI stats showing **Total tasks** and **Completed** count
+- **Right side:** Filters for **All Areas**, **All Status**, and **Sort** options (Due Date, Priority, Oldest First, Newest First, Name)
 
 ---
 
@@ -125,6 +132,10 @@ Click **New ▾ → Project**.
 | **Description** | Optional summary |
 | **Start / End Date** | Optional date range |
 | **Colour** | Pick from 8 colour swatches |
+
+### Projects Page
+
+The Projects page displays all projects grouped by area in expandable rows. The page header shows a **Projects** count KPI card on the left side, with a **New Project** button on the right. Click the chevron icon on any project card to expand an inline list of its tasks.
 
 ### Project View
 

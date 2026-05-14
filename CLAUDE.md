@@ -44,7 +44,7 @@ The Tasks page renders a horizontal column per area (`renderTasks`). Each column
 3. Calls the matching render function: `renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, `renderBucketView`, or `renderProjectsView`
 4. Sets `state.currentView`
 
-Sidebar order: Dashboard → Collect → All Tasks → Ideas → Projects → Calendar.
+Sidebar order: Dashboard → Collect → All Tasks → Projects → Ideas → Calendar.
 
 `navigateProject(id)` is a special case that reuses `view-tasks` with a project filter applied. It is called from project cards in the Projects view and Dashboard — there are no individual project items in the sidebar.
 
@@ -62,7 +62,7 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | Project | `id, name, desc, area, color, start, end, completed` | `area` is an ID reference to `state.areas`; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()` |
 | Area | `id, name` | Stored in `state.areas`; defaults are Work, Life, University; user can add custom areas via the "＋ New area…" option in any Area dropdown |
 | Meeting | `id, name, date, startTime, endTime, location, project, recur, recurEnd, attendees, type:'meeting'` | Shares calendar rendering with tasks via `isMeeting` flag |
-| Bucket item | `id, text, created, completed, processed, processedAs` | `processedAs` is `task/project/meeting/idea` |
+| Bucket item | `id, text, created, completed, processed, processedAs, area?, project?` | `processedAs` is `task/project/meeting/idea`; `area` and `project` are optional IDs set when marking an item Done via the Done modal |
 | Idea item | `id, text, created, developed, processed, processedAs` | Mirror of bucket; `developed` ≡ bucket's `completed` |
 
 ### Recurring Events
@@ -79,6 +79,10 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | `view-projects` | `nav-projects` | `renderProjectsView()` — projects grouped into area rows; each area row also includes a dashed "No Project" card for tasks in that area with no project (`loose` tasks); an "Other" row collects unassigned projects and tasks; every card has a chevron that expands an inline task list via `_expandedProjects` Set + `toggleProjectExpand(id, e)`; "No Project" cards use key `'unassigned-'+areaId` |
 | `view-calendar` | `nav-calendar` | `renderCalendar()` → `renderMonthView/WeekView/DayView()` |
 | `view-tasks` | `nav-tasks` | `renderTasks()` |
+
+### Collect Done with Area / Project
+
+Clicking **Done** on a bucket item opens `#bucket-done-modal` via `openBucketDoneModal(id)`. The modal shows the item text (read-only) plus optional Area and Project dropdowns. The Project dropdown is filtered by the selected area via `_filterBucketDoneProjects()` — the same pattern as the task modal. On confirm, `saveBucketDone()` writes `area` and `project` onto the bucket item, sets `item.completed = true`, and calls `saveToStorage()` + `renderBucketView()`. Completed items with an area/project assigned display those as colour-coded badges in their meta row.
 
 ### Collect → Ideas Transfer
 
@@ -152,11 +156,13 @@ The overlay is dismissed for the rest of the session via `closeStartup()` (sets 
 
 ### renderTasks sorting and layout
 
-`_sortTasks(tasks, sortBy)` handles all sorting — done tasks always sink to the bottom, then within each group sorts by: `'due'` (ascending, no-date last), `'priority'` (High→Low), `'created'` (oldest first), or `'name'` (A-Z). The sort is chosen via `#task-sort-filter` select in the tasks header.
+The All Tasks page header displays two sections: left side shows KPI stats (**Total tasks**, **Completed**), right side shows filters (**All Areas**, **All Status**, and **Sort**).
 
-`renderTasks()` renders the All Tasks page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add task" button. An "Other" column collects tasks with no recognised area.
+`renderTasks()` updates the task stats at the start, then renders the All Tasks page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add task" button. An "Other" column collects tasks with no recognised area.
 
-When an area filter is active (`af` is non-empty — set by the All Areas dropdown), only that area's column is shown. All areas are shown when the filter is empty.
+`_sortTasks(tasks, sortBy)` handles all sorting — done tasks always sink to the bottom, then within each group sorts by: `'due'` (ascending, no-date last), `'priority'` (High→Low), `'created'` (oldest first), `'created-desc'` (newest first), or `'name'` (A-Z). The sort is chosen via `#task-sort-filter` select on the right side of the header.
+
+When an area filter is active (`af` is non-empty — set by the **All Areas** dropdown), only that area's column is shown. All areas are shown when the filter is empty.
 
 ### Collect list sorting
 
@@ -165,6 +171,10 @@ When an area filter is active (`af` is non-empty — set by the All Areas dropdo
 ### Project completion
 
 `toggleProjectComplete(id)` flips `p.completed`, saves, and calls `refreshView()`. Completed projects are greyed out (`.project-card.completed { opacity:.45; filter:grayscale(.4) }`) on the Dashboard and Projects view. The `completed` flag is preserved through edits in `saveProject()`.
+
+### Projects page header
+
+The Projects page header displays a KPI card showing the **Projects** count on the left side, with a **New Project** button on the right side. `renderProjectsView()` updates the project count at the start of the function.
 
 ### Excel (.xlsx) Import / Export
 
