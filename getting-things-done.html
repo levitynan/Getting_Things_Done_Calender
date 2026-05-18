@@ -757,6 +757,10 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         </button>
         <span class="cal-nav-label" id="cal-nav-label"></span>
         <button class="btn btn-ghost" onclick="calToday()" style="font-size:var(--text-xs);padding:var(--space-1) var(--space-3)">Today</button>
+        <div class="cal-view-switcher" style="margin-left:0">
+          <div class="cal-view-btn active" id="cal-actions-toggle" onclick="toggleCalActions()">Actions</div>
+          <div class="cal-view-btn active" id="cal-meetings-toggle" onclick="toggleCalMeetings()">Meetings</div>
+        </div>
         <div class="cal-view-switcher">
           <div class="cal-view-btn active" data-calview="month" onclick="setCalView('month')">Month</div>
           <div class="cal-view-btn" data-calview="week" onclick="setCalView('week')">Week</div>
@@ -1620,6 +1624,32 @@ function priorityBadge(p){
 function recurLabel(r){return{daily:'Daily',weekdays:'Weekdays',weekly:'Weekly',biweekly:'Bi-weekly',monthly:'Monthly'}[r]||r;}
 
 // ===== CALENDAR CONTROLLER =====
+let _calShowActions  = true;
+let _calShowMeetings = true;
+
+function _calFilter(instances) {
+  return instances.filter(t => t.isMeeting ? _calShowMeetings : _calShowActions);
+}
+
+function _updateCalToggleUI() {
+  const a = document.getElementById('cal-actions-toggle');
+  const m = document.getElementById('cal-meetings-toggle');
+  if (a) a.classList.toggle('active', _calShowActions);
+  if (m) m.classList.toggle('active', _calShowMeetings);
+}
+
+function toggleCalActions() {
+  _calShowActions = !_calShowActions;
+  _updateCalToggleUI();
+  renderCalendar();
+}
+
+function toggleCalMeetings() {
+  _calShowMeetings = !_calShowMeetings;
+  _updateCalToggleUI();
+  renderCalendar();
+}
+
 function setCalView(v){
   state.calView=v;
   document.querySelectorAll('.cal-view-btn').forEach(b=>b.classList.toggle('active',b.dataset.calview===v));
@@ -1669,7 +1699,7 @@ function renderMonthView(){
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-nav-label').textContent=months[m]+' '+y;
   const pm=getProjectMap();
-  const instances=expandTasksMonth(y,m);
+  const instances=_calFilter(expandTasksMonth(y,m));
   const byDate={};
   instances.forEach(t=>{if(!byDate[t.instanceDate])byDate[t.instanceDate]=[];byDate[t.instanceDate].push(t);});
   const firstDay=new Date(y,m,1).getDay();
@@ -1704,7 +1734,7 @@ function monthCellClick(ds){
   const pm=getProjectMap();
   const d0=new Date(ds+'T00:00:00');
   const d1=new Date(ds+'T23:59:59');
-  const dayTasks=expandTasksRange(d0,d1).filter(t=>t.instanceDate===ds);
+  const dayTasks=_calFilter(expandTasksRange(d0,d1)).filter(t=>t.instanceDate===ds);
   const panel=document.getElementById('day-detail-panel');
   if(!dayTasks.length){
     panel.innerHTML=`<div class="day-detail"><div class="day-detail-title">${formatDate(ds)}</div><p style="color:var(--color-text-muted);font-size:var(--text-sm)">No actions. <button class="btn btn-ghost" style="margin-left:var(--space-2)" onclick="openTaskModalForDate('${ds}')">Add Action</button></p></div>`;
@@ -1720,7 +1750,7 @@ function renderWeekView(){
   const days=Array.from({length:7},(_,i)=>addDays(ws,i));
   const from=new Date(ws); from.setHours(0,0,0,0);
   const to=addDays(ws,6); to.setHours(23,59,59,999);
-  const instances=expandTasksRange(from,to); // includes meetings via expandTasksRange patch
+  const instances=_calFilter(expandTasksRange(from,to));
   const todayStr=dateStr(TODAY);
   const pm=getProjectMap();
 
@@ -1849,7 +1879,7 @@ function renderDayView(){
   document.getElementById('cal-nav-label').textContent=d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const from=new Date(ds+'T00:00:00');
   const to=new Date(ds+'T23:59:59');
-  const instances=expandTasksRange(from,to).filter(t=>t.instanceDate===ds);
+  const instances=_calFilter(expandTasksRange(from,to)).filter(t=>t.instanceDate===ds);
   const timed=instances.filter(t=>t.time);
   const allDay=instances.filter(t=>!t.time);
   const isToday=ds===todayStr;
