@@ -3301,7 +3301,11 @@ function confirmMoveIdeaToFolder() {
   const ideaId = document.getElementById('idea-folder-move-id').value;
   const folderId = document.getElementById('idea-folder-move-select').value || null;
   const item = state.ideas.find(i => i.id === ideaId);
-  if (item) { item.folderId = folderId; saveToStorage(); }
+  if (item) {
+    item.folderId = folderId;
+    if (folderId && !item.developed) item.developed = true;
+    saveToStorage();
+  }
   closeModal('idea-folder-modal');
   if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
   else renderIdeaList();
