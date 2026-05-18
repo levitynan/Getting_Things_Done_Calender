@@ -20,10 +20,10 @@ The left sidebar contains six main sections:
 
 | Section | Purpose |
 |---|---|
-| **Dashboard** | Overview of projects, KPIs, and upcoming tasks |
-| **🪣 Collect** | Rapid-capture inbox for any thought, task, or to-do |
-| **All Tasks** | Task list organised into area columns (Work, Life, University, custom) |
-| **💡 Ideas** | Capture ideas and develop them into tasks, projects, or meetings |
+| **Dashboard** | Overview of projects, KPIs, and upcoming actions |
+| **🪣 Collect** | Rapid-capture inbox for any thought, action, or to-do |
+| **Next Actions** | Action list organised into area columns (Work, Life, University, custom) |
+| **💡 Ideas** | Capture ideas and develop them into actions, projects, or meetings |
 | **Calendar** | Monthly, weekly, and daily calendar views |
 | **Projects** | One nav item per project (listed below Calendar) |
 
@@ -31,7 +31,7 @@ The top bar contains two utility buttons alongside **New ▾**:
 - **⊞ (grid icon)** — opens the Import / Export CSV modal
 - **↓ (download icon)** — exports a `.ics` calendar file
 
-Click **New ▾** to create a Task, Project, or Scheduled Meeting from anywhere in the app.
+Click **New ▾** to create an Action, Project, or Scheduled Meeting from anywhere in the app.
 
 ---
 
@@ -53,7 +53,7 @@ The startup screen appears on every page load and is dismissed for the rest of t
 The Collect page is a frictionless capture inbox — dump anything here without worrying about where it belongs yet.
 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
-- Each captured item can be processed into a **Task**, **Project**, **Meeting**, or **Idea** using the action buttons on the card.
+- Each captured item can be processed into an **Action**, **Project**, **Meeting**, or **Idea** using the action buttons on the card.
 - Clicking **Done** opens a small modal where you can optionally assign an **Area** and **Project** before marking the item complete. Completed items display the assigned area and project as colour-coded badges.
 - Sending an item to **Idea** transfers it silently to the Ideas page — no form opens, and the card is marked "→ Ideas".
 - Converted items show an **Undo** button — clicking it reverses the conversion. For items sent to Ideas, the corresponding idea is also removed.
@@ -76,7 +76,7 @@ Shows only ideas with no assigned folder. This is the default view for capturing
 - Ideas can also arrive here from the Collect page via the **Idea** action button on any captured item.
 - Each idea card is fully editable — click the text to modify it.
 - **Developed** — mark an idea as thought through without acting on it yet.
-- **Collect** — move the idea back to the Collect inbox, where it can then be converted into a Task, Project, or Meeting.
+- **Collect** — move the idea back to the Collect inbox, where it can then be converted into an Action, Project, or Meeting.
 - **Move** — assign the idea to a folder.
 - **Discard** — delete the idea permanently.
 - Filter the list by: **All · To Develop · Developed · Converted**
@@ -109,23 +109,23 @@ Organise ideas into a hierarchical folder structure using a two-pane layout:
 
 ## Areas
 
-Tasks and projects can be assigned to an **area**: **Work**, **Life**, or **University**. You can also create custom areas at any time by choosing **＋ New area…** from any Area dropdown.
+Actions and projects can be assigned to an **area**: **Work**, **Life**, or **University**. You can also create custom areas at any time by choosing **＋ New area…** from any Area dropdown.
 
-### All Tasks Page
+### Next Actions Page
 
-The All Tasks page displays a separate column for each area. Tasks with no area (or an unrecognised area) appear in an **Other** column, which is only shown when such tasks exist. Click **Add task** inside any column to open the task form with that area pre-filled.
+The Next Actions page displays a separate column for each area. Actions with no area (or an unrecognised area) appear in an **Other** column, which is only shown when such actions exist. Click **Add action** inside any column to open the action form with that area pre-filled.
 
 The page header displays:
-- **Left side:** KPI stats showing **Total tasks** and **Completed** count
+- **Left side:** KPI stats showing **Total actions** and **Completed** count
 - **Right side:** Filters for **All Areas**, **All Status**, and **Sort** options (Due Date, Priority, Oldest First, Newest First, Name)
 
 ---
 
-## Tasks
+## Actions
 
-### Creating a Task
+### Creating an Action
 
-Click **New ▾ → Task**, or click any day on the calendar to open the task form pre-filled with that date.
+Click **New ▾ → Action**, or click any day on the calendar to open the action form pre-filled with that date.
 
 | Field | Notes |
 |---|---|
@@ -137,18 +137,18 @@ Click **New ▾ → Task**, or click any day on the calendar to open the task fo
 | **Due Time** | Optional time |
 | **Notes** | Free-text notes field |
 
-### Managing Tasks
+### Managing Actions
 
-- **Check** the circle on any task card to mark it done (strikethrough applied).
-- **Edit** (pencil icon) to reopen the task form.
-- **Delete** (bin icon) to remove the task permanently.
-- Completed tasks remain visible but styled as done and sorted below uncompleted tasks in each column.
+- **Check** the circle on any action card to mark it done (strikethrough applied).
+- **Edit** (pencil icon) to reopen the action form.
+- **Delete** (bin icon) to remove the action permanently.
+- Completed actions remain visible but styled as done and sorted below uncompleted actions in each column.
 
 ---
 
 ## Projects
 
-Projects group related tasks together and appear as coloured entries in the sidebar, on task cards, and in the Dashboard.
+Projects group related actions together and appear as coloured entries in the sidebar, on action cards, and in the Dashboard.
 
 ### Creating a Project
 
@@ -164,11 +164,11 @@ Click **New ▾ → Project**.
 
 ### Projects Page
 
-The Projects page displays all projects grouped by area in expandable rows. The page header shows a **Projects** count KPI card on the left side, with a **New Project** button on the right. Click the chevron icon on any project card to expand an inline list of its tasks.
+The Projects page displays all projects grouped by area in expandable rows. The page header shows a **Projects** count KPI card on the left side, with a **New Project** button on the right. Click the chevron icon on any project card to expand an inline list of its actions.
 
 ### Project View
 
-Click a project name in the sidebar to switch to its filtered task list, showing only tasks belonging to that project. The Dashboard shows a card for each project with a progress bar, task count, and date range.
+Click a project name in the sidebar to switch to its filtered action list, showing only actions belonging to that project. The Dashboard shows a card for each project with a progress bar, action count, and date range.
 
 ### Completing a Project
 
@@ -178,7 +178,7 @@ Click the **circle icon** in the top-right of any project card on the Dashboard 
 
 ## Meetings
 
-Meetings are scheduled events distinct from tasks — they support additional fields suited to collaborative events.
+Meetings are scheduled events distinct from actions — they support additional fields suited to collaborative events.
 
 ### Creating a Meeting
 
@@ -190,7 +190,7 @@ Click **New ▾ → Scheduled Meeting**.
 | **Date / Start Time** | Required |
 | **Duration** | In minutes |
 | **Location / Link** | Room name or URL (e.g. Google Meet link) |
-| **Recurrence** | Same options as tasks |
+| **Recurrence** | Same options as actions |
 | **Attendees** | Type a name and press Enter or click Add — shown as chips |
 | **Agenda / Notes** | Free-text |
 
@@ -206,7 +206,7 @@ Switch between **Month**, **Week**, and **Day** using the buttons in the top-rig
 
 | View | Description |
 |---|---|
-| **Month** | Full month grid. Tasks and meetings shown as colour-coded pills. Click a day to see a detail panel below. |
+| **Month** | Full month grid. Actions and meetings shown as colour-coded pills. Click a day to see a detail panel below. |
 | **Week** | 7-column time grid (48px per hour). All-day events shown above the grid. A red line marks the current time. |
 | **Day** | Single-day time grid with full event details. |
 
@@ -223,15 +223,15 @@ Switch between **Month**, **Week**, and **Day** using the buttons in the top-rig
 
 The Dashboard shows:
 
-- **KPI cards** — Total projects, total tasks, completed tasks, overdue tasks, tasks due in the next 7 days.
-- **Project cards** — Each project with a progress bar (completed / total tasks), description, and date range.
-- **Upcoming Tasks** — A panel listing all tasks due in the next 14 days, grouped by date, with project colour coding.
+- **KPI cards** — Total projects, total actions, completed actions, overdue actions, actions due in the next 7 days.
+- **Project cards** — Each project with a progress bar (completed / total actions), description, and date range.
+- **Upcoming Actions** — A panel listing all actions due in the next 14 days, grouped by date, with project colour coding.
 
 ---
 
 ## Exporting to a Calendar
 
-Click the **↓ download icon** in the top bar to export a `.ics` file covering the current month ±1–3 months. The file includes all tasks and meetings with their recurrence rules.
+Click the **↓ download icon** in the top bar to export a `.ics` file covering the current month ±1–3 months. The file includes all actions and meetings with their recurrence rules.
 
 Import the `.ics` file into:
 - **Google Calendar** — Settings → Import
@@ -250,7 +250,7 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 
 | Sheet | Contents |
 |---|---|
-| **Tasks** | All tasks — project ID and name, priority, recurrence, notes, completion state, timestamps |
+| **Actions** | All actions — project ID and name, priority, recurrence, notes, completion state, timestamps |
 | **Projects** | All projects with colour, dates, and description |
 | **Meetings** | All meetings — date, times, location, attendees, recurrence, notes |
 | **Collect** | All Collect items with processing state |
@@ -266,7 +266,7 @@ Each data type can also be exported and imported independently as a `.csv` file:
 
 | Export file | Contents |
 |---|---|
-| `taskcal-tasks.csv` | Tasks |
+| `taskcal-tasks.csv` | Actions |
 | `taskcal-projects.csv` | Projects |
 | `taskcal-meetings.csv` | Meetings (attendees as pipe-separated values) |
 | `taskcal-collect.csv` | Collect items |
@@ -286,7 +286,7 @@ Click **Toggle Theme** at the bottom of the sidebar to switch between light and 
 
 ## Resetting Data
 
-Click **Reset All Data** at the bottom of the sidebar to wipe all tasks, projects, meetings, and collected items and restore the built-in sample data. **This action cannot be undone.**
+Click **Reset All Data** at the bottom of the sidebar to wipe all actions, projects, meetings, and collected items and restore the built-in sample data. **This operation cannot be undone.**
 
 ---
 
@@ -305,7 +305,7 @@ All data is stored in your browser's `localStorage` under the key `taskcal-v1`. 
 ## Technical Notes
 
 - Single `.html` file — no build tools, no package manager.
-- Fonts loaded from Google Fonts CDN; SheetJS loaded from jsDelivr CDN. Both require internet on first load and are cached by the browser thereafter. All other features (tasks, calendar, CSV) work fully offline.
+- Fonts loaded from Google Fonts CDN; SheetJS loaded from jsDelivr CDN. Both require internet on first load and are cached by the browser thereafter. All other features (actions, calendar, CSV) work fully offline.
 - Compatible with Chrome 90+, Edge 90+, Firefox 88+, Safari 14+.
 - Tested at desktop (1280px+) and mobile (375px). Fully responsive.
 - Light and dark mode via CSS custom properties (`data-theme` attribute on `<html>`).

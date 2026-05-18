@@ -34,7 +34,7 @@ State is persisted entirely to `localStorage` under the key `taskcal_data` via `
 
 `state.areas` is an array of `{id, name}` objects. The defaults (Work, Life, University) are seeded from `DEFAULT_STATE.areas` and persisted. Users can add custom areas at any time via the "＋ New area…" option in any Area dropdown — `handleAreaSelect(el)` detects this sentinel value, prompts for a name, pushes to `state.areas`, saves, and rebuilds the dropdown. `_populateAreaSelect(el)` populates any `<select>` with the current areas list plus the add-new option.
 
-The Tasks page renders a horizontal column per area (`renderTasks`). Each column shows tasks whose `area` field matches, with an inline "Add task" button that calls `openTaskModalForArea(areaId)` → `openTaskModal(null, null, areaId)` to pre-fill the Area field. Tasks with no area or an unknown area ID appear in an "Other" column (only rendered when such tasks exist).
+The Next Actions page renders a horizontal column per area (`renderTasks`). Each column shows tasks whose `area` field matches, with an inline "Add action" button that calls `openTaskModalForArea(areaId)` → `openTaskModal(null, null, areaId)` to pre-fill the Area field. Tasks with no area or an unknown area ID appear in an "Other" column (only rendered when such tasks exist).
 
 ### Navigation
 
@@ -44,7 +44,7 @@ The Tasks page renders a horizontal column per area (`renderTasks`). Each column
 3. Calls the matching render function: `renderDashboard`, `renderCalendar`, `renderTasks`, `renderIdeaView`, `renderBucketView`, or `renderProjectsView`
 4. Sets `state.currentView`
 
-Sidebar order: Dashboard → Collect → All Tasks → Projects → Ideas → Calendar.
+Sidebar order: Dashboard → Collect → Next Actions → Projects → Ideas → Calendar.
 
 `navigateProject(id)` is a special case that reuses `view-tasks` with a project filter applied. It is called from project cards in the Projects view and Dashboard — there are no individual project items in the sidebar.
 
@@ -62,7 +62,7 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | Project | `id, name, desc, area, color, start, end, completed` | `area` is an ID reference to `state.areas`; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()` |
 | Area | `id, name` | Stored in `state.areas`; defaults are Work, Life, University; user can add custom areas via the "＋ New area…" option in any Area dropdown |
 | Meeting | `id, name, date, startTime, endTime, location, project, recur, recurEnd, attendees, type:'meeting'` | Shares calendar rendering with tasks via `isMeeting` flag |
-| Bucket item | `id, text, created, completed, processed, processedAs, area?, project?` | `processedAs` is `task/project/meeting/idea`; `area` and `project` are optional IDs set when marking an item Done via the Done modal |
+| Bucket item | `id, text, created, completed, processed, processedAs, area?, project?` | `processedAs` is `task/project/meeting/idea` (internal values unchanged); `area` and `project` are optional IDs set when marking an item Done via the Done modal |
 | Idea item | `id, text, created, developed, processed, processedAs, folderId?` | Mirror of bucket; `developed` ≡ bucket's `completed`; `folderId` optional reference to `state.ideaFolders` |
 | Idea folder | `id, name, parentId` | Forms a tree structure; `parentId` is null for root-level folders |
 
@@ -77,9 +77,9 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | `view-bucket` | `nav-bucket` | `renderBucketView()` + `renderBucketList()` |
 | `view-ideas` | `nav-ideas` | `renderIdeaView()` — dispatches to `renderIdeaList()` (Unfiled tab) or `renderIdeaFolderContent()` (File Explorer tab) based on `_ideaTab` |
 | `view-dashboard` | `nav-dashboard` | `renderDashboard()` |
-| `view-projects` | `nav-projects` | `renderProjectsView()` — projects grouped into area rows; each area row also includes a dashed "No Project" card for tasks in that area with no project (`loose` tasks); an "Other" row collects unassigned projects and tasks; every card has a chevron that expands an inline task list via `_expandedProjects` Set + `toggleProjectExpand(id, e)`; "No Project" cards use key `'unassigned-'+areaId` |
+| `view-projects` | `nav-projects` | `renderProjectsView()` — projects grouped into area rows; each area row also includes a dashed "No Project" card for actions in that area with no project (`loose` tasks); an "Other" row collects unassigned projects and actions; every card has a chevron that expands an inline action list via `_expandedProjects` Set + `toggleProjectExpand(id, e)`; "No Project" cards use key `'unassigned-'+areaId` |
 | `view-calendar` | `nav-calendar` | `renderCalendar()` → `renderMonthView/WeekView/DayView()` |
-| `view-tasks` | `nav-tasks` | `renderTasks()` |
+| `view-tasks` | `nav-tasks` | `renderTasks()` — the "Next Actions" page |
 
 ### Collect Done with Area / Project
 
@@ -172,7 +172,7 @@ All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.o
 
 ### Task completion follow-up
 
-`toggleTask(id)` shows `#followup-modal` whenever a task is marked done. The modal asks if completing the task created something new — options are **New Task**, **New Meeting**, **Turn into Project**, or **Nothing**. `_followupTask` holds the completed task object. `followupAction(type)` closes the modal and opens the relevant create modal: `openTaskModal(null,'',task.area)`, `openMeetingModal(null,null,null,task.name)`, or `openProjectModal(null,task.name)`.
+`toggleTask(id)` shows `#followup-modal` whenever a task is marked done. The modal asks if completing the action created something new — options are **New Action**, **New Meeting**, **Turn into Project**, or **Nothing**. `_followupTask` holds the completed task object. `followupAction(type)` closes the modal and opens the relevant create modal: `openTaskModal(null,'',task.area)`, `openMeetingModal(null,null,null,task.name)`, or `openProjectModal(null,task.name)`.
 
 ### Theming
 
@@ -195,17 +195,17 @@ The overlay is dismissed for the rest of the session via `closeStartup()` (sets 
 
 ### Task age tint
 
-`_ageTint(createdISO, done)` returns an inline `background: hsla(...)` style for incomplete tasks older than one week. Hue shifts from yellow-orange (week 1) toward red (week 4+); alpha increases by 0.06 per week, capped at 0.28. Applied as an inline style on the `.task-item` div in `renderTaskItem`. Done tasks receive no tint. Each task card also shows an "Added [date]" label from `t.created`.
+`_ageTint(createdISO, done)` returns an inline `background: hsla(...)` style for incomplete actions older than one week. Hue shifts from yellow-orange (week 1) toward red (week 4+); alpha increases by 0.06 per week, capped at 0.28. Applied as an inline style on the `.task-item` div in `renderTaskItem`. Done actions receive no tint. Each action card also shows an "Added [date]" label from `t.created`.
 
 ### renderTasks sorting and layout
 
-The All Tasks page header displays two sections: left side shows KPI stats (**Total tasks**, **Completed**), right side shows filters (**All Areas**, **All Status**, and **Sort**).
+The Next Actions page header displays two sections: left side shows KPI stats (**Total actions**, **Completed**), right side shows filters (**All Areas**, **All Status**, and **Sort**).
 
-`renderTasks()` updates the task stats at the start, then renders the All Tasks page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add task" button. An "Other" column collects tasks with no recognised area.
+`renderTasks()` updates the action stats at the start, then renders the Next Actions page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add action" button. An "Other" column collects actions with no recognised area.
 
 `_sortTasks(tasks, sortBy)` handles all sorting — done tasks always sink to the bottom, then within each group sorts by: `'due'` (ascending, no-date last), `'priority'` (High→Low), `'created'` (oldest first), `'created-desc'` (newest first), or `'name'` (A-Z). The sort is chosen via `#task-sort-filter` select on the right side of the header.
 
-When an area filter is active (`af` is non-empty — set by the **All Areas** dropdown), only that area's column is shown. All areas are shown when the filter is empty.
+When an area filter is active (`af` is non-empty — set by the **All Areas** dropdown), only that area's column is shown. All area columns are shown when the filter is empty.
 
 ### Collect list sorting
 

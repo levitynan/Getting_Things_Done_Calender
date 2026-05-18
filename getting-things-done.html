@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaskCal — Project & Task Calendar</title>
+<title>TaskCal — Project & Action Calendar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -526,7 +526,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       <span id="bucket-badge" style="margin-left:auto;background:var(--color-gold);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
     </div>
     <div class="nav-item" id="nav-tasks" onclick="navigate('tasks')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>All Tasks
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Next Actions
       <div style="margin-left:auto;display:flex;gap:var(--space-1);align-items:center">
         <span id="tasks-badge" style="background:var(--color-primary);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
         <span id="tasks-completed-badge" style="background:var(--color-success);color:white;border-radius:var(--radius-full);font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 5px"></span>
@@ -579,13 +579,13 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
             <div class="new-dd-icon" style="background:var(--color-primary-highlight)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
-            <div class="new-dd-label">Task<span>A to-do with optional recurrence</span></div>
+            <div class="new-dd-label">Action<span>A to-do with optional recurrence</span></div>
           </div>
           <div class="new-dd-item" onclick="closeNewDropdown();openProjectModal()">
             <div class="new-dd-icon" style="background:var(--color-blue-highlight)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-blue)" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </div>
-            <div class="new-dd-label">Project<span>Group tasks under a project</span></div>
+            <div class="new-dd-label">Project<span>Group actions under a project</span></div>
           </div>
           <div class="dd-divider"></div>
           <div class="new-dd-item" onclick="closeNewDropdown();openMeetingModal()">
@@ -606,7 +606,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
   <div class="bucket-hero">
     <div class="bucket-hero-text">
       <h2>🪣 Collect</h2>
-      <p>Capture every thought, idea, or to-do as it comes. When you're ready, process each item into a task, project, or meeting.</p>
+      <p>Capture every thought, idea, or to-do as it comes. When you're ready, process each item into an action, project, or meeting.</p>
     </div>
     <div class="bucket-stats">
       <div class="bucket-stat"><div class="bucket-stat-num" id="bstat-total">0</div><div class="bucket-stat-label">captured</div></div>
@@ -642,7 +642,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(-35 12 12)"><path d="M8 10h8l-1.5 9h-5z"/><line x1="7" y1="10" x2="17" y2="10"/><path d="M10 10 Q12 7 14 10"/></g><path d="M17 5 Q19 3 18 1.5" stroke-width="1.8"/><path d="M19.5 8 Q21.5 7 21 5" stroke-width="1.8"/><circle cx="18.5" cy="1" r="1" fill="currentColor" stroke="none"/><circle cx="21.5" cy="4.5" r="1" fill="currentColor" stroke="none"/></svg>
       Empty Bucket
     </button>
-    <span style="font-size:var(--text-xs);color:var(--color-text-faint)">Review each item and turn it into a task, project, or meeting</span>
+    <span style="font-size:var(--text-xs);color:var(--color-text-faint)">Review each item and turn it into an action, project, or meeting</span>
   </div>
 
   <div class="bucket-controls" style="margin-top:var(--space-4)">
@@ -656,7 +656,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
   <div class="bucket-hero" style="padding:var(--space-5) var(--space-5) 0">
     <div class="bucket-hero-text">
       <h2>💡 Ideas</h2>
-      <p>Capture every idea as it sparks. When you're ready, develop each one into a task, project, or meeting.</p>
+      <p>Capture every idea as it sparks. When you're ready, develop each one into an action, project, or meeting.</p>
     </div>
     <div class="bucket-stats">
       <div class="bucket-stat"><div class="bucket-stat-num" id="istat-total">0</div><div class="bucket-stat-label">captured</div></div>
@@ -688,7 +688,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       </div>
       <div class="process-banner" id="idea-banner" style="display:none">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div><strong id="idea-banner-count"></strong> <span>ideas waiting to be developed into tasks, projects, or meetings.</span></div>
+        <div><strong id="idea-banner-count"></strong> <span>ideas waiting to be developed into actions, projects, or meetings.</span></div>
       </div>
       <div class="bucket-controls" style="margin-top:var(--space-4)">
         <span class="bucket-controls-label" id="idea-list-label">Unfiled ideas</span>
@@ -722,7 +722,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       <h2 class="section-heading">Projects</h2>
       <div id="project-list-dashboard"></div>
       <div style="margin-top:var(--space-6)">
-        <h2 class="section-heading">Upcoming Tasks</h2>
+        <h2 class="section-heading">Upcoming Actions</h2>
         <div id="upcoming-tasks-list"></div>
       </div>
     </div>
@@ -770,7 +770,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         <div class="tasks-stats">
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-primary)" id="task-stat-total">0</div>
-            <div class="kpi-label">Total Tasks</div>
+            <div class="kpi-label">Total Actions</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-success)" id="task-stat-completed">0</div>
@@ -865,12 +865,12 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 <div class="modal-overlay" id="task-modal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="task-modal-title">New Task</span>
+      <span class="modal-title" id="task-modal-title">New Action</span>
       <button class="btn-icon" onclick="closeModal('task-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="task-edit-id">
-      <div class="form-group"><label>Task Name *</label><input type="text" class="input" id="task-name" placeholder="e.g. Write project report"></div>
+      <div class="form-group"><label>Action Name *</label><input type="text" class="input" id="task-name" placeholder="e.g. Write project report"></div>
       <div class="form-group"><label>Area</label><select class="select" id="task-area" onchange="handleAreaSelect(this);_filterTaskProjects()"></select></div>
       <div class="form-row">
         <div class="form-group"><label>Project</label><select class="select" id="task-project"><option value="">No Project</option></select></div>
@@ -884,7 +884,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('task-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save Action</button>
     </div>
   </div>
 </div>
@@ -1125,7 +1125,7 @@ function navigate(view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   state.currentView=view;
-  const titles={bucket:'Collect',ideas:'Ideas',dashboard:'Dashboard',calendar:'Calendar',tasks:'All Tasks',projects:'Projects'};
+  const titles={bucket:'Collect',ideas:'Ideas',dashboard:'Dashboard',calendar:'Calendar',tasks:'Next Actions',projects:'Projects'};
   document.getElementById('topbar-title').textContent=titles[view]||view;
   if(view==='calendar') renderCalendar();
   if(view==='tasks') renderTasks();
@@ -1143,7 +1143,7 @@ function navigateProject(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-tasks').classList.add('active');
   const proj=state.projects.find(p=>p.id===id);
-  document.getElementById('topbar-title').textContent=proj?proj.name:'Tasks';
+  document.getElementById('topbar-title').textContent=proj?proj.name:'Actions';
   renderTasks();
 }
 
@@ -1157,13 +1157,13 @@ function renderDashboard(){
   const overdue=state.tasks.filter(t=>!t.done&&t.due&&t.due<today).length;
   document.getElementById('kpi-row').innerHTML=`
     <div class="kpi-card"><div class="kpi-value" style="color:#a855f7">${state.projects.length}</div><div class="kpi-label">Projects</div></div>
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--color-primary)">${total}</div><div class="kpi-label">Total Tasks</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--color-primary)">${total}</div><div class="kpi-label">Total Actions</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-success)">${done}</div><div class="kpi-label">Completed</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-error)">${overdue}</div><div class="kpi-label">Overdue</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-warning)">${upcoming7.length}</div><div class="kpi-label">Next 7 Days</div></div>`;
   const projDiv=document.getElementById('project-list-dashboard');
   if(!state.projects.length){
-    projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your tasks.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
+    projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
   } else {
     projDiv.innerHTML=`<div class="projects-grid">${state.projects.map(p=>{
       const pt=state.tasks.filter(t=>t.project===p.id);
@@ -1178,13 +1178,13 @@ function renderDashboard(){
           <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         </div>
         <div class="project-card-desc">${p.desc||'No description'}</div>
-        <div class="project-meta"><span class="badge badge-teal">${pt.length} tasks</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+        <div class="project-meta"><span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
         <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
       </div>`;}).join('')}</div>`;
   }
   const upcomingDiv=document.getElementById('upcoming-tasks-list');
   const sorted=upcoming7.sort((a,b)=>a.instanceDate.localeCompare(b.instanceDate)).slice(0,8);
-  upcomingDiv.innerHTML=sorted.length?sorted.map(t=>renderTaskItem(t,pm)).join(''):`<div class="empty-state" style="padding:var(--space-8)"><div class="empty-state-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>All clear!</h3><p>No upcoming tasks in the next 7 days.</p></div>`;
+  upcomingDiv.innerHTML=sorted.length?sorted.map(t=>renderTaskItem(t,pm)).join(''):`<div class="empty-state" style="padding:var(--space-8)"><div class="empty-state-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>All clear!</h3><p>No upcoming actions in the next 7 days.</p></div>`;
 }
 
 // ===== PROJECTS VIEW =====
@@ -1199,7 +1199,7 @@ function renderProjectsView(){
   const projDiv=document.getElementById('project-list-projects');
   if(!projDiv) return;
   if(!state.projects.length&&!state.tasks.length){
-    projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your tasks.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
+    projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
     return;
   }
   function cardHtml(p){
@@ -1217,16 +1217,16 @@ function renderProjectsView(){
         <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
         ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
       </div>`).join('')
-      :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No tasks yet</div>`
+      :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`
     }</div>`:'';
     return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
       <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px"></div><span class="project-card-title">${p.name}</span>
-        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} tasks" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
+        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} actions" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
         <button class="btn-icon" style="opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
         <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
       <div class="project-card-desc">${p.desc||'No description'}</div>
-      <div class="project-meta"><span class="badge badge-teal">${pt.length} tasks</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+      <div class="project-meta"><span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
       <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
       ${taskList}
     </div>`;
@@ -1244,9 +1244,9 @@ function renderProjectsView(){
     }</div>`:'';
     return `<div class="project-card" style="border-style:dashed">
       <div class="project-card-header"><span class="project-card-title" style="color:var(--color-text-muted)">No Project</span>
-        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} tasks" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
+        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} actions" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
       </div>
-      <div class="project-meta"><span class="badge badge-teal">${tasks.length} tasks</span><span class="badge badge-success">${done} done</span></div>
+      <div class="project-meta"><span class="badge badge-teal">${tasks.length} actions</span><span class="badge badge-success">${done} done</span></div>
       ${taskList}
     </div>`;
   }
@@ -1301,10 +1301,10 @@ function renderTasks(){
   if(sf==='done') tasks=tasks.filter(t=>t.done);
   _sortTasks(tasks,sortBy);
   const container=document.getElementById('task-list');
-  if(!tasks.length){container.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>No tasks found</h3><p>Add a task to get started.</p><button class="btn btn-primary" onclick="openTaskModal()">Add Task</button></div>`;return;}
+  if(!tasks.length){container.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>No actions found</h3><p>Add an action to get started.</p><button class="btn btn-primary" onclick="openTaskModal()">Add Action</button></div>`;return;}
   const areas=state.areas||[];
   const areaIds=new Set(areas.map(a=>a.id));
-  let columns=af?[{id:af,name:areas.find(a=>a.id===af)?.name||'Tasks',tasks}]:areas.map(a=>({id:a.id,name:a.name,tasks:tasks.filter(t=>t.area===a.id)}));
+  let columns=af?[{id:af,name:areas.find(a=>a.id===af)?.name||'Actions',tasks}]:areas.map(a=>({id:a.id,name:a.name,tasks:tasks.filter(t=>t.area===a.id)}));
   const unassigned=af?[]:tasks.filter(t=>!t.area||!areaIds.has(t.area));
   if(unassigned.length) columns.push({id:'',name:'Other',tasks:unassigned});
   container.innerHTML=`<div class="task-columns">${columns.map(col=>`<div class="task-column">
@@ -1315,7 +1315,7 @@ function renderTasks(){
     <div class="task-column-body">
       ${col.tasks.map(t=>renderTaskItem(t,pm)).join('')}
       <div class="task-column-add" onclick="openTaskModalForArea('${col.id}')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add task
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add action
       </div>
     </div>
   </div>`).join('')}</div>`;
@@ -1477,9 +1477,9 @@ function monthCellClick(ds){
   const dayTasks=expandTasksRange(d0,d1).filter(t=>t.instanceDate===ds);
   const panel=document.getElementById('day-detail-panel');
   if(!dayTasks.length){
-    panel.innerHTML=`<div class="day-detail"><div class="day-detail-title">${formatDate(ds)}</div><p style="color:var(--color-text-muted);font-size:var(--text-sm)">No tasks. <button class="btn btn-ghost" style="margin-left:var(--space-2)" onclick="openTaskModalForDate('${ds}')">Add Task</button></p></div>`;
+    panel.innerHTML=`<div class="day-detail"><div class="day-detail-title">${formatDate(ds)}</div><p style="color:var(--color-text-muted);font-size:var(--text-sm)">No actions. <button class="btn btn-ghost" style="margin-left:var(--space-2)" onclick="openTaskModalForDate('${ds}')">Add Action</button></p></div>`;
   } else {
-    panel.innerHTML=`<div class="day-detail"><div class="day-detail-title">${formatDate(ds)} — ${dayTasks.length} task${dayTasks.length>1?'s':''}</div>${dayTasks.map(t=>renderTaskItem(t,pm)).join('')}</div>`;
+    panel.innerHTML=`<div class="day-detail"><div class="day-detail-title">${formatDate(ds)} — ${dayTasks.length} action${dayTasks.length>1?'s':''}</div>${dayTasks.map(t=>renderTaskItem(t,pm)).join('')}</div>`;
   }
 }
 
@@ -1681,7 +1681,7 @@ function openTaskModal(editId, prefillName, prefillArea){
   _populateAreaSelect(document.getElementById('task-area'));
   if(editId){
     const t=state.tasks.find(x=>x.id===editId); if(!t) return;
-    document.getElementById('task-modal-title').textContent='Edit Task';
+    document.getElementById('task-modal-title').textContent='Edit Action';
     document.getElementById('task-edit-id').value=editId;
     document.getElementById('task-name').value=t.name;
     document.getElementById('task-area').value=t.area||'';
@@ -1692,7 +1692,7 @@ function openTaskModal(editId, prefillName, prefillArea){
     document.getElementById('task-time').value=t.time||'';
     document.getElementById('task-notes').value=t.notes||'';
   } else {
-    document.getElementById('task-modal-title').textContent='New Task';
+    document.getElementById('task-modal-title').textContent='New Action';
     document.getElementById('task-edit-id').value='';
     document.getElementById('task-name').value=prefillName||'';
     document.getElementById('task-area').value=prefillArea||'';
@@ -1904,7 +1904,7 @@ function openDataModal() {
   };
   const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
   const rows = [
-    { type:'tasks',    label:'Tasks',    sub: plural(counts.tasks,'task'),
+    { type:'tasks',    label:'Actions',    sub: plural(counts.tasks,'action'),
       bg:'var(--color-primary-highlight)', fg:'var(--color-primary)',
       icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' },
     { type:'projects', label:'Projects', sub: plural(counts.projects,'project'),
@@ -1929,7 +1929,7 @@ function openDataModal() {
         </div>
         <div>
           <div class="data-row-name">All data</div>
-          <div class="data-row-count">Tasks · Projects · Meetings · Collect · Ideas</div>
+          <div class="data-row-count">Actions · Projects · Meetings · Collect · Ideas</div>
         </div>
       </div>
       <div class="data-row-actions">
@@ -2599,10 +2599,10 @@ function renderBucketList() {
 
   if (items.length === 0) {
     const emptyMsgs = {
-      all: ['🪣','Bucket is empty','Start capturing thoughts above. Anything goes: ideas, tasks, reminders.'],
+      all: ['🪣','Bucket is empty','Start capturing thoughts above. Anything goes: ideas, actions, reminders.'],
       pending: ['✅','All clear!','Every item has been completed or converted — great work!'],
       completed: ['🎉','No completed items','Mark items done as you finish them without converting them.'],
-      processed: ['📂','Nothing converted yet','Use Task / Project / Meeting buttons to convert captured items.']
+      processed: ['📂','Nothing converted yet','Use Action / Project / Meeting buttons to convert captured items.']
     };
     const [ei,et,ep] = emptyMsgs[bucketFilter]||emptyMsgs.all;
     container.innerHTML = `<div class="bucket-empty">
@@ -2617,7 +2617,7 @@ function renderBucketList() {
     const d = new Date(item.created);
     const dateStr = d.toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const typeColors = {task:'var(--color-primary)',project:'var(--color-blue)',meeting:'var(--color-purple)',idea:'var(--color-gold)'};
-    const typeLabels = {task:'→ Task',project:'→ Project',meeting:'→ Meeting',idea:'→ Ideas'};
+    const typeLabels = {task:'→ Action',project:'→ Project',meeting:'→ Meeting',idea:'→ Ideas'};
     const tagHtml = item.processed && item.processedAs
       ? `<span class="bucket-item-tag" style="color:${typeColors[item.processedAs]}">${typeLabels[item.processedAs]}</span>` : '';
 
@@ -2651,7 +2651,7 @@ function renderBucketList() {
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Done
             </button>
             <button class="process-btn process-btn-task" onclick="processAs('${item.id}','task')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Task
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Action
             </button>
             <button class="process-btn process-btn-project" onclick="processAs('${item.id}','project')">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Project
@@ -2737,7 +2737,7 @@ function renderReviewStep() {
         <h3>Bucket emptied!</h3>
         <p>You've reviewed everything. Here's what happened:</p>
         <div class="review-done-stats">
-          <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-primary)">${sum.task}</div><div class="review-done-stat-label">Tasks</div></div>
+          <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-primary)">${sum.task}</div><div class="review-done-stat-label">Actions</div></div>
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-blue)">${sum.project}</div><div class="review-done-stat-label">Projects</div></div>
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-purple)">${sum.meeting}</div><div class="review-done-stat-label">Meetings</div></div>
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-success)">${sum.completed}</div><div class="review-done-stat-label">Completed</div></div>
@@ -2774,7 +2774,7 @@ function renderReviewStep() {
           <div class="review-btn-icon" style="background:var(--color-primary-highlight)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </div>
-          Make Task
+          Make Action
         </button>
         <button class="review-action-btn review-btn-project" onclick="reviewConvert('${id}','project')">
           <div class="review-btn-icon" style="background:var(--color-blue-highlight)">
@@ -3452,7 +3452,7 @@ function renderIdeaList() {
 
 // ===== CLEAR DATA =====
 function clearAllData(){
-  if(!confirm('Reset all tasks, projects and meetings to defaults? This cannot be undone.')) return;
+  if(!confirm('Reset all actions, projects and meetings to defaults? This cannot be undone.')) return;
   localStorage.removeItem(STORAGE_KEY);
   const d = { ...DEFAULT_STATE, meetings: [] };
   state.projects = d.projects.map(p=>({...p}));
@@ -3543,14 +3543,14 @@ setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
 <div class="modal-overlay" id="followup-modal">
   <div class="modal" style="max-width:400px">
     <div class="modal-header">
-      <span class="modal-title">Task complete 🎉</span>
+      <span class="modal-title">Action complete 🎉</span>
       <button class="btn-icon" onclick="closeModal('followup-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <p style="margin-bottom:var(--space-4);color:var(--color-text-muted);font-size:var(--text-sm)">Did completing <strong id="followup-task-name" style="color:var(--color-text)"></strong> create something new?</p>
+      <p style="margin-bottom:var(--space-4);color:var(--color-text-muted);font-size:var(--text-sm)">Did completing <strong id="followup-task-name" style="color:var(--color-text)"></strong> create a new action?</p>
       <div style="display:flex;flex-direction:column;gap:var(--space-2)">
         <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('task')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>New Task
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>New Action
         </button>
         <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('meeting')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>New Meeting
