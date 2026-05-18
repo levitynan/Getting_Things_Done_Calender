@@ -1624,6 +1624,13 @@ function priorityBadge(p){
 function recurLabel(r){return{daily:'Daily',weekdays:'Weekdays',weekly:'Weekly',biweekly:'Bi-weekly',monthly:'Monthly'}[r]||r;}
 
 // ===== CALENDAR CONTROLLER =====
+// Returns a small circle complete-button for action pills; empty string for meetings.
+function _calCompleteBtn(t) {
+  if (t.isMeeting || t.type === 'meeting') return '';
+  const done = !!t.done;
+  return `<span style="flex-shrink:0;width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;background:${done?'currentColor':'transparent'}" onclick="event.stopPropagation();toggleTask('${t.id}')" title="${done?'Mark incomplete':'Mark complete'}"></span>`;
+}
+
 let _calShowActions  = true;
 let _calShowMeetings = true;
 
@@ -1719,7 +1726,7 @@ function renderMonthView(){
       <div class="cal-date">${d}</div>
       ${visible.map(t=>{const proj=pm[t.project];const color=proj?proj.color:'#7a7974';const isMtg=t.isMeeting||t.type==='meeting';
 const evColor=isMtg?'#7a39bb':(proj?proj.color:'#7a7974');
-return`<div class="cal-event" style="background:${evColor}22;color:${evColor}" title="${t.name}" onclick="event.stopPropagation();${isMtg?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${isMtg?'📅 ':''}${t.name}</div>`;}).join('')}
+return`<div class="cal-event" style="background:${evColor}22;color:${evColor};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" title="${t.name}" onclick="event.stopPropagation();${isMtg?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${isMtg?'📅 ':''}${t.name}</span></div>`;}).join('')}
       ${more>0?`<div class="cal-more">+${more} more</div>`:''}
     </div>`;
   }
@@ -1787,7 +1794,7 @@ function renderWeekView(){
     const ds=dateStr(d);
     const adt=allDayByDay[ds]||[];
     html+=`<div class="week-allday-cell">${adt.map(t=>{const proj=pm[t.project];const color=proj?proj.color:'#7a7974';const isMtg2=t.isMeeting||t.type==='meeting';const aColor=isMtg2?'#7a39bb':color;
-return`<div class="week-allday-event" style="background:${aColor}22;color:${aColor}" onclick="${isMtg2?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}" title="${t.name}">${isMtg2?'📅 ':''}${t.name}</div>`;}).join('')}</div>`;
+return`<div class="week-allday-event" style="background:${aColor}22;color:${aColor};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" onclick="${isMtg2?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}" title="${t.name}">${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${isMtg2?'📅 ':''}${t.name}</span></div>`;}).join('')}</div>`;
   });
   html+='</div>';
   // Body
@@ -1830,9 +1837,9 @@ function placeWeekEvent(t,colIndex,pm){
   const height2=t.endTime?(()=>{const[eh,em]=t.endTime.split(':').map(Number);const[sh,sm]=(t.time||'00:00').split(':').map(Number);return Math.max(24,(eh*60+em-sh*60-sm)/60*48);})():48;
   const el=document.createElement('div');
   el.className='week-event';
-  el.style.cssText=`top:${top}px;height:${height2}px;background:${color}22;color:${color};border-left:3px solid ${color}`;
+  el.style.cssText=`top:${top}px;height:${height2}px;background:${color}22;color:${color};border-left:3px solid ${color};display:flex;align-items:flex-start;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}`;
   el.title=t.name;
-  el.textContent=`${t.time}${isMtgW?' 📅':''} ${t.name}`;
+  el.innerHTML=`${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${t.time}${isMtgW?' 📅':''} ${t.name}</span>`;
   el.onclick=()=>isMtgW?openMeetingModal(t.id):openTaskModal(t.id);
   // Find the correct cell: cells are ordered h=0..23, within each hour col 0..6
   // grid: 1 time col + 7 day cols, 24 rows
@@ -1889,7 +1896,7 @@ function renderDayView(){
       <div class="day-big-date" ${isToday?'style="color:var(--color-primary)"':''}>${d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'})}</div>
     </div>`;
   if(allDay.length){
-    html+=`<div class="day-allday-bar"><div class="day-allday-label">All-day</div>${allDay.map(t=>{const proj=pm[t.project];const color=proj?proj.color:'#7a7974';return`<div class="week-allday-event" style="background:${color}22;color:${color}" onclick="openTaskModal('${t.id}')">${t.name}</div>`;}).join('')}</div>`;
+    html+=`<div class="day-allday-bar"><div class="day-allday-label">All-day</div>${allDay.map(t=>{const proj=pm[t.project];const isMtgA=t.isMeeting||t.type==='meeting';const color=isMtgA?'#7a39bb':(proj?proj.color:'#7a7974');return`<div class="week-allday-event" style="background:${color}22;color:${color};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" onclick="${isMtgA?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${isMtgA?'📅 ':''}${t.name}</span></div>`;}).join('')}</div>`;
   }
   html+=`<div class="day-body" id="day-body-scroll">
     <div class="day-time-col">`;
@@ -1918,8 +1925,8 @@ function renderDayView(){
 
       const isMtgD=t.isMeeting||t.type==='meeting';
       const dColor=isMtgD?'#7a39bb':(proj?proj.color:'#7a7974');
-      el.style.cssText=`top:${top}px;min-height:52px;background:${dColor}22;color:${dColor};border-left:3px solid ${dColor}`;
-      el.innerHTML=`<div style="font-weight:700">${t.time}${isMtgD?' 📅':''}</div><div>${t.name}</div>${proj?`<div style="opacity:.7;font-size:10px">${proj.name}</div>`:''}`;
+      el.style.cssText=`top:${top}px;min-height:52px;background:${dColor}22;color:${dColor};border-left:3px solid ${dColor};${t.done?'opacity:.55;text-decoration:line-through':''}`;
+      el.innerHTML=`<div style="display:flex;align-items:center;gap:4px;font-weight:700">${_calCompleteBtn(t)}${t.time}${isMtgD?' 📅':''}</div><div>${t.name}</div>${proj?`<div style="opacity:.7;font-size:10px">${proj.name}</div>`:''}`;
       el.onclick=()=>isMtgD?openMeetingModal(t.id):openTaskModal(t.id);
       col.appendChild(el);
     });
