@@ -2039,8 +2039,8 @@ function exportCSV(type) {
     filename = 'taskcal-collect.csv';
   } else if (type === 'ideas') {
     csv = _toCSV(
-      ['id','text','created','developed','processed','processedAs','folderId'],
-      state.ideas.map(i => [i.id, i.text, i.created||'', i.developed?'true':'false', i.processed?'true':'false', i.processedAs||'', i.folderId||''])
+      ['id','text','created','developed','processed','processedAs','processedAt','folderId'],
+      state.ideas.map(i => [i.id, i.text, i.created||'', i.developed?'true':'false', i.processed?'true':'false', i.processedAs||'', i.processedAt||'', i.folderId||''])
     );
     filename = 'taskcal-ideas.csv';
   } else if (type === 'meetings') {
@@ -2140,6 +2140,7 @@ function importCSV(type, input) {
           developed:   bool(r[col('developed')]),
           processed:   bool(r[col('processed')]),
           processedAs: r[col('processedAs')] || null,
+          processedAt: r[col('processedAt')] || null,
           folderId:    r[col('folderId')]    || null
         };
         if (!item.folderId) item.folderId = null;
@@ -2242,7 +2243,7 @@ function exportXLSX() {
     state.ideas.map(i => ({
       id: i.id, text: i.text, created: i.created||'',
       developed: i.developed?'true':'false', processed: i.processed?'true':'false',
-      processedAs: i.processedAs||'', folderId: i.folderId||''
+      processedAs: i.processedAs||'', processedAt: i.processedAt||'', folderId: i.folderId||''
     }))
   ), 'Ideas');
 
@@ -2330,6 +2331,7 @@ function importXLSX(input) {
           id: String(r.id||'i'+Date.now()+Math.floor(Math.random()*9999)),
           text: String(r.text||''), created: r.created||new Date().toISOString(),
           developed: bool(r.developed), processed: bool(r.processed), processedAs: r.processedAs||null,
+          processedAt: r.processedAt ? String(r.processedAt) : null,
           folderId: r.folderId ? String(r.folderId) : null
         };
         const xi = state.ideas.findIndex(i => i.id === item.id);
@@ -3372,6 +3374,7 @@ function moveIdeaToCollect(id) {
   if (!item) return;
   item.processed = true;
   item.processedAs = 'collect';
+  item.processedAt = new Date().toISOString();
   state.bucket.unshift({ id:'b'+Date.now(), text:item.text, created:new Date().toISOString(), completed:false, processed:false, processedAs:null });
   saveToStorage();
   renderIdeaView();
