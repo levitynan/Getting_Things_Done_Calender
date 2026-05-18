@@ -66,15 +66,44 @@ The Collect page is a frictionless capture inbox — dump anything here without 
 
 ## Ideas
 
-The Ideas page is a dedicated space for capturing sparks of inspiration before they're ready to become action items.
+The Ideas page is a dedicated space for capturing sparks of inspiration and organizing them into a folder structure. It has two tabs:
+
+### Unfiled Tab
+
+Shows only ideas with no assigned folder. This is the default view for capturing new ideas.
 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
 - Ideas can also arrive here from the Collect page via the **Idea** action button on any captured item.
-- Mark an idea as **Developed** to indicate it has been thought through without acting on it yet.
-- When an idea is ready to act on, use the **Collect** button to move it back to the Collect inbox, where it can then be converted into a Task, Project, or Meeting.
-- Ideas moved to Collect are marked "→ Collect" and show an **Undo** button — clicking it removes the corresponding Collect entry and restores the idea.
+- Each idea card is fully editable — click the text to modify it.
+- **Developed** — mark an idea as thought through without acting on it yet.
+- **Collect** — move the idea back to the Collect inbox, where it can then be converted into a Task, Project, or Meeting.
+- **Move** — assign the idea to a folder.
+- **Discard** — delete the idea permanently.
 - Filter the list by: **All · To Develop · Developed · Converted**
+
+### File Explorer Tab
+
+Organise ideas into a hierarchical folder structure using a two-pane layout:
+
+**Folder sidebar (left):**
+- **All Ideas** — shows every idea regardless of folder.
+- Folder tree — root folders and subfolders listed below. Click any folder to show its ideas in the content pane.
+- Expand/collapse arrows (⊳) — click to navigate subfolders.
+- Item counts — shown in parentheses next to each folder name.
+- Hover a folder to reveal action buttons: **+** (new subfolder), **✎** (rename), **✕** (delete).
+- **New** button at the top of the sidebar — creates a root-level folder.
+- **Collapse/expand toggle** — the thin strip on the right edge of the sidebar collapses it to give more room for the content pane; click again to restore it.
+
+**Content pane (right):**
+- Displays the ideas belonging to the selected folder, sorted oldest to newest.
+- Each idea is fully editable with **Developed**, **Unfile**, **Move**, and **Discard** action buttons.
+- Selecting **All Ideas** shows every idea across all folders.
+
+### General
+
+- Ideas moved to Collect are marked "→ Collect" and show an **Undo** button — clicking it removes the corresponding Collect entry and restores the idea.
 - The sidebar badge shows the count of ideas still waiting to be developed.
+- Newlines in idea text are preserved (use **Shift+Enter** to add new lines within an idea).
 
 ---
 

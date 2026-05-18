@@ -103,6 +103,7 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 /* VIEWS */
 .view{display:none}
 .view.active{display:block}
+#view-ideas.active{display:flex;flex-direction:column}
 
 /* PROJECTS */
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:var(--space-4)}
@@ -263,6 +264,47 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .save-toast.show{opacity:1;transform:translateY(0)}
 
 
+/* ===== IDEA FOLDERS ===== */
+.idea-layout{display:flex;gap:var(--space-4);align-items:flex-start;margin-top:var(--space-4)}
+.idea-folder-sidebar{width:200px;min-width:170px;flex-shrink:0;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-lg);padding:var(--space-1);font-size:13px;overflow:hidden}
+.idea-folder-sidebar-title{font-size:11px;font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.07em;padding:var(--space-2) var(--space-2) var(--space-1);display:block}
+.idea-content{flex:1;min-width:0}
+.idea-folder-item{display:flex;align-items:center;gap:3px;padding:2px 4px 2px 2px;border-radius:3px;cursor:pointer;color:var(--color-text);transition:background var(--transition-interactive);user-select:none;height:23px;position:relative;white-space:nowrap;overflow:hidden}
+.idea-folder-item:hover{background:oklch(from var(--color-text) l c h/.07)}
+.idea-folder-item.active{background:var(--color-primary);color:white}
+.idea-folder-item.active .idea-folder-count{background:rgba(255,255,255,.25);color:white}
+.idea-folder-item.active .idea-folder-actions button{color:white}
+.idea-folder-toggle{width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--color-text-faint);cursor:pointer}
+.idea-folder-toggle:hover{color:var(--color-text)}
+.idea-folder-item.active .idea-folder-toggle{color:rgba(255,255,255,.7)}
+.idea-folder-icon{flex-shrink:0;display:flex;align-items:center}
+.idea-folder-label{flex:1;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.idea-folder-count{font-size:10px;background:oklch(from var(--color-text) l c h/.08);border-radius:999px;padding:0 5px;line-height:16px;flex-shrink:0;margin-left:2px}
+.idea-folder-actions{display:flex;gap:1px;flex-shrink:0;opacity:0;margin-left:2px}
+.idea-folder-item:hover .idea-folder-actions,.idea-folder-item.active .idea-folder-actions{opacity:1}
+.idea-folder-actions button{height:16px;padding:0 4px;display:flex;align-items:center;justify-content:center;border-radius:3px;flex-shrink:0;font-size:11px;font-weight:600;gap:2px;line-height:1}
+.idea-folder-actions button:hover{background:oklch(from var(--color-text) l c h/.12)}
+.idea-folder-item.active .idea-folder-actions button:hover{background:rgba(255,255,255,.2)}
+.idea-folder-children{padding-left:16px;border-left:1px solid var(--color-divider);margin-left:8px}
+.idea-folder-add{color:var(--color-text-faint);font-size:var(--text-xs);margin-top:var(--space-1);border:1px dashed var(--color-divider);border-radius:3px;height:24px;justify-content:center;gap:var(--space-1)}
+.idea-folder-add:hover{color:var(--color-text);background:oklch(from var(--color-text) l c h/.05);border-color:var(--color-border)}
+.idea-tabs{display:flex;gap:var(--space-2);border-bottom:1px solid var(--color-divider);padding:var(--space-3) var(--space-5) 0}
+.idea-tab-btn{background:transparent;border:none;padding:var(--space-2) var(--space-4);font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:color var(--transition-interactive),border-color var(--transition-interactive);margin-bottom:-1px}
+.idea-tab-btn:hover{color:var(--color-text)}
+.idea-tab-btn.active{color:var(--color-primary);border-bottom-color:var(--color-primary)}
+.idea-tab-pane{display:none}
+.idea-tab-pane.active{display:block}
+#idea-tab-fileexplorer.active{display:flex}
+#idea-tab-unfiled{padding:var(--space-5) var(--space-5) 0}
+.idea-folder-sidebar{width:240px;flex-shrink:0;background:var(--color-surface-offset);border-right:1px solid var(--color-divider);display:flex;flex-direction:column;min-width:0;transition:width .2s;overflow:hidden}
+.idea-folder-sidebar.collapsed{width:0}
+.idea-sidebar-toggle{flex-shrink:0;width:16px;background:var(--color-surface-offset);border:none;border-right:1px solid var(--color-divider);cursor:pointer;color:var(--color-text-faint);display:flex;align-items:center;justify-content:center;padding:0;transition:background var(--transition-interactive),color var(--transition-interactive)}
+.idea-sidebar-toggle:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.idea-folder-tree-item-wrapper{margin-top:var(--space-1)}
+.idea-folder-tree-item{padding:var(--space-2);cursor:pointer;border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--color-text-muted);transition:background var(--transition-interactive),color var(--transition-interactive);user-select:none;display:flex;align-items:center;justify-content:space-between}
+.idea-folder-tree-item:hover{background:var(--color-surface-dynamic);color:var(--color-text)}
+.idea-folder-tree-item:hover .folder-actions{opacity:1 !important}
+.idea-folder-tree-item.selected{background:var(--color-primary-highlight);color:var(--color-primary);font-weight:600}
 /* ===== COLLECTION BUCKET ===== */
 .bucket-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-6);flex-wrap:wrap}
 .bucket-hero-text h2{font-size:var(--text-xl);font-weight:800;letter-spacing:-.03em;margin-bottom:var(--space-1)}
@@ -291,7 +333,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .bucket-item.processed{opacity:.45}
 .bucket-item-header{display:flex;align-items:flex-start;gap:var(--space-3)}
 .bucket-item-body{flex:1;min-width:0}
-.bucket-item-text{font-size:var(--text-base);font-weight:500;line-height:1.5;margin-bottom:var(--space-1);word-break:break-word}
+.bucket-item-text{font-size:var(--text-base);font-weight:500;line-height:1.5;margin-bottom:var(--space-1);word-break:break-word;white-space:pre-wrap}
 .bucket-item-text[contenteditable="true"]{outline:none;border-bottom:1px dashed var(--color-border);cursor:text}
 .bucket-item-meta{display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap;font-size:var(--text-xs);color:var(--color-text-muted)}
 .bucket-item-date{font-family:var(--font-mono)}
@@ -610,8 +652,8 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
   <div id="bucket-list"></div>
 </div>
 
-<div class="view" id="view-ideas">
-  <div class="bucket-hero">
+<div class="view" id="view-ideas" style="padding:0">
+  <div class="bucket-hero" style="padding:var(--space-5) var(--space-5) 0">
     <div class="bucket-hero-text">
       <h2>💡 Ideas</h2>
       <p>Capture every idea as it sparks. When you're ready, develop each one into a task, project, or meeting.</p>
@@ -623,30 +665,56 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       <div class="bucket-stat"><div class="bucket-stat-num" id="istat-done">0</div><div class="bucket-stat-label">converted</div></div>
     </div>
   </div>
-  <div class="capture-bar">
-    <div class="capture-input-wrap">
-      <textarea class="capture-input" id="idea-capture-input" rows="2" onkeydown="captureIdeaKeydown(event)" placeholder="What's your idea? Capture it here… (Enter to add, Shift+Enter for new line)"></textarea>
-      <div class="capture-hint">Press <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Enter</kbd> to capture &nbsp;·&nbsp; <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Shift+Enter</kbd> for new line</div>
+  <div class="idea-tabs">
+    <button class="idea-tab-btn active" data-tab="unfiled" onclick="switchIdeaTab('unfiled')">Unfiled</button>
+    <button class="idea-tab-btn" data-tab="fileexplorer" onclick="switchIdeaTab('fileexplorer')">File Explorer</button>
+  </div>
+  <div class="idea-tab-content">
+    <div id="idea-tab-unfiled" class="idea-tab-pane active">
+      <div class="capture-bar">
+        <div class="capture-input-wrap">
+          <textarea class="capture-input" id="idea-capture-input" rows="2" onkeydown="captureIdeaKeydown(event)" placeholder="What's your idea? Capture it here… (Enter to add, Shift+Enter for new line)"></textarea>
+          <div class="capture-hint">Press <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Enter</kbd> to capture &nbsp;·&nbsp; <kbd style="background:var(--color-surface-offset);border:1px solid var(--color-border);padding:1px 5px;border-radius:3px;font-size:10px">Shift+Enter</kbd> for new line</div>
+        </div>
+        <button class="btn btn-primary" onclick="captureIdea()" style="align-self:flex-start;margin-top:1px;background:var(--color-gold);border-color:var(--color-gold)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Capture
+        </button>
+      </div>
+      <div class="tag-chips" id="idea-tag-chips">
+        <div class="tag-chip active" data-itag="all" onclick="setIdeaFilter(this,'all')">All</div>
+        <div class="tag-chip" data-itag="pending" onclick="setIdeaFilter(this,'pending')">&#x23F3; To Develop</div>
+        <div class="tag-chip" data-itag="developed" onclick="setIdeaFilter(this,'developed')">&#x2714; Developed</div>
+        <div class="tag-chip" data-itag="processed" onclick="setIdeaFilter(this,'processed')">&#x1F4C2; Converted</div>
+      </div>
+      <div class="process-banner" id="idea-banner" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div><strong id="idea-banner-count"></strong> <span>ideas waiting to be developed into tasks, projects, or meetings.</span></div>
+      </div>
+      <div class="bucket-controls" style="margin-top:var(--space-4)">
+        <span class="bucket-controls-label" id="idea-list-label">Unfiled ideas</span>
+        <button class="btn btn-ghost" onclick="clearIdeaProcessed()" id="clear-idea-processed-btn" style="font-size:var(--text-xs);display:none">Clear processed</button>
+      </div>
+      <div id="idea-list"></div>
     </div>
-    <button class="btn btn-primary" onclick="captureIdea()" style="align-self:flex-start;margin-top:1px;background:var(--color-gold);border-color:var(--color-gold)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Capture
-    </button>
+    <div id="idea-tab-fileexplorer" class="idea-tab-pane" style="padding:0;height:100%">
+      <div id="idea-folder-sidebar" class="idea-folder-sidebar">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);padding:var(--space-5) var(--space-4) 0">
+          <h3 style="margin:0;font-size:var(--text-base);font-weight:700">Folders</h3>
+          <button class="btn btn-primary" onclick="createIdeaFolder(null)" style="background:var(--color-gold);border-color:var(--color-gold);padding:var(--space-2) var(--space-3);height:auto">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New
+          </button>
+        </div>
+        <div id="idea-folder-tree" style="padding:0 var(--space-4);overflow-y:auto;flex:1"></div>
+      </div>
+      <button id="sidebar-pin-btn" onclick="toggleIdeaSidebarPin()" class="idea-sidebar-toggle" title="Collapse sidebar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline id="sidebar-pin-icon" points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div id="idea-folder-content-pane" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:var(--space-5)">
+        <div id="idea-folder-items-header"></div>
+        <div id="idea-folder-items" style="flex:1;overflow-y:auto;margin-top:var(--space-4)"></div>
+      </div>
+    </div>
   </div>
-  <div class="tag-chips" id="idea-tag-chips">
-    <div class="tag-chip active" data-itag="all" onclick="setIdeaFilter(this,'all')">All</div>
-    <div class="tag-chip" data-itag="pending" onclick="setIdeaFilter(this,'pending')">&#x23F3; To Develop</div>
-    <div class="tag-chip" data-itag="developed" onclick="setIdeaFilter(this,'developed')">&#x2714; Developed</div>
-    <div class="tag-chip" data-itag="processed" onclick="setIdeaFilter(this,'processed')">&#x1F4C2; Converted</div>
-  </div>
-  <div class="process-banner" id="idea-banner" style="display:none">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <div><strong id="idea-banner-count"></strong> <span>ideas waiting to be developed into tasks, projects, or meetings.</span></div>
-  </div>
-  <div class="bucket-controls" style="margin-top:var(--space-4)">
-    <span class="bucket-controls-label" id="idea-list-label">Captured ideas</span>
-    <button class="btn btn-ghost" onclick="clearIdeaProcessed()" id="clear-idea-processed-btn" style="font-size:var(--text-xs);display:none">Clear processed</button>
-  </div>
-  <div id="idea-list"></div>
 </div>
 
 <div class="view" id="view-dashboard">
@@ -727,6 +795,48 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     </div>
   </div>
 </main>
+
+<!-- Idea Move to Folder Modal -->
+<div class="modal-overlay" id="idea-folder-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <span class="modal-title">Move to Folder</span>
+      <button class="btn-icon" onclick="closeModal('idea-folder-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="idea-folder-move-id">
+      <div class="form-group">
+        <label>Folder</label>
+        <select class="select" id="idea-folder-move-select"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('idea-folder-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmMoveIdeaToFolder()">Move</button>
+    </div>
+  </div>
+</div>
+
+<!-- Move Folder Modal -->
+<div class="modal-overlay" id="move-folder-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <span class="modal-title">Move Folder</span>
+      <button class="btn-icon" onclick="closeModal('move-folder-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="move-folder-id">
+      <div class="form-group">
+        <label>Parent Folder</label>
+        <select class="select" id="move-folder-parent-select"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('move-folder-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmMoveFolderToParent()">Move</button>
+    </div>
+  </div>
+</div>
 
 <!-- Bucket Done Modal -->
 <div class="modal-overlay" id="bucket-done-modal">
@@ -889,28 +999,30 @@ function loadFromStorage() {
     if (raw) {
       const saved = JSON.parse(raw);
       return {
-        projects: saved.projects || DEFAULT_STATE.projects,
-        tasks:    saved.tasks    || DEFAULT_STATE.tasks,
-        meetings: saved.meetings || [],
-        bucket:   saved.bucket   || [],
-        ideas:    saved.ideas    || [],
-        areas:    saved.areas    || DEFAULT_STATE.areas
+        projects:     saved.projects     || DEFAULT_STATE.projects,
+        tasks:        saved.tasks        || DEFAULT_STATE.tasks,
+        meetings:     saved.meetings     || [],
+        bucket:       saved.bucket       || [],
+        ideas:        saved.ideas        || [],
+        areas:        saved.areas        || DEFAULT_STATE.areas,
+        ideaFolders:  saved.ideaFolders  || []
       };
     }
   } catch(e) { console.warn('TaskCal: could not load saved data', e); }
-  return { ...DEFAULT_STATE, meetings: [], bucket: [], ideas: [], areas: DEFAULT_STATE.areas };
+  return { ...DEFAULT_STATE, meetings: [], bucket: [], ideas: [], areas: DEFAULT_STATE.areas, ideaFolders: [] };
 }
 
 let _toastTimer=null;
 function saveToStorage() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      projects: state.projects,
-      tasks:    state.tasks,
-      meetings: state.meetings,
-      bucket:   state.bucket,
-      ideas:    state.ideas,
-      areas:    state.areas
+      projects:    state.projects,
+      tasks:       state.tasks,
+      meetings:    state.meetings,
+      bucket:      state.bucket,
+      ideas:       state.ideas,
+      areas:       state.areas,
+      ideaFolders: state.ideaFolders
     }));
     const t=document.getElementById('save-toast');
     if(t){t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
@@ -918,16 +1030,18 @@ function saveToStorage() {
 }
 
 const _persisted = loadFromStorage();
-if (!Array.isArray(_persisted.bucket)) _persisted.bucket = [];
-if (!Array.isArray(_persisted.ideas))  _persisted.ideas  = [];
+if (!Array.isArray(_persisted.bucket))      _persisted.bucket      = [];
+if (!Array.isArray(_persisted.ideas))       _persisted.ideas       = [];
+if (!Array.isArray(_persisted.ideaFolders)) _persisted.ideaFolders = [];
 
 let state = {
-  projects: _persisted.projects,
-  tasks:    _persisted.tasks,
-  meetings: _persisted.meetings,
-  bucket:   _persisted.bucket,
-  ideas:    _persisted.ideas,
-  areas:    _persisted.areas || DEFAULT_STATE.areas,
+  projects:    _persisted.projects,
+  tasks:       _persisted.tasks,
+  meetings:    _persisted.meetings,
+  bucket:      _persisted.bucket,
+  ideas:       _persisted.ideas,
+  areas:       _persisted.areas || DEFAULT_STATE.areas,
+  ideaFolders: _persisted.ideaFolders,
   calView:'month',
   calYear:TODAY.getFullYear(), calMonth:TODAY.getMonth(),
   calWeekStart: null,
@@ -2284,6 +2398,7 @@ function deleteMeeting(id) { state.meetings = state.meetings.filter(m => m.id !=
 
 // ===== COLLECTION BUCKET =====
 let bucketFilter = 'all';
+let _showProcessedDate = false; // toggle for showing created date on processed items
 let _pendingBucketId = null; // set when a bucket item opens a modal; cleared on save or cancel
 
 function captureItem() {
@@ -2726,18 +2841,367 @@ function reviewDiscard(id) {
 
 // ===== IDEAS =====
 let ideaFilter = 'all';
+let _ideaTab = 'unfiled'; // 'unfiled' or 'fileexplorer'
+let _selectedIdeaFolder = null; // null=All Ideas, 'unfiled'=no folder, else folderId
+let _expandedIdeaFolders = new Set();
+
+// SVG helpers for file-explorer style tree
+const _feTriangle = (expanded) =>
+  `<svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" style="transition:transform .12s;transform:rotate(${expanded?'90':'0'}deg)"><polygon points="1,1 7,4 1,7"/></svg>`;
+const _feFolder = (open, active) => {
+  const color = active ? 'rgba(255,255,255,.9)' : '#f59e0b';
+  if (open) return `<svg width="15" height="15" viewBox="0 0 24 24" fill="${color}" stroke="${active?'rgba(255,255,255,.4)':'#d97706'}" stroke-width="1"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 11h18" stroke-width="1.2"/></svg>`;
+  return `<svg width="15" height="15" viewBox="0 0 24 24" fill="${color}" stroke="${active?'rgba(255,255,255,.4)':'#d97706'}" stroke-width="1"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
+};
+
+function _ideaFolderTree(parentId) {
+  const folders = state.ideaFolders || [];
+  const children = folders.filter(f => (f.parentId || null) === parentId);
+  if (!children.length) return '';
+  return children.map(f => {
+    const isSelected = _selectedIdeaFolder === f.id;
+    const isExpanded = _expandedIdeaFolders.has(f.id);
+    const hasChildren = folders.some(c => c.parentId === f.id);
+    const count = state.ideas.filter(i => i.folderId === f.id && !i.processed).length;
+    const actCol = isSelected ? 'color:rgba(255,255,255,.7)' : 'color:var(--color-error)';
+    return `<div>
+      <div class="idea-folder-item${isSelected?' active':''}" onclick="selectIdeaFolder('${f.id}')">
+        <div class="idea-folder-toggle" onclick="event.stopPropagation();toggleIdeaFolderExpand('${f.id}')">
+          ${hasChildren ? _feTriangle(isExpanded) : ''}
+        </div>
+        <span class="idea-folder-icon">${_feFolder(isExpanded && hasChildren, isSelected)}</span>
+        <span class="idea-folder-label">${f.name}</span>
+        ${count>0?`<span class="idea-folder-count">${count}</span>`:''}
+        <div class="idea-folder-actions">
+          <button class="btn-icon" title="New subfolder" onclick="event.stopPropagation();createIdeaFolder('${f.id}')">+</button>
+          <button class="btn-icon" title="Rename" onclick="event.stopPropagation();renameIdeaFolder('${f.id}')">✎</button>
+          <button class="btn-icon" style="${actCol}" title="Delete" onclick="event.stopPropagation();deleteIdeaFolder('${f.id}')">✕</button>
+        </div>
+      </div>
+      ${isExpanded ? `<div class="idea-folder-children">${_ideaFolderTree(f.id)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderIdeaFolderSidebar() {
+  const sidebar = document.getElementById('idea-folder-sidebar');
+  if (!sidebar) return;
+  const folders = state.ideaFolders || [];
+  const allCount = state.ideas.filter(i => !i.processed).length;
+  const unfiledCount = state.ideas.filter(i => !i.folderId && !i.processed).length;
+  const allActive = _selectedIdeaFolder === null;
+  const unfiledActive = _selectedIdeaFolder === 'unfiled';
+  sidebar.innerHTML = `
+    <span class="idea-folder-sidebar-title">Ideas</span>
+    <div class="idea-folder-item${allActive?' active':''}" onclick="selectIdeaFolder(null)">
+      <div class="idea-folder-toggle"></div>
+      <span class="idea-folder-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="${allActive?'rgba(255,255,255,.9)':'var(--color-gold)'}" stroke="${allActive?'rgba(255,255,255,.4)':'#ca8a04'}" stroke-width="1"><circle cx="12" cy="11" r="5"/><path d="M9 18h6M10 21h4" stroke-width="1.5" fill="none"/></svg>
+      </span>
+      <span class="idea-folder-label">All Ideas</span>
+      ${allCount>0?`<span class="idea-folder-count">${allCount}</span>`:''}
+    </div>
+    ${folders.length>0||unfiledCount>0?`<div class="idea-folder-item${unfiledActive?' active':''}" onclick="selectIdeaFolder('unfiled')">
+      <div class="idea-folder-toggle"></div>
+      <span class="idea-folder-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${unfiledActive?'rgba(255,255,255,.8)':'var(--color-text-muted)'}" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="8" y1="13" x2="16" y2="13" stroke-width="1"/><line x1="8" y1="16" x2="13" y2="16" stroke-width="1"/></svg>
+      </span>
+      <span class="idea-folder-label">Unfiled</span>
+      ${unfiledCount>0?`<span class="idea-folder-count">${unfiledCount}</span>`:''}
+    </div>`:''}
+    ${_ideaFolderTree(null)}
+    <div class="idea-folder-item idea-folder-add" onclick="createIdeaFolder(null)">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Folder
+    </div>`;
+}
+
+let _selectedIdeaFolderForView = null;
+let _ideaSidebarPinned = true;
+
+function renderIdeaFolderContent() {
+  renderIdeaFolderTree();
+  renderIdeaFolderItems();
+}
+
+function renderIdeaFolderTree() {
+  const container = document.getElementById('idea-folder-tree');
+  if (!container) return;
+
+  const allCount = state.ideas.filter(i => !i.processed).length;
+  const unfiledCount = state.ideas.filter(i => !i.folderId && !i.processed).length;
+
+  function renderTreeNode(parentId, depth=0) {
+    const folders = state.ideaFolders || [];
+    const children = folders.filter(f => (f.parentId || null) === parentId);
+    let html = '';
+
+    children.forEach(f => {
+      const hasSubfolders = folders.some(c => c.parentId === f.id);
+      const isExpanded = _expandedIdeaFolders.has(f.id);
+      const isSelected = _selectedIdeaFolderForView === f.id;
+      const itemCount = state.ideas.filter(i => i.folderId === f.id && !i.processed).length;
+      const marginLeft = depth * 12;
+
+      html += `<div style="margin-left:${marginLeft}px" class="idea-folder-tree-item-wrapper">
+        <div class="idea-folder-tree-item${isSelected ? ' selected' : ''}" onclick="selectIdeaFolderForView('${f.id}')">
+          <div style="display:flex;align-items:center;gap:var(--space-2);flex:1">
+            <span style="cursor:pointer;display:flex;align-items:center" onclick="event.stopPropagation();toggleIdeaFolderExpand('${f.id}')">${_feTriangle(isExpanded)}</span>
+            <span>${f.name}</span>
+            ${itemCount>0?`<span style="font-size:var(--text-xs);color:var(--color-text-muted)">(${itemCount})</span>`:''}
+          </div>
+          <div style="display:flex;gap:var(--space-1);opacity:0;transition:opacity var(--transition-interactive)" class="folder-actions">
+            <button class="btn-icon" style="padding:var(--space-1);font-size:10px" title="New subfolder" onclick="event.stopPropagation();createIdeaFolder('${f.id}')">+</button>
+            <button class="btn-icon" style="padding:var(--space-1);font-size:10px" title="Rename" onclick="event.stopPropagation();renameIdeaFolder('${f.id}')">✎</button>
+            <button class="btn-icon" style="padding:var(--space-1);font-size:10px;color:var(--color-error)" title="Delete" onclick="event.stopPropagation();deleteIdeaFolder('${f.id}')">✕</button>
+          </div>
+        </div>
+        ${isExpanded ? renderTreeNode(f.id, depth+1) : ''}
+      </div>`;
+    });
+
+    return html;
+  }
+
+  const isAllSelected = _selectedIdeaFolderForView === 'all';
+  let html = `<div class="idea-folder-tree-item-wrapper">
+    <div class="idea-folder-tree-item${isAllSelected ? ' selected' : ''}" onclick="selectIdeaFolderForView('all')" style="font-weight:500">
+      <div style="display:flex;align-items:center;gap:var(--space-2);flex:1">
+        <span>All Ideas</span>
+        ${allCount>0?`<span style="font-size:var(--text-xs);color:var(--color-text-muted)">(${allCount})</span>`:''}
+      </div>
+    </div>
+  </div>`;
+  html += renderTreeNode(null);
+
+  container.innerHTML = html;
+}
+
+function renderIdeaFolderItems() {
+  const headerContainer = document.getElementById('idea-folder-items-header');
+  const itemsContainer = document.getElementById('idea-folder-items');
+  if (!headerContainer || !itemsContainer) return;
+
+  if (_selectedIdeaFolderForView === null) {
+    headerContainer.innerHTML = '';
+    itemsContainer.innerHTML = '<div style="color:var(--color-text-muted);text-align:center;padding:var(--space-8)">Select a folder to view its ideas</div>';
+    return;
+  }
+
+  let items = [];
+  let headerText = '';
+
+  if (_selectedIdeaFolderForView === 'all') {
+    headerText = 'All Ideas';
+    items = state.ideas.filter(i => !i.processed).sort((a, b) => new Date(a.created) - new Date(b.created));
+  } else if (_selectedIdeaFolderForView === 'unfiled') {
+    headerText = 'Unfiled';
+    items = state.ideas.filter(i => !i.folderId && !i.processed).sort((a, b) => new Date(a.created) - new Date(b.created));
+  } else {
+    const folder = state.ideaFolders?.find(f => f.id === _selectedIdeaFolderForView);
+    headerText = folder?.name || 'Folder';
+    items = state.ideas.filter(i => i.folderId === _selectedIdeaFolderForView && !i.processed).sort((a, b) => new Date(a.created) - new Date(b.created));
+  }
+
+  headerContainer.innerHTML = `<h3 style="margin:0;font-size:var(--text-lg);font-weight:700">${headerText}</h3>`;
+
+  if (items.length === 0) {
+    itemsContainer.innerHTML = '<div style="color:var(--color-text-muted);text-align:center;padding:var(--space-8)">No ideas yet</div>';
+    return;
+  }
+
+  itemsContainer.innerHTML = items.map(item => {
+    const isDeveloped = !!item.developed && !item.processed;
+    const isProcessed = !!item.processed;
+    const isLocked = isDeveloped || isProcessed;
+    const d = new Date(item.created);
+    const dateLabel = d.toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<div class="bucket-item${isProcessed?' processed':''}${isDeveloped?' completed':''}" id="iitem-${item.id}" style="margin-bottom:var(--space-4)">
+      ${isProcessed ? '<div class="bucket-processed-badge">↗</div>' : ''}
+      ${isDeveloped ? '<div class="bucket-completed-badge">✓</div>' : ''}
+      <div class="bucket-item-header">
+        <div class="bucket-item-body">
+          <div class="bucket-item-text" contenteditable="${isLocked?'false':'true'}"
+               onblur="editIdeaText('${item.id}', this.textContent.trim())"
+               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur()}"
+          >${item.text}</div>
+          <div class="bucket-item-meta">
+            <span class="bucket-item-date">${dateLabel}</span>
+          </div>
+          ${!isProcessed ? `<div class="bucket-actions">
+            ${!isDeveloped ? `
+            <button class="process-btn process-btn-complete" onclick="toggleIdeaDeveloped('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Developed
+            </button>
+            ` : `
+            <button class="process-btn process-btn-uncomplete" onclick="toggleIdeaDeveloped('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Undo
+            </button>
+            `}
+            <button class="process-btn" onclick="unfileIdea('${item.id}')" title="Unfile">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>Unfile
+            </button>
+            <button class="process-btn" onclick="openIdeaFolderMoveModal('${item.id}')" title="Move to folder">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Move
+            </button>
+            <button class="process-btn process-btn-delete" onclick="deleteIdeaItem('${item.id}')" title="Discard" style="margin-left:auto">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Discard
+            </button>
+          </div>` : `<div class="bucket-actions">
+            <button class="process-btn process-btn-uncomplete" onclick="undoIdeaProcess('${item.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Undo
+            </button>
+          </div>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectIdeaFolderForView(folderId) {
+  _selectedIdeaFolderForView = folderId;
+  renderIdeaFolderTree();
+  renderIdeaFolderItems();
+}
+
+function toggleIdeaSidebarPin() {
+  _ideaSidebarPinned = !_ideaSidebarPinned;
+  const sidebar = document.getElementById('idea-folder-sidebar');
+  const icon = document.getElementById('sidebar-pin-icon');
+  const btn = document.getElementById('sidebar-pin-btn');
+  if (!sidebar) return;
+  if (_ideaSidebarPinned) {
+    sidebar.classList.remove('collapsed');
+    if (icon) icon.setAttribute('points', '15 18 9 12 15 6');
+    if (btn) btn.title = 'Collapse sidebar';
+  } else {
+    sidebar.classList.add('collapsed');
+    if (icon) icon.setAttribute('points', '9 18 15 12 9 6');
+    if (btn) btn.title = 'Expand sidebar';
+  }
+}
+
+function selectIdeaFolder(id) {
+  _selectedIdeaFolder = id;
+  renderIdeaFolderContent();
+}
+
+function toggleIdeaFolderExpand(id) {
+  _expandedIdeaFolders.has(id) ? _expandedIdeaFolders.delete(id) : _expandedIdeaFolders.add(id);
+  if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
+}
+
+function createIdeaFolder(parentId) {
+  const name = prompt(parentId ? 'Subfolder name:' : 'Folder name:');
+  if (!name || !name.trim()) return;
+  if (!state.ideaFolders) state.ideaFolders = [];
+  state.ideaFolders.push({ id: 'if'+Date.now(), name: name.trim(), parentId: parentId || null });
+  if (parentId) _expandedIdeaFolders.add(parentId);
+  saveToStorage();
+  if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
+}
+
+function renameIdeaFolder(id) {
+  const f = (state.ideaFolders||[]).find(f => f.id === id);
+  if (!f) return;
+  const name = prompt('Rename folder:', f.name);
+  if (!name || !name.trim()) return;
+  f.name = name.trim();
+  saveToStorage();
+  if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
+}
+
+function deleteIdeaFolder(id) {
+  if (!confirm('Delete this folder? Ideas inside will become Unfiled.')) return;
+  function descendants(fid) {
+    const kids = (state.ideaFolders||[]).filter(f => f.parentId === fid).map(f => f.id);
+    return [fid, ...kids.flatMap(k => descendants(k))];
+  }
+  const toDelete = new Set(descendants(id));
+  state.ideas.forEach(i => { if (toDelete.has(i.folderId)) i.folderId = null; });
+  state.ideaFolders = (state.ideaFolders||[]).filter(f => !toDelete.has(f.id));
+  if (_selectedIdeaFolder === id || toDelete.has(_selectedIdeaFolder)) _selectedIdeaFolder = null;
+  if (_selectedIdeaFolderForView === id || toDelete.has(_selectedIdeaFolderForView)) _selectedIdeaFolderForView = null;
+  saveToStorage();
+  if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
+}
+
+function openMoveIdeaFolderModal(folderId) {
+  const folder = (state.ideaFolders||[]).find(f => f.id === folderId);
+  if (!folder) return;
+  document.getElementById('move-folder-id').value = folderId;
+  const selEl = document.getElementById('move-folder-parent-select');
+  selEl.innerHTML = '<option value="">Root</option>';
+  function descendants(id) {
+    const kids = (state.ideaFolders||[]).filter(f => f.parentId === id).map(f => f.id);
+    return [id, ...kids.flatMap(k => descendants(k))];
+  }
+  const cannotMove = new Set(descendants(folderId));
+  (state.ideaFolders || []).filter(f => !cannotMove.has(f.id)).forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.id;
+    opt.textContent = f.name;
+    selEl.appendChild(opt);
+  });
+  selEl.value = folder.parentId || '';
+  document.getElementById('move-folder-modal').classList.add('open');
+}
+
+function confirmMoveFolderToParent() {
+  const folderId = document.getElementById('move-folder-id').value;
+  const parentId = document.getElementById('move-folder-parent-select').value || null;
+  const folder = (state.ideaFolders||[]).find(f => f.id === folderId);
+  if (folder) {
+    folder.parentId = parentId;
+    saveToStorage();
+    renderIdeaFolderContent();
+  }
+  closeModal('move-folder-modal');
+}
+
+function openIdeaFolderModal(ideaId) {
+  const folders = state.ideaFolders || [];
+  const item = state.ideas.find(i => i.id === ideaId);
+  if (!item) return;
+  document.getElementById('idea-folder-move-id').value = ideaId;
+  function flatFolders(parentId, depth) {
+    return (folders.filter(f => (f.parentId||null) === parentId)).flatMap(f =>
+      [{ id: f.id, name: '  '.repeat(depth) + f.name }, ...flatFolders(f.id, depth+1)]
+    );
+  }
+  const flat = flatFolders(null, 0);
+  const sel = document.getElementById('idea-folder-move-select');
+  sel.innerHTML = `<option value="">— Unfiled —</option>` +
+    flat.map(f => `<option value="${f.id}"${item.folderId===f.id?' selected':''}>${f.name}</option>`).join('');
+  document.getElementById('idea-folder-modal').classList.add('open');
+}
+
+function confirmMoveIdeaToFolder() {
+  const ideaId = document.getElementById('idea-folder-move-id').value;
+  const folderId = document.getElementById('idea-folder-move-select').value || null;
+  const item = state.ideas.find(i => i.id === ideaId);
+  if (item) { item.folderId = folderId; saveToStorage(); }
+  closeModal('idea-folder-modal');
+  if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
+  else renderIdeaList();
+}
 
 function captureIdea() {
   const inp = document.getElementById('idea-capture-input');
   const text = inp.value.trim();
   if (!text) { inp.focus(); return; }
+  let folderId = null;
+  if (_ideaTab === 'fileexplorer' && _selectedIdeaFolder && _selectedIdeaFolder !== 'unfiled') {
+    folderId = _selectedIdeaFolder;
+  }
   const item = {
     id: 'i' + Date.now(),
     text,
     created: new Date().toISOString(),
     developed: false,
     processed: false,
-    processedAs: null
+    processedAs: null,
+    folderId
   };
   state.ideas.unshift(item);
   inp.value = '';
@@ -2794,6 +3258,31 @@ function moveIdeaToCollect(id) {
   renderIdeaView();
 }
 
+function unfileIdea(id) {
+  const item = state.ideas.find(i => i.id === id);
+  if (item) {
+    item.folderId = null;
+    saveToStorage();
+    renderIdeaView();
+  }
+}
+
+function openIdeaFolderMoveModal(id) {
+  const item = state.ideas.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('idea-folder-move-id').value = id;
+  const selEl = document.getElementById('idea-folder-move-select');
+  selEl.innerHTML = '<option value="">Unfiled</option>';
+  (state.ideaFolders || []).forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.id;
+    opt.textContent = f.name;
+    selEl.appendChild(opt);
+  });
+  selEl.value = item.folderId || '';
+  document.getElementById('idea-folder-modal').classList.add('open');
+}
+
 function undoIdeaProcess(id) {
   const item = state.ideas.find(b => b.id === id);
   if (!item || !item.processed) return;
@@ -2805,6 +3294,19 @@ function undoIdeaProcess(id) {
   item.processedAs = null;
   saveToStorage();
   renderIdeaView();
+}
+
+function switchIdeaTab(tab) {
+  _ideaTab = tab;
+  document.querySelectorAll('.idea-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.idea-tab-btn[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.idea-tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`idea-tab-${tab}`).classList.add('active');
+  if (tab === 'fileexplorer') {
+    _selectedIdeaFolder = null;
+    if (_selectedIdeaFolderForView === null) _selectedIdeaFolderForView = 'all';
+    renderIdeaFolderContent();
+  }
 }
 
 function renderIdeaView() {
@@ -2834,7 +3336,11 @@ function renderIdeaView() {
   const cpBtn = document.getElementById('clear-idea-processed-btn');
   if (cpBtn) cpBtn.style.display = (processed > 0 || developed > 0) ? 'inline-flex' : 'none';
 
-  renderIdeaList();
+  if (_ideaTab === 'unfiled') {
+    renderIdeaList();
+  } else {
+    renderIdeaFolderContent();
+  }
 }
 
 function renderIdeaList() {
@@ -2842,19 +3348,21 @@ function renderIdeaList() {
   if (!container) return;
 
   let items = [...state.ideas];
+  items = items.filter(i => !i.folderId);
   if (ideaFilter === 'pending')   items = items.filter(b => !b.processed && !b.developed);
   if (ideaFilter === 'developed') items = items.filter(b => b.developed && !b.processed);
   if (ideaFilter === 'processed') items = items.filter(b => b.processed);
 
   const label = document.getElementById('idea-list-label');
   if (label) {
+    const unfiled = state.ideas.filter(b=>!b.folderId);
     const counts = {
-      all:       state.ideas.length,
-      pending:   state.ideas.filter(b=>!b.processed&&!b.developed).length,
-      developed: state.ideas.filter(b=>b.developed&&!b.processed).length,
-      processed: state.ideas.filter(b=>b.processed).length
+      all:       unfiled.length,
+      pending:   unfiled.filter(b=>!b.processed&&!b.developed).length,
+      developed: unfiled.filter(b=>b.developed&&!b.processed).length,
+      processed: unfiled.filter(b=>b.processed).length
     };
-    const names = {all:'All captured ideas', pending:'To develop', developed:'Developed ideas', processed:'Converted ideas'};
+    const names = {all:'Unfiled ideas', pending:'To develop', developed:'Developed ideas', processed:'Converted ideas'};
     label.textContent = `${names[ideaFilter]} (${counts[ideaFilter]})`;
   }
 
@@ -2879,6 +3387,9 @@ function renderIdeaList() {
     const dateLabel = d.toLocaleDateString('en-AU',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const tagHtml = item.processed && item.processedAs === 'collect'
       ? `<span class="bucket-item-tag" style="color:var(--color-blue)">→ Collect</span>` : '';
+    const itemFolder = item.folderId ? (state.ideaFolders||[]).find(f=>f.id===item.folderId) : null;
+    const folderBadge = (itemFolder && _selectedIdeaFolder === null)
+      ? `<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">📁 ${itemFolder.name}</span>` : '';
 
     const isDeveloped = !!item.developed && !item.processed;
     const isProcessed = !!item.processed;
@@ -2896,6 +3407,7 @@ function renderIdeaList() {
           <div class="bucket-item-meta">
             <span class="bucket-item-date">${dateLabel}</span>
             ${tagHtml}
+            ${folderBadge}
           </div>
           ${!isProcessed ? `<div class="bucket-actions">
             ${!isDeveloped ? `
@@ -2909,6 +3421,9 @@ function renderIdeaList() {
             `}
             <button class="process-btn process-btn-idea" onclick="moveIdeaToCollect('${item.id}')">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l9 6 9-6"/><path d="M3 6v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6"/></svg>Collect
+            </button>
+            <button class="process-btn" onclick="openIdeaFolderModal('${item.id}')" title="Move to folder">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Folder
             </button>
             <button class="process-btn process-btn-delete" onclick="deleteIdeaItem('${item.id}')" title="Discard" style="margin-left:auto">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Discard
@@ -2931,9 +3446,12 @@ function clearAllData(){
   const d = { ...DEFAULT_STATE, meetings: [] };
   state.projects = d.projects.map(p=>({...p}));
   state.tasks    = d.tasks.map(t=>({...t}));
-  state.meetings = [];
-  state.bucket   = [];
-  state.ideas    = [];
+  state.meetings     = [];
+  state.bucket       = [];
+  state.ideas        = [];
+  state.ideaFolders  = [];
+  _selectedIdeaFolder = null;
+  _expandedIdeaFolders.clear();
   saveToStorage();
   navigate('dashboard');
 }

@@ -63,7 +63,8 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | Area | `id, name` | Stored in `state.areas`; defaults are Work, Life, University; user can add custom areas via the "＋ New area…" option in any Area dropdown |
 | Meeting | `id, name, date, startTime, endTime, location, project, recur, recurEnd, attendees, type:'meeting'` | Shares calendar rendering with tasks via `isMeeting` flag |
 | Bucket item | `id, text, created, completed, processed, processedAs, area?, project?` | `processedAs` is `task/project/meeting/idea`; `area` and `project` are optional IDs set when marking an item Done via the Done modal |
-| Idea item | `id, text, created, developed, processed, processedAs` | Mirror of bucket; `developed` ≡ bucket's `completed` |
+| Idea item | `id, text, created, developed, processed, processedAs, folderId?` | Mirror of bucket; `developed` ≡ bucket's `completed`; `folderId` optional reference to `state.ideaFolders` |
+| Idea folder | `id, name, parentId` | Forms a tree structure; `parentId` is null for root-level folders |
 
 ### Recurring Events
 
@@ -74,7 +75,7 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | View ID | Nav ID | Render function |
 |---|---|---|
 | `view-bucket` | `nav-bucket` | `renderBucketView()` + `renderBucketList()` |
-| `view-ideas` | `nav-ideas` | `renderIdeaView()` + `renderIdeaList()` |
+| `view-ideas` | `nav-ideas` | `renderIdeaView()` — dispatches to `renderIdeaList()` (Unfiled tab) or `renderIdeaFolderContent()` (File Explorer tab) based on `_ideaTab` |
 | `view-dashboard` | `nav-dashboard` | `renderDashboard()` |
 | `view-projects` | `nav-projects` | `renderProjectsView()` — projects grouped into area rows; each area row also includes a dashed "No Project" card for tasks in that area with no project (`loose` tasks); an "Other" row collects unassigned projects and tasks; every card has a chevron that expands an inline task list via `_expandedProjects` Set + `toggleProjectExpand(id, e)`; "No Project" cards use key `'unassigned-'+areaId` |
 | `view-calendar` | `nav-calendar` | `renderCalendar()` → `renderMonthView/WeekView/DayView()` |
@@ -111,6 +112,48 @@ Processed idea items render an **Undo** button. Clicking it calls `undoIdeaProce
 
 - For `processedAs === 'collect'`: finds the first matching unprocessed bucket item by text and removes it, then clears the idea's `processed` / `processedAs` flags.
 - The idea item's `developed` state is preserved through the undo.
+
+### Ideas Page: Unfiled and File Explorer Tabs
+
+The Ideas page has two tabs controlled by `_ideaTab` (either `'unfiled'` or `'fileexplorer'`):
+
+**Unfiled tab** (`renderIdeaList()`) — displays only ideas with no folder (`!i.folderId`). Ideas are edited inline with full action buttons (Developed toggle, Collect button, Move to folder, Discard). Newlines in idea text are preserved via `white-space: pre-wrap` CSS.
+
+**File Explorer tab** (`renderIdeaFolderContent()`) — split layout with a collapsible folder sidebar on the left and a main content pane on the right:
+
+- **Sidebar** (`#idea-folder-sidebar`, `.idea-folder-sidebar`) — renders `#idea-folder-tree` via `renderIdeaFolderTree()`. Shows an "All Ideas" entry at the top, followed by the root/subfolder tree. Hovering a folder reveals action buttons: **+** (new subfolder), **✎** (rename), **✕** (delete). A thin toggle strip (`#sidebar-pin-btn`, `.idea-sidebar-toggle`) sits on the divider between sidebar and content; clicking it collapses or expands the sidebar by toggling `.collapsed` on `#idea-folder-sidebar` via `toggleIdeaSidebarPin()`.
+- **Content pane** (`#idea-folder-content-pane`) — renders items for the selected folder via `renderIdeaFolderItems()`. Items are sorted oldest-to-newest by `created`. Each item is fully editable with Developed toggle, Unfile, Move to folder, and Discard buttons.
+
+`switchIdeaTab(tab)` toggles between tabs. When switching to File Explorer, if `_selectedIdeaFolderForView` is null it defaults to `'all'` (All Ideas), then calls `renderIdeaFolderContent()`.
+
+### Idea Folders
+
+`state.ideaFolders` is an array of `{id, name, parentId}` objects. Folders form a tree structure via `parentId` (null means root level).
+
+- `_selectedIdeaFolderForView` — drives the content pane: `null`=empty prompt, `'all'`=All Ideas, else a folderId
+- `_ideaSidebarPinned` — boolean; false collapses the sidebar
+- `_expandedIdeaFolders` — Set tracking which folders are expanded in the tree
+
+**Render functions:**
+- `renderIdeaFolderContent()` — calls `renderIdeaFolderTree()` then `renderIdeaFolderItems()`
+- `renderIdeaFolderTree()` — rebuilds `#idea-folder-tree` from `state.ideaFolders`; renders All Ideas entry then recursive `renderTreeNode(null)`
+- `renderIdeaFolderItems()` — rebuilds `#idea-folder-items` based on `_selectedIdeaFolderForView`
+- `selectIdeaFolderForView(id)` — sets `_selectedIdeaFolderForView` and re-renders both panes
+- `toggleIdeaSidebarPin()` — toggles `_ideaSidebarPinned` and `.collapsed` class on sidebar
+
+**Folder operations:**
+- `createIdeaFolder(parentId)` — prompts for name, creates folder as child of parentId (or root if null); "New" button in sidebar header always passes null; hover "+" button on a folder passes that folder's id
+- `renameIdeaFolder(id)` — prompts for new name
+- `deleteIdeaFolder(id)` — deletes folder and all descendants; ideas in deleted folders become unfiled; resets `_selectedIdeaFolderForView` if the deleted folder was selected
+- `openMoveIdeaFolderModal(folderId)` — opens modal to move folder to a different parent; prevents moving a folder into itself or its descendants via the `cannotMove` Set
+- `confirmMoveFolderToParent()` — updates folder's parentId and re-renders
+
+**Idea-folder association:**
+- `unfileIdea(id)` — sets `idea.folderId = null`
+- `openIdeaFolderMoveModal(id)` — opens modal to assign idea to a folder
+- `confirmMoveIdeaToFolder()` — updates idea's folderId
+
+When capturing ideas in File Explorer tab, new ideas are assigned to `_selectedIdeaFolderForView` if it is a folderId; in Unfiled tab, new ideas have no folder.
 
 ### Collect → Task / Project / Meeting (deferred processing)
 
