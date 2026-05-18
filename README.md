@@ -250,7 +250,7 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 
 | Sheet | Contents |
 |---|---|
-| **Tasks** | All actions — area, project, priority, recurrence, notes, completion state, timestamps |
+| **Actions** | All actions — area, project, priority, recurrence, notes, completion state, timestamps |
 | **Projects** | All projects with area, colour, dates, description, and completion state |
 | **Meetings** | All meetings — date, times, location, attendees, recurrence, notes |
 | **Collect** | All Collect items with processing state, and any area/project assigned via Done modal |

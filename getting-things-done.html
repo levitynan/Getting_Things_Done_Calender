@@ -902,7 +902,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="modal-body">
       <input type="hidden" id="project-edit-id">
       <div class="form-group"><label>Project Name *</label><input type="text" class="input" id="project-name" placeholder="e.g. Website Redesign"></div>
-      <div class="form-group"><label>Description</label><textarea class="textarea" id="project-desc" placeholder="Brief description..."></textarea></div>
+      <div class="form-group"><label>Outcome *</label><textarea class="textarea" id="project-desc" placeholder="Desired outcome..."></textarea></div>
       <div class="form-group"><label>Area</label><select class="select" id="project-area" onchange="handleAreaSelect(this)"></select></div>
       <div class="form-group"><label>Colour</label>
         <div class="color-swatches">
@@ -1074,7 +1074,7 @@ function _buildXLSXWorkbook() {
     priority:t.priority||'',due:t.due||'',time:t.time||'',recur:t.recur||'',
     recurEnd:t.recurEnd||'',notes:t.notes||'',done:t.done?'true':'false',
     completedAt:t.completedAt||'',created:t.created||''
-  }))),'Tasks');
+  }))),'Actions');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.projects.map(p=>({
     id:p.id,name:p.name,desc:p.desc||'',area_id:p.area||'',area_name:areaMap[p.area]||'',
     color:p.color||'',start:p.start||'',end:p.end||'',completed:p.completed?'true':'false'
@@ -1102,8 +1102,8 @@ function _buildXLSXWorkbook() {
 function _parseXLSXWorkbook(wb) {
   const bool = v => String(v).toLowerCase() === 'true';
   const parsed = {};
-  if (wb.SheetNames.includes('Tasks'))
-    parsed.tasks = XLSX.utils.sheet_to_json(wb.Sheets['Tasks']).filter(r=>r.name).map(r=>({
+  if (wb.SheetNames.includes('Actions'))
+    parsed.tasks = XLSX.utils.sheet_to_json(wb.Sheets['Actions']).filter(r=>r.name).map(r=>({
       id:String(r.id||'t'+Date.now()+Math.random()),name:String(r.name||''),area:String(r.area_id||''),
       project:String(r.project_id||''),priority:String(r.priority||'medium'),due:String(r.due||''),
       time:String(r.time||''),recur:String(r.recur||'none'),recurEnd:String(r.recurEnd||''),
@@ -2021,6 +2021,7 @@ function openProjectModal(editId, prefillName){
 }
 function saveProject(){
   const name=document.getElementById('project-name').value.trim(); if(!name){document.getElementById('project-name').focus();return;}
+  const desc=document.getElementById('project-desc').value.trim(); if(!desc){document.getElementById('project-desc').focus();return;}
   const editId=document.getElementById('project-edit-id').value;
   const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:document.getElementById('project-end').value,completed:editId?(state.projects.find(p=>p.id===editId)?.completed||false):false};
   if(editId){const idx=state.projects.findIndex(p=>p.id===editId);if(idx!==-1)state.projects[idx]=proj;}else state.projects.push(proj);

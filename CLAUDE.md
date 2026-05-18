@@ -229,7 +229,7 @@ Sheet names and columns:
 
 | Sheet | Columns |
 |---|---|
-| `Tasks` | `id, name, area_id, area_name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
+| `Actions` | `id, name, area_id, area_name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
 | `Projects` | `id, name, desc, area_id, area_name, color, start, end, completed` |
 | `Meetings` | `id, name, date, startTime, endTime, location, project_id, project_name, recur, recurEnd, attendees, notes` |
 | `Collect` | `id, text, created, completed, processed, processedAs, area_id, project_id` |
