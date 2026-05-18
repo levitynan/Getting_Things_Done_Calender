@@ -130,13 +130,13 @@ The Ideas page has two tabs controlled by `_ideaTab` (either `'unfiled'` or `'fi
 
 `state.ideaFolders` is an array of `{id, name, parentId}` objects. Folders form a tree structure via `parentId` (null means root level).
 
-- `_selectedIdeaFolderForView` — drives the content pane: `null`=empty prompt, `'all'`=All Ideas, else a folderId
-- `_ideaSidebarPinned` — boolean; false collapses the sidebar
+- `_selectedIdeaFolderForView` — drives the content pane: `null`=empty prompt, `'all'`=All Ideas, `'unfiled'`=no folder, else a folderId
+- `_ideaSidebarPinned` — boolean; false collapses the sidebar via CSS `width:0` (not `display:none`) so the transition animates
 - `_expandedIdeaFolders` — Set tracking which folders are expanded in the tree
 
 **Render functions:**
 - `renderIdeaFolderContent()` — calls `renderIdeaFolderTree()` then `renderIdeaFolderItems()`
-- `renderIdeaFolderTree()` — rebuilds `#idea-folder-tree` from `state.ideaFolders`; renders All Ideas entry then recursive `renderTreeNode(null)`
+- `renderIdeaFolderTree()` — rebuilds `#idea-folder-tree` from `state.ideaFolders`; renders All Ideas entry then recursive `renderTreeNode(null)`. The child filter uses `(f.parentId || null) === parentId` — the `|| null` normalises `undefined` parentId values that may exist in older saved data.
 - `renderIdeaFolderItems()` — rebuilds `#idea-folder-items` based on `_selectedIdeaFolderForView`
 - `selectIdeaFolderForView(id)` — sets `_selectedIdeaFolderForView` and re-renders both panes
 - `toggleIdeaSidebarPin()` — toggles `_ideaSidebarPinned` and `.collapsed` class on sidebar
