@@ -229,13 +229,15 @@ Sheet names and columns:
 
 | Sheet | Columns |
 |---|---|
-| `Tasks` | `id, name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
-| `Projects` | `id, name, desc, color, start, end` |
+| `Tasks` | `id, name, area_id, area_name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
+| `Projects` | `id, name, desc, area_id, area_name, color, start, end, completed` |
 | `Meetings` | `id, name, date, startTime, endTime, location, project_id, project_name, recur, recurEnd, attendees, notes` |
-| `Collect` | `id, text, created, completed, processed, processedAs` |
-| `Ideas` | `id, text, created, developed, processed, processedAs` |
+| `Collect` | `id, text, created, completed, processed, processedAs, area_id, project_id` |
+| `Ideas` | `id, text, created, developed, processed, processedAs, folderId` |
+| `Areas` | `id, name` |
+| `IdeaFolders` | `id, name, parentId` |
 
-`project_name` in the Tasks sheet is derived at export time from `state.projects`; on import it is ignored (the `project_id` column drives the join). Both export and import guard against `XLSX` being undefined (CDN not loaded) and alert the user.
+`area_name` and `project_name` columns are derived at export time and ignored on import — the `area_id` / `project_id` columns drive the join. Both export and import guard against `XLSX` being undefined (CDN not loaded) and alert the user.
 
 ### CSV Import / Export
 
@@ -245,11 +247,13 @@ Sheet names and columns:
 
 | Type | Columns |
 |---|---|
-| `tasks` | `id, name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
-| `projects` | `id, name, desc, color, start, end` |
+| `tasks` | `id, name, area_id, area_name, project_id, project_name, priority, due, time, recur, recurEnd, notes, done, completedAt, created` |
+| `projects` | `id, name, desc, area_id, area_name, color, start, end, completed` |
 | `meetings` | `id, name, date, startTime, endTime, location, project_id, project_name, recur, recurEnd, attendees, notes` |
-| `bucket` | `id, text, created, completed, processed, processedAs` |
-| `ideas` | `id, text, created, developed, processed, processedAs` |
+| `bucket` | `id, text, created, completed, processed, processedAs, area_id, project_id` |
+| `ideas` | `id, text, created, developed, processed, processedAs, folderId` |
+| `areas` | `id, name` |
+| `ideaFolders` | `id, name, parentId` |
 
 `attendees` is serialised as a pipe-separated string (`Alice|Bob|Carol`) in both CSV and xlsx; on import it is split back into an array.
 

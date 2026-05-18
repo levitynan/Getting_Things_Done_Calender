@@ -250,11 +250,13 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 
 | Sheet | Contents |
 |---|---|
-| **Actions** | All actions — project ID and name, priority, recurrence, notes, completion state, timestamps |
-| **Projects** | All projects with colour, dates, and description |
+| **Tasks** | All actions — area, project, priority, recurrence, notes, completion state, timestamps |
+| **Projects** | All projects with area, colour, dates, description, and completion state |
 | **Meetings** | All meetings — date, times, location, attendees, recurrence, notes |
-| **Collect** | All Collect items with processing state |
-| **Ideas** | All Ideas items with development and processing state |
+| **Collect** | All Collect items with processing state, and any area/project assigned via Done modal |
+| **Ideas** | All Ideas items with development state and folder assignment |
+| **Areas** | All areas (including custom user-created areas) |
+| **IdeaFolders** | All idea folder definitions with parent–child relationships |
 
 The exported file (`taskcal-data.xlsx`) can be opened and edited directly in Excel or Google Sheets. Re-importing merges by ID — existing rows are updated, new rows are appended.
 
@@ -266,11 +268,13 @@ Each data type can also be exported and imported independently as a `.csv` file:
 
 | Export file | Contents |
 |---|---|
-| `taskcal-tasks.csv` | Actions |
-| `taskcal-projects.csv` | Projects |
+| `taskcal-tasks.csv` | Actions (with area and project) |
+| `taskcal-projects.csv` | Projects (with area and completion state) |
 | `taskcal-meetings.csv` | Meetings (attendees as pipe-separated values) |
-| `taskcal-collect.csv` | Collect items |
-| `taskcal-ideas.csv` | Ideas |
+| `taskcal-collect.csv` | Collect items (with area/project if set via Done modal) |
+| `taskcal-ideas.csv` | Ideas (with folder assignment) |
+| `taskcal-areas.csv` | Areas (including custom areas) |
+| `taskcal-idea-folders.csv` | Idea folders (with parent–child structure) |
 
 **Importing** merges by ID — rows whose ID already exists are updated in place; new IDs are appended. Re-importing an export will not create duplicates. A toast notification confirms how many rows were added and updated.
 
