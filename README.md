@@ -6,7 +6,7 @@
 
 ## Getting Started
 
-1. Save `task-calendar-9.html` anywhere on your computer.
+1. Save `getting-things-done.html` anywhere on your computer.
 2. Open it in a browser (Chrome, Edge, Firefox, Safari).
 3. Optionally, use the **Live Server** extension in VS Code for a smoother development experience.
 
@@ -25,7 +25,7 @@ The left sidebar contains six main sections:
 | **Next Actions** | Action list organised into area columns (Work, Life, University, custom) |
 | **💡 Ideas** | Capture ideas and develop them into actions, projects, or meetings |
 | **Calendar** | Monthly, weekly, and daily calendar views |
-| **Projects** | One nav item per project (listed below Calendar) |
+| **Projects** | All projects grouped by area |
 
 The top bar contains two utility buttons alongside **New ▾**:
 - **⊞ (grid icon)** — opens the Import / Export CSV modal
@@ -116,8 +116,10 @@ Actions and projects can be assigned to an **area**: **Work**, **Life**, or **Un
 The Next Actions page displays a separate column for each area. Actions with no area (or an unrecognised area) appear in an **Other** column, which is only shown when such actions exist. Click **Add action** inside any column to open the action form with that area pre-filled.
 
 The page header displays:
-- **Left side:** KPI stats showing **Total actions** and **Completed** count
+- **Left side:** KPI stats showing **Incomplete Actions** and **Completed** count
 - **Right side:** Filters for **All Areas**, **All Status**, and **Sort** options (Due Date, Priority, Oldest First, Newest First, Name)
+
+The sidebar badge for Next Actions shows the count of **incomplete** (not done) actions.
 
 ---
 
@@ -130,12 +132,15 @@ Click **New ▾ → Action**, or click any day on the calendar to open the actio
 | Field | Notes |
 |---|---|
 | **Title** | Required |
+| **Waiting on** | Toggle "Is this action waiting on anything?" — reveals a text field to describe what you're blocked on |
 | **Area** | Work / Life / University / custom |
 | **Project** | Optional — assign to an existing project |
 | **Priority** | Low / Medium / High |
 | **Due Date** | Date picker |
 | **Due Time** | Optional time |
 | **Notes** | Free-text notes field |
+
+When a "waiting on" value is set, an amber **⏳** badge appears on the action card showing what the action is blocked on.
 
 ### Managing Actions
 
@@ -144,11 +149,21 @@ Click **New ▾ → Action**, or click any day on the calendar to open the actio
 - **Delete** (bin icon) to remove the action permanently.
 - Completed actions remain visible but styled as done and sorted below uncompleted actions in each column.
 
+### Action States
+
+Actions support three states, cycled via the circle button on calendar pills:
+
+| State | Appearance |
+|---|---|
+| **Pending** | Empty circle |
+| **In Progress** | Amber fill with `~` |
+| **Done** | Filled circle with `✓` |
+
 ---
 
 ## Projects
 
-Projects group related actions together and appear as coloured entries in the sidebar, on action cards, and in the Dashboard.
+Projects group related actions together and appear as coloured cards in the Projects view and Dashboard.
 
 ### Creating a Project
 
@@ -157,22 +172,38 @@ Click **New ▾ → Project**.
 | Field | Notes |
 |---|---|
 | **Name** | Required |
+| **Outcome** | Required description of the desired result |
 | **Area** | Work / Life / University / custom |
-| **Description** | Optional summary |
-| **Start / End Date** | Optional date range |
+| **Parent Project** | Optional — nest this project inside another project (filtered to the selected area) |
 | **Colour** | Pick from 8 colour swatches |
+| **Start / End Date** | Optional date range |
+
+### Project Nesting
+
+Projects can be organised hierarchically. Assign a **Parent Project** when creating or editing a project to make it a sub-project. In the Projects view:
+
+- Only top-level (root) projects appear as standalone cards in the grid.
+- Expand a parent project card to reveal a **Sub-projects** section, which lists child project cards (themselves expandable).
+- A **"N sub-projects"** badge on the card shows the count of direct children.
+- Clicking a parent project's name shows its actions **and all descendant sub-project actions** together.
 
 ### Projects Page
 
-The Projects page displays all projects grouped by area in expandable rows. The page header shows a **Projects** count KPI card on the left side, with a **New Project** button on the right. Click the chevron icon on any project card to expand an inline list of its actions.
+The Projects page displays all root projects grouped by area in a card grid. The page header shows a **Projects** count KPI card on the left side, with a **New Project** button on the right.
+
+Each project card has:
+- **+ button** — create a new action pre-assigned to that project
+- **Chevron** — expand to show sub-projects and actions inline
+- **Complete toggle** — mark the project done/active
+- **Edit button** — reopen the project form
 
 ### Project View
 
-Click a project name in the sidebar to switch to its filtered action list, showing only actions belonging to that project. The Dashboard shows a card for each project with a progress bar, action count, and date range.
+Click a project card to switch to its filtered action list, showing actions belonging to that project and all its sub-projects.
 
 ### Completing a Project
 
-Click the **circle icon** in the top-right of any project card on the Dashboard to mark the project complete. Completed projects are greyed out on the Dashboard and shown with a strikethrough in the sidebar. Click the icon again to reactivate the project.
+Click the **circle icon** on any project card to mark the project complete. Completed projects are greyed out. Click the icon again to reactivate.
 
 ---
 
@@ -189,8 +220,9 @@ Click **New ▾ → Scheduled Meeting**.
 | **Title** | Required |
 | **Date / Start Time** | Required |
 | **Duration** | In minutes |
+| **Area** | Work / Life / University / custom |
 | **Location / Link** | Room name or URL (e.g. Google Meet link) |
-| **Recurrence** | Same options as actions |
+| **Recurrence** | None / Daily / Weekly / etc. |
 | **Attendees** | Type a name and press Enter or click Add — shown as chips |
 | **Agenda / Notes** | Free-text |
 
@@ -216,6 +248,15 @@ Switch between **Month**, **Week**, and **Day** using the buttons in the top-rig
 - **Today** button jumps back to the current date.
 - Click any **day number** in week view to jump to that day in day view.
 - Click any **calendar event pill** to open its edit form.
+
+### Schedule Action
+
+Click **Schedule Action** in the calendar toolbar to open a searchable list of your Next Actions. Select any action and click **Schedule Now** to place it on the calendar at the current time (rounded to 5 minutes).
+
+- **Scheduling again**: scheduling an already-scheduled action adds a new time slot — the original slot remains. Both appear as separate calendar pills.
+- **Undo**: an undo toast appears for 5 seconds after scheduling, letting you reverse the last schedule operation.
+- **Unschedule**: click the **×** on any calendar pill to remove that specific time slot from the calendar.
+- **Partial actions**: in-progress (partially complete) actions appear in the "To Do" filter and can be scheduled.
 
 ---
 
@@ -250,9 +291,9 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 
 | Sheet | Contents |
 |---|---|
-| **Actions** | All actions — area, project, priority, recurrence, notes, completion state, timestamps |
-| **Projects** | All projects with area, colour, dates, description, and completion state |
-| **Meetings** | All meetings — date, times, location, attendees, recurrence, notes |
+| **Actions** | All actions — area, project, priority, recurrence, notes, waiting-on, additional schedule slots, completion state, timestamps |
+| **Projects** | All projects with area, colour, dates, description, completion state, and parent project |
+| **Meetings** | All meetings — date, times, area, location, attendees, recurrence, notes |
 | **Collect** | All Collect items with processing state, and any area/project assigned via Done modal |
 | **Ideas** | All Ideas items with development state and folder assignment |
 | **Areas** | All areas (including custom user-created areas) |
@@ -268,9 +309,9 @@ Each data type can also be exported and imported independently as a `.csv` file:
 
 | Export file | Contents |
 |---|---|
-| `taskcal-tasks.csv` | Actions (with area and project) |
-| `taskcal-projects.csv` | Projects (with area and completion state) |
-| `taskcal-meetings.csv` | Meetings (attendees as pipe-separated values) |
+| `taskcal-tasks.csv` | Actions (with area, project, waiting-on, partial state) |
+| `taskcal-projects.csv` | Projects (with area, completion state, parent project) |
+| `taskcal-meetings.csv` | Meetings (with area, attendees as pipe-separated values) |
 | `taskcal-collect.csv` | Collect items (with area/project if set via Done modal) |
 | `taskcal-ideas.csv` | Ideas (with folder assignment) |
 | `taskcal-areas.csv` | Areas (including custom areas) |
@@ -313,4 +354,3 @@ All data is stored in your browser's `localStorage` under the key `taskcal-v1`. 
 - Compatible with Chrome 90+, Edge 90+, Firefox 88+, Safari 14+.
 - Tested at desktop (1280px+) and mobile (375px). Fully responsive.
 - Light and dark mode via CSS custom properties (`data-theme` attribute on `<html>`).
-

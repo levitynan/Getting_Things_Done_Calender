@@ -107,6 +107,8 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 
 /* PROJECTS */
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:var(--space-4)}
+.project-tree{display:flex;flex-direction:column;gap:var(--space-4)}
+.project-children{margin-left:var(--space-6);margin-top:var(--space-3);padding-left:var(--space-4);border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:var(--space-3)}
 .project-card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.08);border-radius:var(--radius-xl);padding:var(--space-5);cursor:pointer;transition:box-shadow var(--transition-interactive),transform var(--transition-interactive)}
 .project-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
 .project-card.completed{opacity:.45;filter:grayscale(.4)}
@@ -142,6 +144,13 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .task-check{width:18px;height:18px;border-radius:var(--radius-sm);border:2px solid var(--color-border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--transition-interactive),border-color var(--transition-interactive);background:transparent}
 .task-check.done{background:var(--color-success);border-color:var(--color-success)}
 .task-check.done::after{content:"✓";color:white;font-size:11px;font-weight:700}
+.task-check.partial{background:var(--color-warning-highlight);border-color:var(--color-warning)}
+.task-check.partial::after{content:"~";color:var(--color-warning);font-size:11px;font-weight:700}
+.sched-action-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);cursor:pointer;transition:background .15s}
+.sched-action-item:hover{background:var(--color-surface-offset)}
+.cal-unsched-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:13px;height:13px;border-radius:50%;font-size:13px;font-weight:400;line-height:1;opacity:.4;transition:opacity .15s,background .15s}
+.cal-unsched-btn:hover{opacity:1;background:rgba(128,128,128,.25)}
+.sched-filters{display:flex;gap:var(--space-2);padding:var(--space-3);border-bottom:1px solid var(--color-border);flex-wrap:wrap}
 .task-info{flex:1;min-width:0}
 .task-title{font-size:var(--text-sm);font-weight:500}
 .task-title.done{text-decoration:line-through;color:var(--color-text-muted)}
@@ -262,6 +271,10 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 /* SAVE TOAST */
 .save-toast{position:fixed;bottom:var(--space-6);right:var(--space-6);background:var(--color-text);color:var(--color-text-inverse);font-size:var(--text-xs);font-weight:600;padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);box-shadow:var(--shadow-md);pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;z-index:999}
 .save-toast.show{opacity:1;transform:translateY(0)}
+.undo-toast{position:fixed;bottom:var(--space-6);left:50%;transform:translateX(-50%) translateY(8px);background:var(--color-text);color:var(--color-text-inverse);font-size:var(--text-xs);font-weight:600;padding:var(--space-2) var(--space-3) var(--space-2) var(--space-4);border-radius:var(--radius-full);box-shadow:var(--shadow-md);display:flex;align-items:center;gap:var(--space-3);opacity:0;transition:opacity .2s ease,transform .2s ease;z-index:998;pointer-events:none}
+.undo-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.undo-toast-btn{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:inherit;border-radius:var(--radius-full);padding:2px var(--space-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;line-height:1.4}
+.undo-toast-btn:hover{background:rgba(255,255,255,.18)}
 
 
 /* ===== IDEA FOLDERS ===== */
@@ -757,6 +770,9 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         </button>
         <span class="cal-nav-label" id="cal-nav-label"></span>
         <button class="btn btn-ghost" onclick="calToday()" style="font-size:var(--text-xs);padding:var(--space-1) var(--space-3)">Today</button>
+        <button class="btn btn-primary" onclick="openScheduleActionModal()" style="font-size:var(--text-xs);padding:var(--space-2) var(--space-3);display:flex;align-items:center;gap:var(--space-1)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Schedule Action
+        </button>
         <div class="cal-view-switcher" style="margin-left:0">
           <div class="cal-view-btn active" id="cal-actions-toggle" onclick="toggleCalActions()">Actions</div>
           <div class="cal-view-btn active" id="cal-meetings-toggle" onclick="toggleCalMeetings()">Meetings</div>
@@ -777,7 +793,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         <div class="tasks-stats">
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-primary)" id="task-stat-total">0</div>
-            <div class="kpi-label">Total Actions</div>
+            <div class="kpi-label">Incomplete Actions</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-success)" id="task-stat-completed">0</div>
@@ -878,6 +894,15 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="modal-body">
       <input type="hidden" id="task-edit-id">
       <div class="form-group"><label>Action Name *</label><input type="text" class="input" id="task-name" placeholder="e.g. Write project report"></div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:var(--space-3);cursor:pointer;user-select:none">
+          <span>Is this action waiting on anything?</span>
+          <input type="checkbox" id="task-waiting-check" onchange="document.getElementById('task-waiting-group').style.display=this.checked?'':'none'" style="width:16px;height:16px;cursor:pointer;accent-color:var(--color-primary)">
+        </label>
+        <div id="task-waiting-group" style="display:none;margin-top:var(--space-2)">
+          <input type="text" class="input" id="task-waiting" placeholder="What are you waiting for?">
+        </div>
+      </div>
       <div class="form-group"><label>Area</label><select class="select" id="task-area" onchange="handleAreaSelect(this);_filterTaskProjects()"></select></div>
       <div class="form-row">
         <div class="form-group"><label>Project</label><select class="select" id="task-project"><option value="">No Project</option></select></div>
@@ -907,7 +932,8 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       <input type="hidden" id="project-edit-id">
       <div class="form-group"><label>Project Name *</label><input type="text" class="input" id="project-name" placeholder="e.g. Website Redesign"></div>
       <div class="form-group"><label>Outcome *</label><textarea class="textarea" id="project-desc" placeholder="Desired outcome..."></textarea></div>
-      <div class="form-group"><label>Area</label><select class="select" id="project-area" onchange="handleAreaSelect(this)"></select></div>
+      <div class="form-group"><label>Area</label><select class="select" id="project-area" onchange="handleAreaSelect(this);_filterProjectParent()"></select></div>
+      <div class="form-group"><label>Parent Project</label><select class="select" id="project-parent"></select></div>
       <div class="form-group"><label>Colour</label>
         <div class="color-swatches">
           <div class="swatch active" data-color="#01696f" style="background:#01696f" onclick="selectSwatch(this)"></div>
@@ -943,8 +969,9 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="modal-body">
       <input type="hidden" id="meeting-edit-id">
       <div class="form-group"><label>Meeting Title *</label><input type="text" class="input" id="meeting-name" placeholder="e.g. Sprint Review"></div>
+      <div class="form-group"><label>Date *</label><input type="date" class="input" id="meeting-date"></div>
       <div class="form-row">
-        <div class="form-group"><label>Date *</label><input type="date" class="input" id="meeting-date"></div>
+        <div class="form-group"><label>Area</label><select class="select" id="meeting-area"></select></div>
         <div class="form-group"><label>Project (optional)</label><select class="select" id="meeting-project"><option value="">No Project</option></select></div>
       </div>
       <div class="form-row">
@@ -1076,12 +1103,12 @@ function _buildXLSXWorkbook() {
     id:t.id,name:t.name,area_id:t.area||'',area_name:areaMap[t.area]||'',
     project_id:t.project||'',project_name:projMap[t.project]||'',
     priority:t.priority||'',due:t.due||'',time:t.time||'',recur:t.recur||'',
-    recurEnd:t.recurEnd||'',notes:t.notes||'',done:t.done?'true':'false',
+    recurEnd:t.recurEnd||'',notes:t.notes||'',waiting:t.waiting||'',scheduledSlots:t.scheduledSlots?.length?JSON.stringify(t.scheduledSlots):'',done:t.done?'true':'false',partial:t.partial?'true':'false',
     completedAt:t.completedAt||'',created:t.created||''
   }))),'Actions');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.projects.map(p=>({
     id:p.id,name:p.name,desc:p.desc||'',area_id:p.area||'',area_name:areaMap[p.area]||'',
-    color:p.color||'',start:p.start||'',end:p.end||'',completed:p.completed?'true':'false'
+    color:p.color||'',start:p.start||'',end:p.end||'',completed:p.completed?'true':'false',parentId:p.parentId||''
   }))),'Projects');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.bucket.map(b=>({
     id:b.id,text:b.text,created:b.created||'',completed:b.completed?'true':'false',
@@ -1094,7 +1121,8 @@ function _buildXLSXWorkbook() {
   }))),'Ideas');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((state.meetings||[]).map(m=>({
     id:m.id,name:m.name,date:m.date||'',startTime:m.startTime||'',endTime:m.endTime||'',
-    location:m.location||'',project_id:m.project||'',project_name:projMap[m.project]||'',
+    location:m.location||'',area_id:m.area||'',area_name:areaMap[m.area]||'',
+    project_id:m.project||'',project_name:projMap[m.project]||'',
     recur:m.recur||'',recurEnd:m.recurEnd||'',attendees:(m.attendees||[]).join('|'),notes:m.notes||''
   }))),'Meetings');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((state.areas||[]).map(a=>({id:a.id,name:a.name}))),'Areas');
@@ -1111,13 +1139,13 @@ function _parseXLSXWorkbook(wb) {
       id:String(r.id||'t'+Date.now()+Math.random()),name:String(r.name||''),area:String(r.area_id||''),
       project:String(r.project_id||''),priority:String(r.priority||'medium'),due:String(r.due||''),
       time:String(r.time||''),recur:String(r.recur||'none'),recurEnd:String(r.recurEnd||''),
-      notes:String(r.notes||''),done:bool(r.done),completedAt:r.completedAt||null,created:r.created||new Date().toISOString()
+      notes:String(r.notes||''),waiting:String(r.waiting||''),scheduledSlots:r.scheduledSlots?JSON.parse(r.scheduledSlots):undefined,done:bool(r.done),partial:bool(r.partial),completedAt:r.completedAt||null,created:r.created||new Date().toISOString()
     }));
   if (wb.SheetNames.includes('Projects'))
     parsed.projects = XLSX.utils.sheet_to_json(wb.Sheets['Projects']).filter(r=>r.name).map(r=>({
       id:String(r.id||'p'+Date.now()+Math.random()),name:String(r.name||''),desc:String(r.desc||''),
       area:String(r.area_id||''),color:String(r.color||'#01696f'),start:String(r.start||''),
-      end:String(r.end||''),completed:bool(r.completed)
+      end:String(r.end||''),completed:bool(r.completed),parentId:r.parentId?String(r.parentId):null
     }));
   if (wb.SheetNames.includes('Collect'))
     parsed.bucket = XLSX.utils.sheet_to_json(wb.Sheets['Collect']).filter(r=>r.text).map(r=>({
@@ -1136,7 +1164,7 @@ function _parseXLSXWorkbook(wb) {
     parsed.meetings = XLSX.utils.sheet_to_json(wb.Sheets['Meetings']).filter(r=>r.name).map(r=>({
       id:String(r.id||'m'+Date.now()+Math.random()),name:String(r.name||''),date:String(r.date||''),
       startTime:String(r.startTime||''),endTime:String(r.endTime||''),location:String(r.location||''),
-      project:String(r.project_id||''),recur:String(r.recur||'none'),recurEnd:String(r.recurEnd||''),
+      area:String(r.area_id||''),project:String(r.project_id||''),recur:String(r.recur||'none'),recurEnd:String(r.recurEnd||''),
       attendees:String(r.attendees||'').split('|').filter(Boolean),notes:String(r.notes||''),type:'meeting'
     }));
   if (wb.SheetNames.includes('Areas'))
@@ -1289,27 +1317,36 @@ state.calWeekStart = getWeekStart(TODAY);
 state.calDay = dateStr(TODAY);
 
 // ===== HELPERS =====
-function dateStr(d){ return d.toISOString().slice(0,10); }
+function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 function getWeekStart(d){ const r=new Date(d); r.setDate(r.getDate()-r.getDay()); return r; }
+// Steps a YYYY-MM-DD string by n days using local calendar arithmetic (avoids UTC offset bugs).
+function _stepDay(ds,n){ const[y,m,d]=ds.split('-').map(Number);const dt=new Date(y,m-1,d+n);return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; }
 function getProjectMap(){ const m={}; state.projects.forEach(p=>m[p.id]=p); return m; }
 
 // Instances computed on the fly; base tasks/meetings in state are never duplicated.
 function expandTasksRange(from,to){
   const instances=[];
   state.tasks.forEach(task=>{
-    if(!task.due) return;
-    const base=new Date(task.due+'T00:00:00');
-    if(task.recur==='none'||!task.recur){
-      if(base>=from&&base<=to) instances.push({...task,instanceDate:task.due});
-      return;
+    if(task.due){
+      const base=new Date(task.due+'T00:00:00');
+      if(task.recur==='none'||!task.recur){
+        if(base>=from&&base<=to) instances.push({...task,instanceDate:task.due,_slotIndex:-1});
+      } else {
+        const end=task.recurEnd?new Date(task.recurEnd+'T00:00:00'):new Date(to.getFullYear()+2,11,31);
+        let cur=new Date(base);
+        while(cur<=to&&cur<=end){
+          if(cur>=from) instances.push({...task,instanceDate:dateStr(cur),_slotIndex:-1});
+          cur=nextOccurrence(cur,task.recur);
+        }
+      }
     }
-    const end=task.recurEnd?new Date(task.recurEnd+'T00:00:00'):new Date(to.getFullYear()+2,11,31);
-    let cur=new Date(base);
-    while(cur<=to&&cur<=end){
-      if(cur>=from) instances.push({...task,instanceDate:dateStr(cur)});
-      cur=nextOccurrence(cur,task.recur);
-    }
+    (task.scheduledSlots||[]).forEach((slot,i)=>{
+      if(!slot.due) return;
+      const slotBase=new Date(slot.due+'T00:00:00');
+      if(slotBase>=from&&slotBase<=to)
+        instances.push({...task,due:slot.due,time:slot.time,instanceDate:slot.due,_slotIndex:i});
+    });
   });
   // include meetings
   (state.meetings||[]).forEach(m=>{
@@ -1371,6 +1408,15 @@ function navigate(view){
   if(navEl) navEl.classList.add('active');
 }
 
+function _getProjectAndDescendantIds(id) {
+  const ids = new Set([id]);
+  let queue = [id];
+  while (queue.length) {
+    const cur = queue.shift();
+    state.projects.filter(p => (p.parentId || null) === cur).forEach(p => { ids.add(p.id); queue.push(p.id); });
+  }
+  return ids;
+}
 // Reuses view-tasks; currentView 'project-{id}' distinguishes it from plain tasks.
 function navigateProject(id){
   state.currentView='project-'+id;
@@ -1445,24 +1491,34 @@ function renderProjectsView(){
       ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
       :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
     const chevron=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;transform:rotate(${expanded?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>`;
-    const taskList=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
-      pt.length?pt.map(t=>`<div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
-        <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
-        <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
-        ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
-      </div>`).join('')
-      :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`
-    }</div>`:'';
+    const children=state.projects.filter(c=>(c.parentId||null)===p.id);
+    let expandedContent='';
+    if(expanded){
+      const childrenSection=children.length?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)" onclick="event.stopPropagation()">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2)">Sub-projects</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-3)">${children.map(cardHtml).join('')}</div>
+      </div>`:'';
+      const taskSection=`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
+        pt.length?pt.map(t=>`<div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+          <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
+          <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
+          ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
+        </div>`).join('')
+        :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`
+      }</div>`;
+      expandedContent=childrenSection+taskSection;
+    }
     return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
       <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px"></div><span class="project-card-title">${p.name}</span>
-        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} actions" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
+        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="Add action" onclick="event.stopPropagation();openTaskModal(null,'','${p.area||''}','${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button class="btn-icon" style="opacity:.6" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
         <button class="btn-icon" style="opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
         <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       </div>
       <div class="project-card-desc">${p.desc||'No description'}</div>
-      <div class="project-meta"><span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+      <div class="project-meta"><span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${children.length?`<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">${children.length} sub-project${children.length>1?'s':''}</span>`:''} ${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
       <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
-      ${taskList}
+      ${expandedContent}
     </div>`;
   }
   function unassignedCardHtml(uid,tasks){
@@ -1486,12 +1542,14 @@ function renderProjectsView(){
   }
   const areas=state.areas||[];
   const areaIds=new Set(areas.map(a=>a.id));
+  const projectIds=new Set(state.projects.map(p=>p.id));
+  function isRoot(p){return !p.parentId||!projectIds.has(p.parentId);}
   const sections=areas.map(a=>{
-    const projects=state.projects.filter(p=>p.area===a.id);
+    const projects=state.projects.filter(p=>p.area===a.id&&isRoot(p));
     const loose=state.tasks.filter(t=>t.area===a.id&&!t.project);
     return {name:a.name,areaId:a.id,projects,loose};
   }).filter(s=>s.projects.length||s.loose.length);
-  const unassignedProjects=state.projects.filter(p=>!p.area||!areaIds.has(p.area));
+  const unassignedProjects=state.projects.filter(p=>(!p.area||!areaIds.has(p.area))&&isRoot(p));
   const unassignedLoose=state.tasks.filter(t=>(!t.area||!areaIds.has(t.area))&&!t.project);
   if(unassignedProjects.length||unassignedLoose.length) sections.push({name:'Other',areaId:'other',projects:unassignedProjects,loose:unassignedLoose});
   projDiv.innerHTML=sections.map(s=>`
@@ -1520,9 +1578,9 @@ function _sortTasks(tasks, sortBy){
 
 function renderTasks(){
   const pm=getProjectMap();
-  const totalTasks=state.tasks.length;
   const completedTasks=state.tasks.filter(t=>t.done).length;
-  document.getElementById('task-stat-total').textContent=totalTasks;
+  const incompleteTasks=state.tasks.length-completedTasks;
+  document.getElementById('task-stat-total').textContent=incompleteTasks;
   document.getElementById('task-stat-completed').textContent=completedTasks;
   const areaFilter=document.getElementById('task-area-filter');
   areaFilter.innerHTML='<option value="">All Areas</option>'+(state.areas||[]).map(a=>`<option value="${a.id}" ${areaFilter.value===a.id?'selected':''}>${a.name}</option>`).join('');
@@ -1530,6 +1588,7 @@ function renderTasks(){
   const sf=document.getElementById('task-status-filter').value;
   const sortBy=document.getElementById('task-sort-filter')?.value||'due';
   let tasks=[...state.tasks];
+  if(state.currentView.startsWith('project-')){const projId=state.currentView.replace('project-','');const projIds=_getProjectAndDescendantIds(projId);tasks=tasks.filter(t=>projIds.has(t.project));}
   if(af) tasks=tasks.filter(t=>t.area===af);
   if(sf==='pending') tasks=tasks.filter(t=>!t.done);
   if(sf==='done') tasks=tasks.filter(t=>t.done);
@@ -1598,7 +1657,7 @@ function renderTaskItem(t,pm){
   const tint=_ageTint(t.created,t.done);
   const createdLabel=t.created?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">Added ${formatDate(t.created.slice(0,10))}</span>`:'';
   return `<div class="task-item" style="${tint}">
-    <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')"></div>
+    <div class="task-check ${t.done?'done':t.partial?'partial':''}" onclick="toggleTask('${t.id}')"></div>
     <div class="task-info">
       <div class="task-title ${t.done?'done':''}">${t.name}${t.recur&&t.recur!=='none'?' <span style="color:var(--color-primary);font-size:10px">↻</span>':''}</div>
       <div class="task-meta">
@@ -1606,6 +1665,7 @@ function renderTaskItem(t,pm){
         ${proj?`<span class="badge" style="background:${proj.color}22;color:${proj.color}">${proj.name}</span>`:''}
         ${priorityBadge(t.priority)}
         ${t.recur&&t.recur!=='none'?`<span class="task-recur">${recurLabel(t.recur)}</span>`:''}
+        ${t.waiting?`<span class="badge" style="background:var(--color-warning-highlight);color:var(--color-warning)" title="Waiting on: ${t.waiting}">⏳ ${t.waiting}</span>`:''}
         ${createdLabel}
       </div>
     </div>
@@ -1624,11 +1684,35 @@ function priorityBadge(p){
 function recurLabel(r){return{daily:'Daily',weekdays:'Weekdays',weekly:'Weekly',biweekly:'Bi-weekly',monthly:'Monthly'}[r]||r;}
 
 // ===== CALENDAR CONTROLLER =====
+// Annotates events with _startMin, _endMin, _layoutCol, _totalCols for collision-free placement.
+function _prepEventLayout(events){
+  events.forEach(t=>{
+    const[h,min]=(t.time||'00:00').split(':').map(Number);
+    t._startMin=h*60+min;
+    if(t.endTime){const[eh,em]=t.endTime.split(':').map(Number);t._endMin=Math.max(t._startMin+15,eh*60+em);}
+    else{t._endMin=t._startMin+60;}
+  });
+  events.sort((a,b)=>a._startMin-b._startMin);
+  const colEnds=[];
+  events.forEach(t=>{
+    let c=colEnds.findIndex(e=>e<=t._startMin);
+    if(c===-1)c=colEnds.length;
+    t._layoutCol=c;
+    colEnds[c]=t._endMin;
+  });
+  const total=Math.max(1,colEnds.length);
+  events.forEach(t=>t._totalCols=total);
+}
 // Returns a small circle complete-button for action pills; empty string for meetings.
 function _calCompleteBtn(t) {
   if (t.isMeeting || t.type === 'meeting') return '';
   const done = !!t.done;
-  return `<span style="flex-shrink:0;width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;background:${done?'currentColor':'transparent'}" onclick="event.stopPropagation();toggleTask('${t.id}')" title="${done?'Mark incomplete':'Mark complete'}"></span>`;
+  const partial = !!t.partial && !done;
+  const bg = done ? 'currentColor' : partial ? 'var(--color-warning)' : 'transparent';
+  const textCol = (done || partial) ? '#fff' : 'currentColor';
+  const label = done ? '✓' : partial ? '~' : '';
+  const title = done ? 'Done — click to reset' : partial ? 'In progress — click to mark done' : 'Click to mark in progress';
+  return `<span style="flex-shrink:0;width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;background:${bg};font-size:8px;line-height:1;color:${textCol}" onclick="event.stopPropagation();cycleTaskState('${t.id}')" title="${title}">${label}</span>`;
 }
 
 let _calShowActions  = true;
@@ -1676,7 +1760,7 @@ function calPrev(){
   } else if(state.calView==='week'){
     state.calWeekStart=addDays(state.calWeekStart,-7);
   } else {
-    state.calDay=dateStr(addDays(new Date(state.calDay+'T00:00:00'),-1));
+    state.calDay=_stepDay(state.calDay,-1);
   }
   document.getElementById('day-detail-panel').innerHTML='';
   renderCalendar();
@@ -1687,7 +1771,7 @@ function calNext(){
   } else if(state.calView==='week'){
     state.calWeekStart=addDays(state.calWeekStart,7);
   } else {
-    state.calDay=dateStr(addDays(new Date(state.calDay+'T00:00:00'),1));
+    state.calDay=_stepDay(state.calDay,1);
   }
   document.getElementById('day-detail-panel').innerHTML='';
   renderCalendar();
@@ -1726,7 +1810,7 @@ function renderMonthView(){
       <div class="cal-date">${d}</div>
       ${visible.map(t=>{const proj=pm[t.project];const color=proj?proj.color:'#7a7974';const isMtg=t.isMeeting||t.type==='meeting';
 const evColor=isMtg?'#7a39bb':(proj?proj.color:'#7a7974');
-return`<div class="cal-event" style="background:${evColor}22;color:${evColor};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" title="${t.name}" onclick="event.stopPropagation();${isMtg?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${isMtg?'📅 ':''}${t.name}</span></div>`;}).join('')}
+return`<div class="cal-event" style="background:${evColor}22;color:${evColor};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" title="${t.name}" onclick="event.stopPropagation();${isMtg?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${_calCompleteBtn(t)}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${isMtg?'📅 ':''}${t.name}</span>${_calUnscheduleBtn(t)}</div>`;}).join('')}
       ${more>0?`<div class="cal-more">+${more} more</div>`:''}
     </div>`;
   }
@@ -1794,7 +1878,7 @@ function renderWeekView(){
     const ds=dateStr(d);
     const adt=allDayByDay[ds]||[];
     html+=`<div class="week-allday-cell">${adt.map(t=>{const proj=pm[t.project];const color=proj?proj.color:'#7a7974';const isMtg2=t.isMeeting||t.type==='meeting';const aColor=isMtg2?'#7a39bb':color;
-return`<div class="week-allday-event" style="background:${aColor}22;color:${aColor};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" onclick="${isMtg2?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}" title="${t.name}">${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${isMtg2?'📅 ':''}${t.name}</span></div>`;}).join('')}</div>`;
+return`<div class="week-allday-event" style="background:${aColor}22;color:${aColor};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" onclick="${isMtg2?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}" title="${t.name}">${_calCompleteBtn(t)}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${isMtg2?'📅 ':''}${t.name}</span>${_calUnscheduleBtn(t)}</div>`;}).join('')}</div>`;
   });
   html+='</div>';
   // Body
@@ -1813,12 +1897,11 @@ return`<div class="week-allday-event" style="background:${aColor}22;color:${aCol
   document.getElementById('cal-body').innerHTML=html;
 
   // Place timed events as absolutely-positioned elements
-  days.forEach(d=>{
+  days.forEach((d,col)=>{
     const ds=dateStr(d);
-    const col=days.indexOf(d);
-    (timedByDay[ds]||[]).forEach(t=>{
-      placeWeekEvent(t,col,pm);
-    });
+    const dayEvts=timedByDay[ds]||[];
+    _prepEventLayout(dayEvts);
+    dayEvts.forEach(t=>placeWeekEvent(t,col,pm));
   });
 
   // Now-line
@@ -1828,25 +1911,26 @@ return`<div class="week-allday-event" style="background:${aColor}22;color:${aCol
 function placeWeekEvent(t,colIndex,pm){
   const body=document.getElementById('week-scroll-body');
   if(!body) return;
-  const [h,min]=(t.time||'00:00').split(':').map(Number);
-  const top=(h*60+min)/60*48; // 48px per hour
-  const height=48; // default 1hr block
   const proj=pm[t.project];
   const isMtgW=t.isMeeting||t.type==='meeting';
   const color=isMtgW?'#7a39bb':(proj?proj.color:'#7a7974');
-  const height2=t.endTime?(()=>{const[eh,em]=t.endTime.split(':').map(Number);const[sh,sm]=(t.time||'00:00').split(':').map(Number);return Math.max(24,(eh*60+em-sh*60-sm)/60*48);})():48;
+  const top=(t._startMin/60)*48;
+  const height=Math.max(20,((t._endMin-t._startMin)/60)*48);
+  const lc=t._layoutCol||0;
+  const tc=t._totalCols||1;
+  const leftPct=(lc/tc)*100;
+  const widthPct=100/tc;
   const el=document.createElement('div');
   el.className='week-event';
-  el.style.cssText=`top:${top}px;height:${height2}px;background:${color}22;color:${color};border-left:3px solid ${color};display:flex;align-items:flex-start;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}`;
+  el.style.cssText=`top:${top}px;height:${height}px;left:${leftPct}%;width:calc(${widthPct}% - 4px);right:auto;background:${color}22;color:${color};border-left:3px solid ${color};display:flex;align-items:flex-start;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}`;
   el.title=t.name;
-  el.innerHTML=`${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${t.time}${isMtgW?' 📅':''} ${t.name}</span>`;
+  el.innerHTML=`${_calCompleteBtn(t)}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${t.time}${isMtgW?' 📅':''} ${t.name}</span>${_calUnscheduleBtn(t)}`;
   el.onclick=()=>isMtgW?openMeetingModal(t.id):openTaskModal(t.id);
-  // Find the correct cell: cells are ordered h=0..23, within each hour col 0..6
-  // grid: 1 time col + 7 day cols, 24 rows
-  // cell index in week-body-cell nodes = h*7 + colIndex
+  // Anchor all events to the midnight cell (row 0) of this day column so top is from midnight.
+  // z-index:1 ensures the anchor cell's stacking context paints above sibling cells.
   const cells=body.querySelectorAll('.week-body-cell');
-  const cellEl=cells[h*7+colIndex];
-  if(cellEl){ cellEl.style.position='relative'; cellEl.appendChild(el); }
+  const anchor=cells[colIndex];
+  if(anchor){anchor.style.overflow='visible';anchor.style.zIndex='1';anchor.appendChild(el);}
 }
 
 function drawWeekNowLine(days){
@@ -1896,7 +1980,7 @@ function renderDayView(){
       <div class="day-big-date" ${isToday?'style="color:var(--color-primary)"':''}>${d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'})}</div>
     </div>`;
   if(allDay.length){
-    html+=`<div class="day-allday-bar"><div class="day-allday-label">All-day</div>${allDay.map(t=>{const proj=pm[t.project];const isMtgA=t.isMeeting||t.type==='meeting';const color=isMtgA?'#7a39bb':(proj?proj.color:'#7a7974');return`<div class="week-allday-event" style="background:${color}22;color:${color};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" onclick="${isMtgA?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${_calCompleteBtn(t)}<span style="overflow:hidden;text-overflow:ellipsis">${isMtgA?'📅 ':''}${t.name}</span></div>`;}).join('')}</div>`;
+    html+=`<div class="day-allday-bar"><div class="day-allday-label">All-day</div>${allDay.map(t=>{const proj=pm[t.project];const isMtgA=t.isMeeting||t.type==='meeting';const color=isMtgA?'#7a39bb':(proj?proj.color:'#7a7974');return`<div class="week-allday-event" style="background:${color}22;color:${color};display:flex;align-items:center;gap:3px;${t.done?'opacity:.55;text-decoration:line-through':''}" onclick="${isMtgA?`openMeetingModal('${t.id}')`:`openTaskModal('${t.id}')`}">${_calCompleteBtn(t)}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${isMtgA?'📅 ':''}${t.name}</span>${_calUnscheduleBtn(t)}</div>`;}).join('')}</div>`;
   }
   html+=`<div class="day-body" id="day-body-scroll">
     <div class="day-time-col">`;
@@ -1915,18 +1999,21 @@ function renderDayView(){
   // Place timed events
   const col=document.getElementById('day-event-col');
   if(col){
+    _prepEventLayout(timed);
     timed.forEach(t=>{
-      const [h,min]=(t.time||'00:00').split(':').map(Number);
-      const top=(h*60+min)/60*60; // 60px per hour for day view
+      const top=(t._startMin/60)*60; // 60px per hour for day view
+      const height=Math.max(24,((t._endMin-t._startMin)/60)*60);
       const proj=pm[t.project];
-      const color=proj?proj.color:'#7a7974';
-      const el=document.createElement('div');
-      el.className='day-event';
-
       const isMtgD=t.isMeeting||t.type==='meeting';
       const dColor=isMtgD?'#7a39bb':(proj?proj.color:'#7a7974');
-      el.style.cssText=`top:${top}px;min-height:52px;background:${dColor}22;color:${dColor};border-left:3px solid ${dColor};${t.done?'opacity:.55;text-decoration:line-through':''}`;
-      el.innerHTML=`<div style="display:flex;align-items:center;gap:4px;font-weight:700">${_calCompleteBtn(t)}${t.time}${isMtgD?' 📅':''}</div><div>${t.name}</div>${proj?`<div style="opacity:.7;font-size:10px">${proj.name}</div>`:''}`;
+      const lc=t._layoutCol||0;
+      const tc=t._totalCols||1;
+      const leftPct=(lc/tc)*100;
+      const widthPct=100/tc;
+      const el=document.createElement('div');
+      el.className='day-event';
+      el.style.cssText=`top:${top}px;min-height:${height}px;left:${leftPct}%;width:calc(${widthPct}% - 8px);right:auto;background:${dColor}22;color:${dColor};border-left:3px solid ${dColor};${t.done?'opacity:.55;text-decoration:line-through':''}`;
+      el.innerHTML=`<div style="display:flex;align-items:center;gap:4px;font-weight:700">${_calCompleteBtn(t)}${t.time}${isMtgD?' 📅':''}<span style="margin-left:auto">${_calUnscheduleBtn(t)}</span></div><div>${t.name}</div>${proj?`<div style="opacity:.7;font-size:10px">${proj.name}</div>`:''}`;
       el.onclick=()=>isMtgD?openMeetingModal(t.id):openTaskModal(t.id);
       col.appendChild(el);
     });
@@ -1944,7 +2031,7 @@ function renderDayView(){
 }
 
 // ===== TASK CRUD =====
-function openTaskModal(editId, prefillName, prefillArea){
+function openTaskModal(editId, prefillName, prefillArea, prefillProject){
   _populateAreaSelect(document.getElementById('task-area'));
   if(editId){
     const t=state.tasks.find(x=>x.id===editId); if(!t) return;
@@ -1958,17 +2045,24 @@ function openTaskModal(editId, prefillName, prefillArea){
     document.getElementById('task-due').value=t.due||'';
     document.getElementById('task-time').value=t.time||'';
     document.getElementById('task-notes').value=t.notes||'';
+    const wc=document.getElementById('task-waiting-check');
+    wc.checked=!!(t.waiting);
+    document.getElementById('task-waiting').value=t.waiting||'';
+    document.getElementById('task-waiting-group').style.display=wc.checked?'':'none';
   } else {
     document.getElementById('task-modal-title').textContent='New Action';
     document.getElementById('task-edit-id').value='';
     document.getElementById('task-name').value=prefillName||'';
     document.getElementById('task-area').value=prefillArea||'';
     _filterTaskProjects();
-    document.getElementById('task-project').value='';
+    if(prefillProject) document.getElementById('task-project').value=prefillProject;
     document.getElementById('task-priority').value='medium';
     document.getElementById('task-due').value='';
     document.getElementById('task-time').value='';
     document.getElementById('task-notes').value='';
+    document.getElementById('task-waiting-check').checked=false;
+    document.getElementById('task-waiting').value='';
+    document.getElementById('task-waiting-group').style.display='none';
   }
   document.getElementById('task-modal').classList.add('open');
   setTimeout(()=>document.getElementById('task-name').focus(),50);
@@ -1992,7 +2086,9 @@ function saveTask(){
     recur:'none',
     recurEnd:'',
     notes:document.getElementById('task-notes').value,
+    waiting:document.getElementById('task-waiting-check').checked?document.getElementById('task-waiting').value.trim():'',
     done:existing?.done||false,
+    partial:existing?.partial||false,
     completedAt:existing?.completedAt||null,
     created:existing?.created||new Date().toISOString()
   };
@@ -2014,6 +2110,27 @@ function toggleTask(id){
   refreshView();
   if(t.done) showFollowupModal(t);
 }
+function cycleTaskState(id){
+  const t=state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  if(!t.done&&!t.partial){
+    t.partial=true;
+  } else if(t.partial&&!t.done){
+    t.partial=false;
+    t.done=true;
+    t.completedAt=new Date().toISOString();
+    saveToStorage();
+    refreshView();
+    showFollowupModal(t);
+    return;
+  } else {
+    t.done=false;
+    t.partial=false;
+    t.completedAt=null;
+  }
+  saveToStorage();
+  refreshView();
+}
 let _followupTask=null;
 function showFollowupModal(task){
   _followupTask=task;
@@ -2025,11 +2142,157 @@ function followupAction(type){
   closeModal('followup-modal');
   if(!task) return;
   if(type==='task') openTaskModal(null,'',task.area||'');
-  else if(type==='meeting') openMeetingModal(null,null,null,task.name);
+  else if(type==='meeting') openMeetingModal(null,null,null,task.name,task.area||'');
   else if(type==='project') openProjectModal(null,task.name);
+}
+// ===== SCHEDULE ACTION MODAL =====
+let _schedFilter={search:'',area:'',status:'pending',sort:'priority'};
+function openScheduleActionModal(){
+  const areaEl=document.getElementById('sched-area');
+  areaEl.innerHTML='<option value="">All Areas</option>'+(state.areas||[]).map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  document.getElementById('sched-search').value='';
+  document.getElementById('sched-status').value=_schedFilter.status;
+  document.getElementById('sched-sort').value=_schedFilter.sort;
+  _schedFilter.search='';
+  _renderScheduleActionList();
+  document.getElementById('schedule-action-modal').classList.add('open');
+}
+function _schedFilterChange(){
+  _schedFilter.search=(document.getElementById('sched-search').value||'').trim().toLowerCase();
+  _schedFilter.area=document.getElementById('sched-area').value;
+  _schedFilter.status=document.getElementById('sched-status').value;
+  _schedFilter.sort=document.getElementById('sched-sort').value;
+  _renderScheduleActionList();
+}
+function _renderScheduleActionList(){
+  const pm=Object.fromEntries((state.projects||[]).map(p=>[p.id,p]));
+  const am=Object.fromEntries((state.areas||[]).map(a=>[a.id,a]));
+  const todayStr=dateStr(TODAY);
+  let tasks=[...state.tasks];
+  if(_schedFilter.status==='pending') tasks=tasks.filter(t=>!t.done);
+  else if(_schedFilter.status==='partial') tasks=tasks.filter(t=>!!t.partial&&!t.done);
+  else if(_schedFilter.status==='done') tasks=tasks.filter(t=>!!t.done);
+  if(_schedFilter.area) tasks=tasks.filter(t=>t.area===_schedFilter.area);
+  if(_schedFilter.search) tasks=tasks.filter(t=>(t.name||'').toLowerCase().includes(_schedFilter.search));
+  const PMAP={high:0,medium:1,low:2};
+  if(_schedFilter.sort==='priority') tasks.sort((a,b)=>(PMAP[a.priority]??2)-(PMAP[b.priority]??2));
+  else if(_schedFilter.sort==='due') tasks.sort((a,b)=>(a.due||'9999')>(b.due||'9999')?1:(a.due||'9999')<(b.due||'9999')?-1:0);
+  else if(_schedFilter.sort==='name') tasks.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  else if(_schedFilter.sort==='newest') tasks.sort((a,b)=>(b.created||'')>(a.created||'')?1:(b.created||'')<(a.created||'')?-1:0);
+  else tasks.sort((a,b)=>(a.created||'')>(b.created||'')?1:(a.created||'')<(b.created||'')?-1:0);
+  const el=document.getElementById('sched-action-list');
+  if(!el) return;
+  if(!tasks.length){el.innerHTML=`<div style="padding:var(--space-6);text-align:center;color:var(--color-text-faint)">No actions match</div>`;return;}
+  el.innerHTML=tasks.map(t=>{
+    const proj=pm[t.project];
+    const area=am[t.area];
+    const overdue=t.due&&t.due<todayStr&&!t.done;
+    const stateChip=t.done?`<span class="badge" style="background:var(--color-success-highlight);color:var(--color-success)">Done</span>`:t.partial?`<span class="badge" style="background:var(--color-warning-highlight);color:var(--color-warning)">In Progress</span>`:'';
+    return`<div class="sched-action-item">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:var(--text-sm);${t.done?'text-decoration:line-through;opacity:.6':''}">${t.name}</div>
+        <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:3px;align-items:center">
+          ${area?`<span style="font-size:var(--text-xs);color:var(--color-text-muted)">${area.name}</span>`:''}
+          ${proj?`<span class="badge" style="background:${proj.color}22;color:${proj.color}">${proj.name}</span>`:''}
+          ${t.due?`<span style="font-size:var(--text-xs);color:${overdue?'var(--color-error)':'var(--color-text-faint)'}">${formatDate(t.due)}</span>`:''}
+          ${priorityBadge(t.priority)}
+          ${stateChip}
+        </div>
+      </div>
+      <button class="btn btn-primary" style="font-size:var(--text-xs);padding:var(--space-1) var(--space-3);flex-shrink:0" onclick="scheduleActionNow('${t.id}')">Schedule Now</button>
+    </div>`;
+  }).join('');
+}
+let _schedUndoState=null;
+let _schedUndoTimer=null;
+function scheduleActionNow(id){
+  const t=state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  const now=new Date();
+  const rawMins=Math.round(now.getMinutes()/5)*5;
+  const h=rawMins===60?now.getHours()+1:now.getHours();
+  const m=rawMins===60?0:rawMins;
+  const newDue=dateStr(now);
+  const newTime=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  if(t.due){
+    if(!t.scheduledSlots) t.scheduledSlots=[];
+    t.scheduledSlots.push({due:newDue,time:newTime});
+    _schedUndoState={id,addedSlot:true};
+  } else {
+    _schedUndoState={id,prevDue:null,prevTime:null};
+    t.due=newDue;
+    t.time=newTime;
+  }
+  saveToStorage();
+  closeModal('schedule-action-modal');
+  _showSchedUndoToast(t.name);
+  if(state.currentView==='calendar') renderCalendar();
+  else navigate('calendar');
+}
+function _showSchedUndoToast(name){
+  clearTimeout(_schedUndoTimer);
+  const toast=document.getElementById('sched-undo-toast');
+  document.getElementById('sched-undo-label').textContent=`"${name}" scheduled`;
+  toast.classList.add('show');
+  _schedUndoTimer=setTimeout(()=>{toast.classList.remove('show');_schedUndoState=null;},5000);
+}
+function _undoScheduleAction(){
+  if(!_schedUndoState) return;
+  const t=state.tasks.find(x=>x.id===_schedUndoState.id);
+  if(t){
+    if(_schedUndoState.addedSlot){
+      if(t.scheduledSlots&&t.scheduledSlots.length) t.scheduledSlots.pop();
+    } else {
+      t.due=_schedUndoState.prevDue;
+      t.time=_schedUndoState.prevTime;
+    }
+    saveToStorage();refreshView();
+  }
+  clearTimeout(_schedUndoTimer);
+  document.getElementById('sched-undo-toast').classList.remove('show');
+  _schedUndoState=null;
+}
+function _calUnscheduleBtn(t){
+  if(t.isMeeting||t.type==='meeting') return '';
+  const si=t._slotIndex!==undefined?t._slotIndex:-1;
+  return `<span class="cal-unsched-btn" onclick="event.stopPropagation();unscheduleAction('${t.id}',${si})" title="Remove from calendar">×</span>`;
+}
+function unscheduleAction(id,slotIndex){
+  const t=state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  if(slotIndex>=0){
+    if(t.scheduledSlots) t.scheduledSlots.splice(slotIndex,1);
+  } else {
+    t.due=null;
+    t.time=null;
+  }
+  saveToStorage();
+  refreshView();
 }
 // ===== PROJECT CRUD =====
 let selectedColor='#01696f';
+function _populateProjectParentSelect(el, editId, areaId) {
+  const cannotParent = new Set();
+  if (editId) {
+    cannotParent.add(editId);
+    let queue = [editId];
+    while (queue.length) {
+      const cur = queue.shift();
+      state.projects.filter(p => (p.parentId || null) === cur).forEach(p => { cannotParent.add(p.id); queue.push(p.id); });
+    }
+  }
+  const prev = el.value;
+  let candidates = state.projects.filter(p => !cannotParent.has(p.id));
+  if (areaId) candidates = candidates.filter(p => p.area === areaId);
+  el.innerHTML = '<option value="">None (top-level)</option>' +
+    candidates.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  if (candidates.find(p => p.id === prev)) el.value = prev;
+}
+function _filterProjectParent() {
+  const editId = document.getElementById('project-edit-id').value || null;
+  const areaId = document.getElementById('project-area').value;
+  _populateProjectParentSelect(document.getElementById('project-parent'), editId, areaId);
+}
 function openProjectModal(editId, prefillName){
   _populateAreaSelect(document.getElementById('project-area'));
   if(editId){
@@ -2039,6 +2302,8 @@ function openProjectModal(editId, prefillName){
     document.getElementById('project-name').value=p.name;
     document.getElementById('project-desc').value=p.desc||'';
     document.getElementById('project-area').value=p.area||'';
+    _populateProjectParentSelect(document.getElementById('project-parent'), editId, p.area||'');
+    document.getElementById('project-parent').value=p.parentId||'';
     document.getElementById('project-start').value=p.start||'';
     document.getElementById('project-end').value=p.end||'';
     selectedColor=p.color;
@@ -2048,6 +2313,7 @@ function openProjectModal(editId, prefillName){
     document.getElementById('project-name').value=prefillName||'';
     document.getElementById('project-desc').value='';
     document.getElementById('project-area').value='';
+    _populateProjectParentSelect(document.getElementById('project-parent'), null, '');
     document.getElementById('project-start').value='';
     document.getElementById('project-end').value='';
     selectedColor='#01696f';
@@ -2060,7 +2326,7 @@ function saveProject(){
   const name=document.getElementById('project-name').value.trim(); if(!name){document.getElementById('project-name').focus();return;}
   const desc=document.getElementById('project-desc').value.trim(); if(!desc){document.getElementById('project-desc').focus();return;}
   const editId=document.getElementById('project-edit-id').value;
-  const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:document.getElementById('project-end').value,completed:editId?(state.projects.find(p=>p.id===editId)?.completed||false):false};
+  const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:document.getElementById('project-end').value,completed:editId?(state.projects.find(p=>p.id===editId)?.completed||false):false,parentId:document.getElementById('project-parent').value||null};
   if(editId){const idx=state.projects.findIndex(p=>p.id===editId);if(idx!==-1)state.projects[idx]=proj;}else state.projects.push(proj);
   if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='project';}_pendingBucketId=null;}
   closeModal('project-modal'); saveToStorage(); refreshView();
@@ -2079,12 +2345,16 @@ function _populateAreaSelect(el) {
     '<option value="__new__">＋ New area…</option>';
 }
 
+function _projectLabel(p) {
+  const parent = p.parentId ? state.projects.find(pp => pp.id === p.parentId) : null;
+  return parent ? `${parent.name} › ${p.name}` : p.name;
+}
 function _filterTaskProjects() {
   const areaId = document.getElementById('task-area').value;
   const pm = document.getElementById('task-project');
   const current = pm.value;
   const projects = areaId ? state.projects.filter(p => p.area === areaId) : state.projects;
-  pm.innerHTML = '<option value="">No Project</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  pm.innerHTML = '<option value="">No Project</option>' + projects.map(p => `<option value="${p.id}">${_projectLabel(p)}</option>`).join('');
   if (projects.find(p => p.id === current)) pm.value = current;
 }
 
@@ -2115,7 +2385,7 @@ function refreshView(){
   const _ip = (state.ideas||[]).filter(b=>!b.processed&&!b.developed).length;
   const _ib = document.getElementById('idea-badge');
   if(_ib){_ib.textContent=_ip;_ib.style.display=_ip>0?'inline-flex':'none';}
-  const _tp = (state.tasks||[]).length;
+  const _tp = (state.tasks||[]).filter(t=>!t.done).length;
   const _tb = document.getElementById('tasks-badge');
   if(_tb){_tb.textContent=_tp;_tb.style.display=_tp>0?'inline-flex':'none';}
   const _tc = (state.tasks||[]).filter(t=>t.done).length;
@@ -2288,15 +2558,15 @@ function exportCSV(type) {
     const projMap = Object.fromEntries(state.projects.map(p=>[p.id,p.name]));
     const areaMap = Object.fromEntries((state.areas||[]).map(a=>[a.id,a.name]));
     csv = _toCSV(
-      ['id','name','area_id','area_name','project_id','project_name','priority','due','time','recur','recurEnd','notes','done','completedAt','created'],
-      state.tasks.map(t => [t.id, t.name, t.area||'', areaMap[t.area]||'', t.project||'', projMap[t.project]||'', t.priority||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.done?'true':'false', t.completedAt||'', t.created||''])
+      ['id','name','area_id','area_name','project_id','project_name','priority','due','time','recur','recurEnd','notes','waiting','done','partial','completedAt','created'],
+      state.tasks.map(t => [t.id, t.name, t.area||'', areaMap[t.area]||'', t.project||'', projMap[t.project]||'', t.priority||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.waiting||'', t.done?'true':'false', t.partial?'true':'false', t.completedAt||'', t.created||''])
     );
     filename = 'taskcal-tasks.csv';
   } else if (type === 'projects') {
     const areaMap = Object.fromEntries((state.areas||[]).map(a=>[a.id,a.name]));
     csv = _toCSV(
-      ['id','name','desc','area_id','area_name','color','start','end','completed'],
-      state.projects.map(p => [p.id, p.name, p.desc||'', p.area||'', areaMap[p.area]||'', p.color||'', p.start||'', p.end||'', p.completed?'true':'false'])
+      ['id','name','desc','area_id','area_name','color','start','end','completed','parentId'],
+      state.projects.map(p => [p.id, p.name, p.desc||'', p.area||'', areaMap[p.area]||'', p.color||'', p.start||'', p.end||'', p.completed?'true':'false', p.parentId||''])
     );
     filename = 'taskcal-projects.csv';
   } else if (type === 'bucket') {
@@ -2313,9 +2583,10 @@ function exportCSV(type) {
     filename = 'taskcal-ideas.csv';
   } else if (type === 'meetings') {
     const projMap = Object.fromEntries(state.projects.map(p=>[p.id,p.name]));
+    const areaMap = Object.fromEntries((state.areas||[]).map(a=>[a.id,a.name]));
     csv = _toCSV(
-      ['id','name','date','startTime','endTime','location','project_id','project_name','recur','recurEnd','attendees','notes'],
-      (state.meetings||[]).map(m => [m.id, m.name, m.date||'', m.startTime||'', m.endTime||'', m.location||'', m.project||'', projMap[m.project]||'', m.recur||'', m.recurEnd||'', (m.attendees||[]).join('|'), m.notes||''])
+      ['id','name','date','startTime','endTime','location','area_id','area_name','project_id','project_name','recur','recurEnd','attendees','notes'],
+      (state.meetings||[]).map(m => [m.id, m.name, m.date||'', m.startTime||'', m.endTime||'', m.location||'', m.area||'', areaMap[m.area]||'', m.project||'', projMap[m.project]||'', m.recur||'', m.recurEnd||'', (m.attendees||[]).join('|'), m.notes||''])
     );
     filename = 'taskcal-meetings.csv';
   } else if (type === 'areas') {
@@ -2360,7 +2631,9 @@ function importCSV(type, input) {
           recur:       r[col('recur')]       || 'none',
           recurEnd:    r[col('recurEnd')]    || '',
           notes:       r[col('notes')]       || '',
+          waiting:     r[col('waiting')]     || '',
           done:        bool(r[col('done')]),
+          partial:     bool(r[col('partial')]),
           completedAt: r[col('completedAt')] || null,
           created:     r[col('created')]     || new Date().toISOString()
         };
@@ -2377,8 +2650,10 @@ function importCSV(type, input) {
           color:     r[col('color')]     || '#01696f',
           start:     r[col('start')]     || '',
           end:       r[col('end')]       || '',
-          completed: bool(r[col('completed')])
+          completed: bool(r[col('completed')]),
+          parentId:  r[col('parentId')]  || null
         };
+        if (!item.parentId) item.parentId = null;
         const xi = state.projects.findIndex(p => p.id === item.id);
         if (xi !== -1) { state.projects[xi] = item; updated++; } else { state.projects.push(item); added++; }
 
@@ -2424,6 +2699,7 @@ function importCSV(type, input) {
           startTime: r[col('startTime')] || '',
           endTime:   r[col('endTime')]   || '',
           location:  r[col('location')]  || '',
+          area:      r[col('area_id')]    || '',
           project:   r[col('project_id')]|| '',
           recur:     r[col('recur')]     || 'none',
           recurEnd:  r[col('recurEnd')]  || '',
@@ -2530,7 +2806,8 @@ document.addEventListener('click', () => closeNewDropdown());
 let selectedMeetingRecur = 'none';
 let meetingAttendees = [];
 
-function openMeetingModal(editId, prefillDate, prefillTime, prefillName) {
+function openMeetingModal(editId, prefillDate, prefillTime, prefillName, prefillArea) {
+  _populateAreaSelect(document.getElementById('meeting-area'));
   const pSel = document.getElementById('meeting-project');
   pSel.innerHTML = '<option value="">No Project</option>' +
     state.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
@@ -2547,6 +2824,7 @@ function openMeetingModal(editId, prefillDate, prefillTime, prefillName) {
     document.getElementById('meeting-notes').value = m.notes || '';
     document.getElementById('meeting-recur-end').value = m.recurEnd || '';
     document.getElementById('meeting-project').value = m.project || '';
+    document.getElementById('meeting-area').value = m.area || '';
     meetingAttendees = [...(m.attendees || [])];
     selectedMeetingRecur = m.recur || 'none';
   } else {
@@ -2559,6 +2837,7 @@ function openMeetingModal(editId, prefillDate, prefillTime, prefillName) {
     document.getElementById('meeting-location').value = '';
     document.getElementById('meeting-notes').value = '';
     document.getElementById('meeting-recur-end').value = '';
+    document.getElementById('meeting-area').value = prefillArea || '';
     selectedMeetingRecur = 'none';
   }
   document.querySelectorAll('[data-mrecur]').forEach(b => b.classList.toggle('active', b.dataset.mrecur === selectedMeetingRecur));
@@ -2605,6 +2884,7 @@ function saveMeeting() {
     endTime: document.getElementById('meeting-end-time').value,
     location: document.getElementById('meeting-location').value.trim(),
     notes: document.getElementById('meeting-notes').value,
+    area: document.getElementById('meeting-area').value,
     project: document.getElementById('meeting-project').value,
     recur: selectedMeetingRecur,
     recurEnd: document.getElementById('meeting-recur-end').value,
@@ -2701,7 +2981,7 @@ function _filterBucketDoneProjects() {
     ? state.projects.filter(p => p.area === areaVal)
     : state.projects;
   sel.innerHTML = '<option value="">No Project</option>' +
-    projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    projects.map(p => `<option value="${p.id}">${_projectLabel(p)}</option>`).join('');
   if (projects.find(p => p.id === prev)) sel.value = prev;
 }
 
@@ -3760,6 +4040,10 @@ setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
 setTimeout(() => _initFileStorage(), 1500);
 </script>
 <div class="save-toast" id="save-toast">✓ Saved</div>
+<div class="undo-toast" id="sched-undo-toast">
+  <span id="sched-undo-label">Scheduled</span>
+  <button class="undo-toast-btn" onclick="_undoScheduleAction()">Undo</button>
+</div>
 
 <!-- ===== DATA IMPORT / EXPORT MODAL ===== -->
 <div class="modal-overlay" id="data-modal">
@@ -3773,6 +4057,36 @@ setTimeout(() => _initFileStorage(), 1500);
 </div>
 
 <!-- ===== TASK COMPLETE FOLLOW-UP MODAL ===== -->
+<div class="modal-overlay" id="schedule-action-modal">
+  <div class="modal" style="max-width:600px;width:100%;max-height:82vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <span class="modal-title">Schedule an Action</span>
+      <button class="btn-icon" onclick="closeModal('schedule-action-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sched-filters">
+      <input class="input" id="sched-search" placeholder="Search actions…" oninput="_schedFilterChange()" style="flex:1;min-width:140px">
+      <select class="select" id="sched-area" onchange="_schedFilterChange()" style="min-width:110px">
+        <option value="">All Areas</option>
+      </select>
+      <select class="select" id="sched-status" onchange="_schedFilterChange()" style="min-width:120px">
+        <option value="pending">To Do</option>
+        <option value="partial">In Progress</option>
+        <option value="all">All</option>
+        <option value="done">Done</option>
+      </select>
+      <select class="select" id="sched-sort" onchange="_schedFilterChange()" style="min-width:130px">
+        <option value="priority">Priority</option>
+        <option value="due">Due Date</option>
+        <option value="name">Name (A–Z)</option>
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+      </select>
+    </div>
+    <div id="sched-action-list" style="overflow-y:auto;flex:1;padding:var(--space-2) 0;min-height:180px"></div>
+    <div style="padding:var(--space-3) var(--space-4);border-top:1px solid var(--color-border);font-size:var(--text-xs);color:var(--color-text-faint)">Scheduling sets today's date and current time on the action so it appears on the calendar.</div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="followup-modal">
   <div class="modal" style="max-width:400px">
     <div class="modal-header">
