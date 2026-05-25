@@ -114,7 +114,9 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .project-card.completed{opacity:.45;filter:grayscale(.4)}
 .project-card.completed .project-card-title{text-decoration:line-through}
 .project-card-header{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)}
-.project-card-title{font-size:var(--text-base);font-weight:700}
+.project-card-title{font-size:var(--text-base);font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-card-actions{display:flex;gap:var(--space-1);padding-bottom:var(--space-2);max-height:0;overflow:hidden;opacity:0;transition:max-height var(--transition-interactive),opacity var(--transition-interactive)}
+.project-card:hover .proj-card-actions{max-height:44px;opacity:1}
 .project-card-desc{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:1.5}
 .project-meta{display:flex;gap:var(--space-3);flex-wrap:wrap}
 .badge{display:inline-flex;align-items:center;gap:var(--space-1);padding:2px var(--space-2);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:600}
@@ -141,6 +143,12 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .task-column-body{padding:var(--space-2);display:flex;flex-direction:column;gap:var(--space-2);min-height:80px}
 .task-column-add{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);color:var(--color-text-muted);font-size:var(--text-sm);cursor:pointer;border-radius:var(--radius-md);transition:background var(--transition-interactive),color var(--transition-interactive);margin-top:var(--space-1)}
 .task-column-add:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.this-week-section{margin-bottom:var(--space-5);background:var(--color-primary-highlight);border:1px solid oklch(from var(--color-primary) l c h/.2);border-radius:var(--radius-xl);padding:var(--space-4) var(--space-5)}
+.this-week-header{display:flex;align-items:center;gap:var(--space-3)}
+.this-week-title{font-size:var(--text-sm);font-weight:700;color:var(--color-primary);flex:1}
+.this-week-grid{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-3)}
+.this-week-card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.08);border-radius:var(--radius-lg);padding:var(--space-2) var(--space-3);display:flex;align-items:center;gap:var(--space-2);max-width:280px}
+.this-week-card .task-check{flex-shrink:0}
 .task-check{width:18px;height:18px;border-radius:var(--radius-sm);border:2px solid var(--color-border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--transition-interactive),border-color var(--transition-interactive);background:transparent}
 .task-check.done{background:var(--color-success);border-color:var(--color-success)}
 .task-check.done::after{content:"✓";color:white;font-size:11px;font-weight:700}
@@ -151,14 +159,16 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .cal-unsched-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:13px;height:13px;border-radius:50%;font-size:13px;font-weight:400;line-height:1;opacity:.4;transition:opacity .15s,background .15s}
 .cal-unsched-btn:hover{opacity:1;background:rgba(128,128,128,.25)}
 .sched-filters{display:flex;gap:var(--space-2);padding:var(--space-3);border-bottom:1px solid var(--color-border);flex-wrap:wrap}
-.task-info{flex:1;min-width:0}
+.task-info{flex:1;min-width:0;display:flex;flex-direction:column}
 .task-title{font-size:var(--text-sm);font-weight:500}
 .task-title.done{text-decoration:line-through;color:var(--color-text-muted)}
 .task-meta{display:flex;gap:var(--space-2);margin-top:var(--space-1);flex-wrap:wrap;align-items:center}
 .task-date{font-size:var(--text-xs);color:var(--color-text-muted);font-family:var(--font-mono)}
 .task-recur{font-size:var(--text-xs);color:var(--color-primary);font-weight:600}
-.task-actions{display:flex;gap:var(--space-1);opacity:0;transition:opacity var(--transition-interactive)}
-.task-item:hover .task-actions{opacity:1}
+.task-actions{display:flex;gap:var(--space-1);padding-top:var(--space-1);max-height:0;overflow:hidden;opacity:0;transition:max-height var(--transition-interactive),opacity var(--transition-interactive)}
+.task-item:hover .task-actions{max-height:40px;opacity:1}
+.proj-task-row .proj-task-btns{display:flex;gap:var(--space-1);padding-top:var(--space-1);max-height:0;overflow:hidden;opacity:0;transition:max-height var(--transition-interactive),opacity var(--transition-interactive)}
+.proj-task-row:hover .proj-task-btns{max-height:40px;opacity:1}
 
 /* ===== CALENDAR SHARED ===== */
 .calendar-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-5);flex-wrap:wrap}
@@ -232,7 +242,7 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .modal-header{padding:var(--space-5) var(--space-5) var(--space-4);border-bottom:1px solid var(--color-divider);display:flex;align-items:center;justify-content:space-between}
 .modal-title{font-size:var(--text-base);font-weight:700}
 .modal-body{padding:var(--space-5)}
-.modal-footer{padding:var(--space-4) var(--space-5);border-top:1px solid var(--color-divider);display:flex;justify-content:flex-end;gap:var(--space-2)}
+.modal-footer{padding:var(--space-4) var(--space-5);border-top:1px solid var(--color-divider);display:flex;justify-content:space-between;gap:var(--space-2)}
 
 /* FORMS */
 .form-group{margin-bottom:var(--space-4)}
@@ -748,8 +758,16 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       <div class="projects-header">
         <div class="projects-stats">
           <div class="kpi-card">
-            <div class="kpi-value" style="color:#a855f7" id="project-stat-total">0</div>
-            <div class="kpi-label">Projects</div>
+            <div class="kpi-value" style="color:var(--color-primary)" id="project-stat-incomplete">0</div>
+            <div class="kpi-label">Incomplete</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" style="color:var(--color-blue)" id="project-stat-ongoing">0</div>
+            <div class="kpi-label">Ongoing</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" style="color:var(--color-success)" id="project-stat-completed">0</div>
+            <div class="kpi-label">Completed</div>
           </div>
         </div>
         <button class="btn btn-primary" onclick="openProjectModal()">
@@ -808,6 +826,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
           <select class="select" style="width:auto" id="task-sort-filter" onchange="renderTasks()">
             <option value="due">Sort: Due Date</option>
             <option value="priority">Sort: Priority</option>
+            <option value="duration">Sort: Duration</option>
             <option value="created">Sort: Oldest First</option>
             <option value="created-desc">Sort: Newest First</option>
             <option value="name">Sort: Name</option>
@@ -905,17 +924,30 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       </div>
       <div class="form-group"><label>Area</label><select class="select" id="task-area" onchange="handleAreaSelect(this);_filterTaskProjects()"></select></div>
       <div class="form-row">
-        <div class="form-group"><label>Project</label><select class="select" id="task-project"><option value="">No Project</option></select></div>
+        <div class="form-group"><label>Project</label><select class="select" id="task-project" onchange="_onTaskProjectChange()"><option value="">No Project</option></select></div>
         <div class="form-group"><label>Priority</label><select class="select" id="task-priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Due Date</label><input type="date" class="input" id="task-due"></div>
         <div class="form-group"><label>Due Time (optional)</label><input type="time" class="input" id="task-time"></div>
       </div>
+      <div class="form-group">
+        <label>Time Required</label>
+        <select class="select" id="task-duration">
+          <option value="">Not estimated</option>
+          <option value="under-10">Under 10 mins</option>
+          <option value="under-30">Under 30 mins</option>
+          <option value="under-60">Under an hour</option>
+          <option value="project">Should be turned into a project</option>
+        </select>
+      </div>
       <div class="form-group"><label>Notes</label><textarea class="textarea" id="task-notes" placeholder="Optional notes..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('task-modal')">Cancel</button>
+      <button class="btn btn-ghost" onclick="saveTaskAsProject()" style="color:var(--color-blue)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Convert to Project
+      </button>
       <button class="btn btn-primary" onclick="saveTask()">Save Action</button>
     </div>
   </div>
@@ -946,7 +978,13 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
           <div class="swatch" data-color="#964219" style="background:#964219" onclick="selectSwatch(this)"></div>
         </div>
       </div>
-      <div class="form-row">
+      <div class="form-group" style="margin-bottom:var(--space-2)">
+        <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;font-weight:400">
+          <input type="checkbox" id="project-ongoing" onchange="_toggleOngoingFields()">
+          <span>Ongoing project <span style="color:var(--color-text-muted)">(continuous — no defined end)</span></span>
+        </label>
+      </div>
+      <div class="form-row" id="project-dates-row">
         <div class="form-group"><label>Start Date</label><input type="date" class="input" id="project-start"></div>
         <div class="form-group"><label>End Date</label><input type="date" class="input" id="project-end"></div>
       </div>
@@ -1102,13 +1140,15 @@ function _buildXLSXWorkbook() {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.tasks.map(t=>({
     id:t.id,name:t.name,area_id:t.area||'',area_name:areaMap[t.area]||'',
     project_id:t.project||'',project_name:projMap[t.project]||'',
-    priority:t.priority||'',due:t.due||'',time:t.time||'',recur:t.recur||'',
-    recurEnd:t.recurEnd||'',notes:t.notes||'',waiting:t.waiting||'',scheduledSlots:t.scheduledSlots?.length?JSON.stringify(t.scheduledSlots):'',done:t.done?'true':'false',partial:t.partial?'true':'false',
+    priority:t.priority||'',duration:t.duration||'',due:t.due||'',time:t.time||'',recur:t.recur||'',
+    recurEnd:t.recurEnd||'',notes:t.notes||'',waiting:t.waiting||'',waitingFulfilled:t.waitingFulfilled?'true':'false',
+    scheduledSlots:t.scheduledSlots?.length?JSON.stringify(t.scheduledSlots):'',sortOrder:t.sortOrder??'',thisWeek:t.thisWeek?'true':'false',
+    done:t.done?'true':'false',partial:t.partial?'true':'false',
     completedAt:t.completedAt||'',created:t.created||''
   }))),'Actions');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.projects.map(p=>({
     id:p.id,name:p.name,desc:p.desc||'',area_id:p.area||'',area_name:areaMap[p.area]||'',
-    color:p.color||'',start:p.start||'',end:p.end||'',completed:p.completed?'true':'false',parentId:p.parentId||''
+    color:p.color||'',start:p.start||'',end:p.end||'',completed:p.completed?'true':'false',ongoing:p.ongoing?'true':'false',parentId:p.parentId||''
   }))),'Projects');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.bucket.map(b=>({
     id:b.id,text:b.text,created:b.created||'',completed:b.completed?'true':'false',
@@ -1137,15 +1177,17 @@ function _parseXLSXWorkbook(wb) {
   if (wb.SheetNames.includes('Actions'))
     parsed.tasks = XLSX.utils.sheet_to_json(wb.Sheets['Actions']).filter(r=>r.name).map(r=>({
       id:String(r.id||'t'+Date.now()+Math.random()),name:String(r.name||''),area:String(r.area_id||''),
-      project:String(r.project_id||''),priority:String(r.priority||'medium'),due:String(r.due||''),
+      project:String(r.project_id||''),priority:String(r.priority||'medium'),duration:String(r.duration||''),due:String(r.due||''),
       time:String(r.time||''),recur:String(r.recur||'none'),recurEnd:String(r.recurEnd||''),
-      notes:String(r.notes||''),waiting:String(r.waiting||''),scheduledSlots:r.scheduledSlots?JSON.parse(r.scheduledSlots):undefined,done:bool(r.done),partial:bool(r.partial),completedAt:r.completedAt||null,created:r.created||new Date().toISOString()
+      notes:String(r.notes||''),waiting:String(r.waiting||''),waitingFulfilled:bool(r.waitingFulfilled),
+      scheduledSlots:r.scheduledSlots?JSON.parse(r.scheduledSlots):[],sortOrder:r.sortOrder!=null&&r.sortOrder!==''?Number(r.sortOrder):null,
+      thisWeek:bool(r.thisWeek),done:bool(r.done),partial:bool(r.partial),completedAt:r.completedAt||null,created:r.created||new Date().toISOString()
     }));
   if (wb.SheetNames.includes('Projects'))
     parsed.projects = XLSX.utils.sheet_to_json(wb.Sheets['Projects']).filter(r=>r.name).map(r=>({
       id:String(r.id||'p'+Date.now()+Math.random()),name:String(r.name||''),desc:String(r.desc||''),
       area:String(r.area_id||''),color:String(r.color||'#01696f'),start:String(r.start||''),
-      end:String(r.end||''),completed:bool(r.completed),parentId:r.parentId?String(r.parentId):null
+      end:String(r.end||''),completed:bool(r.completed),ongoing:bool(r.ongoing),parentId:r.parentId?String(r.parentId):null
     }));
   if (wb.SheetNames.includes('Collect'))
     parsed.bucket = XLSX.utils.sheet_to_json(wb.Sheets['Collect']).filter(r=>r.text).map(r=>({
@@ -1453,12 +1495,15 @@ function renderDashboard(){
         ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
         :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
       return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
-        <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px"></div><span class="project-card-title">${p.name}</span>
-          <button class="btn-icon" style="margin-left:auto;opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
-          <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px;flex-shrink:0"></div><span class="project-card-title">${p.name}</span>
+          ${!p.ongoing?`<button class="btn-icon" style="flex-shrink:0;opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>`:''}
+        </div>
+        <div class="proj-card-actions">
+          <button class="btn-icon" title="Edit" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn-icon" title="Delete" style="color:var(--color-error)" onclick="event.stopPropagation();deleteProject('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
         </div>
         <div class="project-card-desc">${p.desc||'No description'}</div>
-        <div class="project-meta"><span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+        <div class="project-meta">${p.ongoing?`<span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">∞ Ongoing</span>`:''}<span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${!p.ongoing&&p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
         <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
       </div>`;}).join('')}</div>`;
   }
@@ -1475,7 +1520,9 @@ function toggleProjectExpand(id,e){
   renderProjectsView();
 }
 function renderProjectsView(){
-  document.getElementById('project-stat-total').textContent=state.projects.length;
+  document.getElementById('project-stat-incomplete').textContent=state.projects.filter(p=>!p.completed&&!p.ongoing).length;
+  document.getElementById('project-stat-ongoing').textContent=state.projects.filter(p=>p.ongoing).length;
+  document.getElementById('project-stat-completed').textContent=state.projects.filter(p=>p.completed).length;
   const projDiv=document.getElementById('project-list-projects');
   if(!projDiv) return;
   if(!state.projects.length&&!state.tasks.length){
@@ -1483,9 +1530,10 @@ function renderProjectsView(){
     return;
   }
   function cardHtml(p){
-    const pt=state.tasks.filter(t=>t.project===p.id);
+    const pt=_projectTasksSorted(p.id);
     const pd=pt.filter(t=>t.done).length;
     const pct=pt.length?Math.round(100*pd/pt.length):0;
+    const pmt=state.meetings.filter(m=>m.project===p.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
     const expanded=_expandedProjects.has(p.id);
     const doneIcon=p.completed
       ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
@@ -1499,45 +1547,125 @@ function renderProjectsView(){
         <div style="display:flex;flex-direction:column;gap:var(--space-3)">${children.map(cardHtml).join('')}</div>
       </div>`:'';
       const taskSection=`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
-        pt.length?pt.map(t=>`<div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
-          <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
-          <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
-          ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
-        </div>`).join('')
+        pt.length?pt.map((t,i)=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isWaiting?';border-left:3px solid var(--color-warning);padding-left:var(--space-2);opacity:.8':';padding-left:var(--space-1)'}" onclick="event.stopPropagation()">
+          <div class="task-check ${t.done?'done':t.partial?'partial':''}" onclick="event.stopPropagation();toggleTask('${t.id}')" style="margin-top:2px"></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;align-items:baseline;gap:var(--space-2)">
+              <span style="font-size:var(--text-sm);flex:1;min-width:0;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
+              ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint);flex-shrink:0;white-space:nowrap">${formatDate(t.due)}</span>`:''}
+            </div>
+            ${isWaiting?`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--color-warning-highlight);color:var(--color-warning);padding:1px 3px 1px 5px;border-radius:var(--radius-full);font-size:10px;font-weight:500;align-self:flex-start">⏳ ${t.waiting}<button onclick="event.stopPropagation();fulfillWaiting('${t.id}')" title="Mark waiting condition as fulfilled" style="border:none;background:none;cursor:pointer;color:inherit;padding:0 1px;font-size:13px;line-height:1;opacity:.7">✓</button></span>`:''}
+            ${isWaitingFulfilled?`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--color-success-highlight);color:var(--color-success);padding:1px 5px;border-radius:var(--radius-full);font-size:10px;font-weight:500;align-self:flex-start" title="Was waiting on: ${t.waiting}">✓ ${t.waiting}</span>`:''}
+            ${t.duration?durationBadge(t.duration):''}
+            <div class="proj-task-btns">
+              <button class="btn-icon" onclick="event.stopPropagation();moveTaskInProject('${t.id}',-1)" title="Move up" ${i===0?'disabled style="opacity:.25"':''}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();moveTaskInProject('${t.id}',1)" title="Move down" ${i===pt.length-1?'disabled style="opacity:.25"':''}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();scheduleActionNow('${t.id}')" title="Schedule now" style="color:var(--color-primary)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();convertTaskToProject('${t.id}')" title="Convert to project" style="color:var(--color-blue)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();openTaskModal('${t.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            </div>
+          </div>
+        </div>`;}).join('')
         :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`
       }</div>`;
-      expandedContent=childrenSection+taskSection;
+      const meetingSection=pmt.length?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)" onclick="event.stopPropagation()">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2)">Meetings</div>
+        ${pmt.map(m=>`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:var(--text-sm)">${m.name}</span>
+            ${m.date?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(m.date)}${m.startTime?' · '+m.startTime:''}</span>`:''}
+            <div class="proj-task-btns">
+              <button class="btn-icon" onclick="event.stopPropagation();openMeetingModal('${m.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();deleteMeeting('${m.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>`:'';
+      expandedContent=childrenSection+taskSection+meetingSection;
     }
     return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
-      <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px"></div><span class="project-card-title">${p.name}</span>
-        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="Add action" onclick="event.stopPropagation();openTaskModal(null,'','${p.area||''}','${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <button class="btn-icon" style="opacity:.6" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
-        <button class="btn-icon" style="opacity:.6;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>
-        <button class="btn-icon" style="opacity:.6" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px;flex-shrink:0"></div><span class="project-card-title">${p.name}</span>
+        <div style="position:relative;flex-shrink:0">
+          <button class="btn-icon" style="opacity:.6" title="Add" onclick="toggleProjectAddMenu('${p.id}',event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <div class="new-dropdown hidden" id="proj-add-menu-${p.id}" style="min-width:170px">
+            <div class="new-dd-item" onclick="closeProjectAddMenu();openTaskModal(null,'','${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-primary-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="new-dd-label">New Action</div></div>
+            <div class="new-dd-item" onclick="closeProjectAddMenu();openMeetingModal(null,null,null,null,'${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-purple-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="new-dd-label">New Meeting</div></div>
+            <div class="new-dd-item" onclick="closeProjectAddMenu();openProjectModal(null,'','${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-blue-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-blue)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="new-dd-label">New Sub-project</div></div>
+          </div>
+        </div>
+        <button class="btn-icon" style="opacity:.6;flex-shrink:0" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
+        ${!p.ongoing?`<button class="btn-icon" style="opacity:.6;flex-shrink:0;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>`:''}
+      </div>
+      <div class="proj-card-actions">
+        <button class="btn-icon" title="Edit" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-icon" title="Delete" style="color:var(--color-error)" onclick="event.stopPropagation();deleteProject('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>
       <div class="project-card-desc">${p.desc||'No description'}</div>
-      <div class="project-meta"><span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${children.length?`<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">${children.length} sub-project${children.length>1?'s':''}</span>`:''} ${p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+      <div class="project-meta">${p.ongoing?`<span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">∞ Ongoing</span>`:''}<span class="badge badge-teal">${pt.length} action${pt.length!==1?'s':''}</span><span class="badge badge-success">${pd} done</span>${pmt.length?`<span class="badge" style="background:var(--color-purple-highlight);color:var(--color-purple)">${pmt.length} meeting${pmt.length!==1?'s':''}</span>`:''}${children.length?`<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">${children.length} sub-project${children.length>1?'s':''}</span>`:''} ${!p.ongoing&&p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
       <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
       ${expandedContent}
     </div>`;
   }
-  function unassignedCardHtml(uid,tasks){
+  function unassignedCardHtml(uid,tasks,areaId){
     const expanded=_expandedProjects.has(uid);
     const chevron=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;transform:rotate(${expanded?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>`;
     const done=tasks.filter(t=>t.done).length;
-    const taskList=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
-      tasks.map(t=>`<div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
-        <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
-        <span style="font-size:var(--text-sm);flex:1;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
-        ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(t.due)}</span>`:''}
-      </div>`).join('')
+    const noProjectMeetings=areaId==='other'
+      ?state.meetings.filter(m=>!m.project&&(!m.area||!areaIds.has(m.area))).sort((a,b)=>(a.date||'').localeCompare(b.date||''))
+      :state.meetings.filter(m=>!m.project&&m.area===areaId).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    const areaArg=areaId?`'${areaId}'`:'null';
+    const taskListHtml=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
+      tasks.map(t=>{
+        const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);
+        const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);
+        return `<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+        <div class="task-check ${t.done?'done':t.partial?'partial':''}" style="margin-top:2px" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <div style="display:flex;align-items:baseline;gap:var(--space-2)">
+            <span style="font-size:var(--text-sm);flex:1;min-width:0;${t.done?'text-decoration:line-through;color:var(--color-text-faint)':''}">${t.name}</span>
+            ${t.due?`<span style="font-size:var(--text-xs);color:var(--color-text-faint);flex-shrink:0;white-space:nowrap">${formatDate(t.due)}</span>`:''}
+          </div>
+          ${isWaiting?`<span style="font-size:var(--text-xs);background:var(--color-warning-highlight,#fffbeb);color:var(--color-warning,#b45309);border:1px solid var(--color-warning,#b45309);border-radius:4px;padding:1px 6px;align-self:flex-start;display:flex;align-items:center;gap:4px">⏳ ${t.waiting}<button onclick="event.stopPropagation();fulfillWaiting('${t.id}')" style="background:none;border:none;cursor:pointer;padding:0;color:inherit;font-size:var(--text-xs);display:flex;align-items:center" title="Mark as fulfilled">✓</button></span>`:''}
+          ${isWaitingFulfilled?`<span style="font-size:var(--text-xs);background:var(--color-success-highlight,#f0fdf4);color:var(--color-success,#16a34a);border:1px solid var(--color-success,#16a34a);border-radius:4px;padding:1px 6px;align-self:flex-start">✓ ${t.waiting}</span>`:''}
+          ${t.duration?durationBadge(t.duration):''}
+          <div class="proj-task-btns">
+            <button class="btn-icon" onclick="event.stopPropagation();scheduleActionNow('${t.id}')" title="Schedule now" style="color:var(--color-primary)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+            <button class="btn-icon" onclick="event.stopPropagation();convertTaskToProject('${t.id}')" title="Convert to project" style="color:var(--color-blue)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+            <button class="btn-icon" onclick="event.stopPropagation();openTaskModal('${t.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="btn-icon" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+          </div>
+        </div>
+      </div>`;}).join('')
     }</div>`:'';
+    const meetingListHtml=expanded&&noProjectMeetings.length?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)" onclick="event.stopPropagation()">
+      <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2)">Meetings</div>
+      ${noProjectMeetings.map(m=>`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:var(--text-sm)">${m.name}</span>
+          ${m.date?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">${formatDate(m.date)}${m.startTime?' · '+m.startTime:''}</span>`:''}
+          <div class="proj-task-btns">
+            <button class="btn-icon" onclick="event.stopPropagation();openMeetingModal('${m.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="btn-icon" onclick="event.stopPropagation();deleteMeeting('${m.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>`:'';
     return `<div class="project-card" style="border-style:dashed">
       <div class="project-card-header"><span class="project-card-title" style="color:var(--color-text-muted)">No Project</span>
-        <button class="btn-icon" style="margin-left:auto;opacity:.6" title="${expanded?'Collapse':'Expand'} actions" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
+        <div style="position:relative;flex-shrink:0;margin-left:auto">
+          <button class="btn-icon" style="opacity:.6" title="Add" onclick="toggleProjectAddMenu('${uid}',event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <div class="new-dropdown hidden" id="proj-add-menu-${uid}" style="min-width:170px">
+            <div class="new-dd-item" onclick="closeProjectAddMenu();_expandedProjects.add('${uid}');openTaskModal(null,null,${areaArg})"><div class="new-dd-icon" style="background:var(--color-primary-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="new-dd-label">New Action</div></div>
+            <div class="new-dd-item" onclick="closeProjectAddMenu();_expandedProjects.add('${uid}');openMeetingModal(null,null,null,null,${areaArg})"><div class="new-dd-icon" style="background:var(--color-purple-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="new-dd-label">New Meeting</div></div>
+          </div>
+        </div>
+        <button class="btn-icon" style="opacity:.6;flex-shrink:0" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
       </div>
-      <div class="project-meta"><span class="badge badge-teal">${tasks.length} actions</span><span class="badge badge-success">${done} done</span></div>
-      ${taskList}
+      <div class="project-meta"><span class="badge badge-teal">${tasks.length} action${tasks.length!==1?'s':''}</span><span class="badge badge-success">${done} done</span>${noProjectMeetings.length?`<span class="badge" style="background:var(--color-purple-highlight);color:var(--color-purple)">${noProjectMeetings.length} meeting${noProjectMeetings.length!==1?'s':''}</span>`:''}</div>
+      ${taskListHtml}${meetingListHtml}
     </div>`;
   }
   const areas=state.areas||[];
@@ -1555,16 +1683,18 @@ function renderProjectsView(){
   projDiv.innerHTML=sections.map(s=>`
     <div style="margin-bottom:var(--space-6)">
       <h2 class="section-heading">${s.name}</h2>
-      <div class="projects-grid">${s.loose.length?unassignedCardHtml('unassigned-'+s.areaId,s.loose):''}${s.projects.map(cardHtml).join('')}</div>
-    </div>`).join('');
+      <div class="projects-grid">${s.loose.length?unassignedCardHtml('unassigned-'+s.areaId,s.loose,s.areaId):''}${s.projects.map(cardHtml).join('')}</div>
+    </div>`).join('')||`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
 }
 
 // ===== TASK LIST =====
 function _sortTasks(tasks, sortBy){
   const prioVal={high:3,medium:2,low:1};
+  const durVal={'under-10':1,'under-30':2,'under-60':3,'project':4};
   return tasks.sort((a,b)=>{
     if(a.done!==b.done) return a.done?1:-1;
     if(sortBy==='priority') return (prioVal[b.priority]||0)-(prioVal[a.priority]||0);
+    if(sortBy==='duration') return (durVal[a.duration]||99)-(durVal[b.duration]||99);
     if(sortBy==='created') return (a.created||'').localeCompare(b.created||'');
     if(sortBy==='created-desc') return (b.created||'').localeCompare(a.created||'');
     if(sortBy==='name') return a.name.localeCompare(b.name);
@@ -1600,18 +1730,32 @@ function renderTasks(){
   let columns=af?[{id:af,name:areas.find(a=>a.id===af)?.name||'Actions',tasks}]:areas.map(a=>({id:a.id,name:a.name,tasks:tasks.filter(t=>t.area===a.id)}));
   const unassigned=af?[]:tasks.filter(t=>!t.area||!areaIds.has(t.area));
   if(unassigned.length) columns.push({id:'',name:'Other',tasks:unassigned});
-  container.innerHTML=`<div class="task-columns">${columns.map(col=>`<div class="task-column">
+  container.innerHTML=`<div class="task-columns">${columns.map(col=>{
+    const colThisWeek=col.tasks.filter(t=>t.thisWeek&&!t.done);
+    const colOther=col.tasks.filter(t=>!t.thisWeek||t.done);
+    const thisWeekSection=colThisWeek.length?`
+      <div style="margin:var(--space-2);background:var(--color-warning-highlight);border:1px solid oklch(from var(--color-warning) l c h/.25);border-radius:var(--radius-lg);padding:var(--space-2)">
+        <div style="display:flex;align-items:center;gap:var(--space-1);margin-bottom:var(--space-2);padding:0 var(--space-1)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--color-warning)" stroke="var(--color-warning)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span style="font-size:10px;font-weight:700;color:var(--color-warning);text-transform:uppercase;letter-spacing:.06em">This Week</span>
+          <span style="font-size:10px;font-weight:700;color:var(--color-warning);background:oklch(from var(--color-warning) l c h/.15);border-radius:var(--radius-full);padding:0 5px;margin-left:2px">${colThisWeek.length}</span>
+        </div>
+        ${colThisWeek.map(t=>renderTaskItem(t,pm)).join('')}
+      </div>
+      ${colOther.length?`<div style="border-top:1px solid var(--color-divider);margin:var(--space-1) 0 var(--space-2)"></div>`:''}`:''  ;
+    return `<div class="task-column">
     <div class="task-column-header">
       <span class="task-column-title">${col.name}</span>
       <span class="task-column-count">${col.tasks.length}</span>
     </div>
-    <div class="task-column-body">
-      ${col.tasks.map(t=>renderTaskItem(t,pm)).join('')}
+    <div class="task-column-body" style="padding-top:${colThisWeek.length?'var(--space-1)':'var(--space-2)'}">
+      ${thisWeekSection}
+      ${colOther.map(t=>renderTaskItem(t,pm)).join('')}
       <div class="task-column-add" onclick="openTaskModalForArea('${col.id}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add action
       </div>
     </div>
-  </div>`).join('')}</div>`;
+  </div>`}).join('')}</div>`;
 }
 
 
@@ -1655,8 +1799,10 @@ function renderTaskItem(t,pm){
   const isOverdue=t.due&&t.due<dateStr(TODAY)&&!t.done;
   const instanceDate=t.instanceDate||t.due;
   const tint=_ageTint(t.created,t.done);
+  const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);
+  const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);
   const createdLabel=t.created?`<span style="font-size:var(--text-xs);color:var(--color-text-faint)">Added ${formatDate(t.created.slice(0,10))}</span>`:'';
-  return `<div class="task-item" style="${tint}">
+  return `<div class="task-item" style="${tint}${isWaiting?'border-left:3px solid var(--color-warning);opacity:.8':''}">
     <div class="task-check ${t.done?'done':t.partial?'partial':''}" onclick="toggleTask('${t.id}')"></div>
     <div class="task-info">
       <div class="task-title ${t.done?'done':''}">${t.name}${t.recur&&t.recur!=='none'?' <span style="color:var(--color-primary);font-size:10px">↻</span>':''}</div>
@@ -1664,14 +1810,19 @@ function renderTaskItem(t,pm){
         ${instanceDate?`<span class="task-date" ${isOverdue?'style="color:var(--color-error)"':''}>${formatDate(instanceDate)}${t.time?' '+t.time:''}</span>`:''}
         ${proj?`<span class="badge" style="background:${proj.color}22;color:${proj.color}">${proj.name}</span>`:''}
         ${priorityBadge(t.priority)}
+        ${durationBadge(t.duration)}
         ${t.recur&&t.recur!=='none'?`<span class="task-recur">${recurLabel(t.recur)}</span>`:''}
-        ${t.waiting?`<span class="badge" style="background:var(--color-warning-highlight);color:var(--color-warning)" title="Waiting on: ${t.waiting}">⏳ ${t.waiting}</span>`:''}
+        ${isWaiting?`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--color-warning-highlight);color:var(--color-warning);padding:2px 4px 2px 6px;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:500">⏳ ${t.waiting}<button onclick="event.stopPropagation();fulfillWaiting('${t.id}')" title="Mark waiting condition as fulfilled" style="border:none;background:none;cursor:pointer;color:inherit;padding:0 1px;font-size:14px;line-height:1;opacity:.7">✓</button></span>`:''}
+        ${isWaitingFulfilled?`<span style="display:inline-flex;align-items:center;gap:3px;background:var(--color-success-highlight);color:var(--color-success);padding:2px 6px;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:500" title="Was waiting on: ${t.waiting}">✓ ${t.waiting}</span>`:''}
         ${createdLabel}
       </div>
-    </div>
-    <div class="task-actions">
-      <button class="btn-icon" onclick="openTaskModal('${t.id}')" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-      <button class="btn-icon" onclick="deleteTask('${t.id}')" title="Delete" style="color:var(--color-error)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <div class="task-actions">
+        <button class="btn-icon" onclick="toggleThisWeek('${t.id}')" title="${t.thisWeek?'Remove from This Week':'Add to This Week'}" style="color:${t.thisWeek?'var(--color-warning)':'var(--color-text-muted)'}"><svg width="13" height="13" viewBox="0 0 24 24" ${t.thisWeek?'fill="var(--color-warning)"':'fill="none"'} stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+        <button class="btn-icon" onclick="scheduleActionNow('${t.id}')" title="Schedule now" style="color:var(--color-primary)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+        <button class="btn-icon" onclick="convertTaskToProject('${t.id}')" title="Convert to project" style="color:var(--color-blue)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+        <button class="btn-icon" onclick="openTaskModal('${t.id}')" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-icon" onclick="deleteTask('${t.id}')" title="Delete" style="color:var(--color-error)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      </div>
     </div>
   </div>`;
 }
@@ -1680,6 +1831,17 @@ function priorityBadge(p){
   if(p==='high') return `<span class="badge" style="background:var(--color-error-highlight);color:var(--color-error)">High</span>`;
   if(p==='medium') return `<span class="badge" style="background:var(--color-warning-highlight);color:var(--color-warning)">Medium</span>`;
   return `<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">Low</span>`;
+}
+function durationBadge(d){
+  if(!d) return '';
+  const map={
+    'under-10':['⏱ &lt;10 mins','var(--color-success-highlight)','var(--color-success)'],
+    'under-30':['⏱ &lt;30 mins','var(--color-primary-highlight)','var(--color-primary)'],
+    'under-60':['⏱ &lt;1 hour','var(--color-warning-highlight)','var(--color-warning)'],
+    'project':['→ Needs a project','var(--color-error-highlight)','var(--color-error)']
+  };
+  const[label,bg,color]=map[d]||[d,'var(--color-surface-offset)','var(--color-text-muted)'];
+  return `<span class="badge" style="background:${bg};color:${color}">${label}</span>`;
 }
 function recurLabel(r){return{daily:'Daily',weekdays:'Weekdays',weekly:'Weekly',biweekly:'Bi-weekly',monthly:'Monthly'}[r]||r;}
 
@@ -2049,6 +2211,7 @@ function openTaskModal(editId, prefillName, prefillArea, prefillProject){
     wc.checked=!!(t.waiting);
     document.getElementById('task-waiting').value=t.waiting||'';
     document.getElementById('task-waiting-group').style.display=wc.checked?'':'none';
+    document.getElementById('task-duration').value=t.duration||'';
   } else {
     document.getElementById('task-modal-title').textContent='New Action';
     document.getElementById('task-edit-id').value='';
@@ -2063,6 +2226,7 @@ function openTaskModal(editId, prefillName, prefillArea, prefillProject){
     document.getElementById('task-waiting-check').checked=false;
     document.getElementById('task-waiting').value='';
     document.getElementById('task-waiting-group').style.display='none';
+    document.getElementById('task-duration').value='';
   }
   document.getElementById('task-modal').classList.add('open');
   setTimeout(()=>document.getElementById('task-name').focus(),50);
@@ -2071,11 +2235,27 @@ function openTaskModal(editId, prefillName, prefillArea, prefillProject){
 function openTaskModalForDate(ds){ openTaskModal(); setTimeout(()=>{document.getElementById('task-due').value=ds;},50); }
 function openTaskModalForDateTime(ds,time){ openTaskModal(); setTimeout(()=>{document.getElementById('task-due').value=ds;document.getElementById('task-time').value=time;},50); }
 
+function saveTaskAsProject(){
+  const name=document.getElementById('task-name').value.trim();
+  const area=document.getElementById('task-area').value;
+  const notes=document.getElementById('task-notes').value;
+  if(_pendingBucketId){
+    const bi=state.bucket.find(b=>b.id===_pendingBucketId);
+    if(bi){bi.processed=true;bi.processedAs='project';}
+    _pendingBucketId=null;
+    saveToStorage();
+    refreshView();
+  }
+  closeModal('task-modal');
+  openProjectModal(null,name,area);
+  if(notes) setTimeout(()=>{const el=document.getElementById('project-desc');if(el) el.value=notes;},50);
+}
 function saveTask(){
   const name=document.getElementById('task-name').value.trim();
   if(!name){document.getElementById('task-name').focus();return;}
   const editId=document.getElementById('task-edit-id').value;
   const existing=editId?state.tasks.find(t=>t.id===editId):null;
+  const newWaiting=document.getElementById('task-waiting-check').checked?document.getElementById('task-waiting').value.trim():'';
   const task={
     id:editId||'t'+Date.now(),name,
     area:document.getElementById('task-area').value||'',
@@ -2086,11 +2266,16 @@ function saveTask(){
     recur:'none',
     recurEnd:'',
     notes:document.getElementById('task-notes').value,
-    waiting:document.getElementById('task-waiting-check').checked?document.getElementById('task-waiting').value.trim():'',
+    waiting:newWaiting,
+    duration:document.getElementById('task-duration').value||'',
+    thisWeek:existing?.thisWeek||false,
     done:existing?.done||false,
     partial:existing?.partial||false,
     completedAt:existing?.completedAt||null,
-    created:existing?.created||new Date().toISOString()
+    created:existing?.created||new Date().toISOString(),
+    sortOrder:existing?.sortOrder??null,
+    scheduledSlots:existing?.scheduledSlots||[],
+    waitingFulfilled:newWaiting&&newWaiting===(existing?.waiting||'')?existing?.waitingFulfilled||false:false
   };
   if(editId){const idx=state.tasks.findIndex(t=>t.id===editId);if(idx!==-1)state.tasks[idx]=task;}
   else state.tasks.push(task);
@@ -2101,14 +2286,42 @@ function saveTask(){
 }
 
 function deleteTask(id){ state.tasks=state.tasks.filter(t=>t.id!==id); saveToStorage(); refreshView(); }
+function fulfillWaiting(id){ const t=state.tasks.find(x=>x.id===id); if(!t) return; t.waitingFulfilled=true; saveToStorage(); refreshView(); }
+function _stampCalendarNow(t){
+  const now=new Date();
+  const rawMins=Math.round(now.getMinutes()/5)*5;
+  const h=rawMins===60?now.getHours()+1:now.getHours();
+  const m=rawMins===60?0:rawMins;
+  if(!t.scheduledSlots) t.scheduledSlots=[];
+  t.scheduledSlots.push({due:dateStr(now),time:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`,completionStamp:true});
+}
+function _unstampCalendar(t){
+  if(!t.scheduledSlots) return;
+  for(let i=t.scheduledSlots.length-1;i>=0;i--){
+    if(t.scheduledSlots[i].completionStamp){t.scheduledSlots.splice(i,1);break;}
+  }
+}
 function toggleTask(id){
   const t=state.tasks.find(x=>x.id===id);
   if(!t) return;
   t.done=!t.done;
-  t.completedAt=t.done?new Date().toISOString():null;
+  if(t.done){
+    t.completedAt=new Date().toISOString();
+    _stampCalendarNow(t);
+  } else {
+    t.completedAt=null;
+    _unstampCalendar(t);
+  }
   saveToStorage();
   refreshView();
   if(t.done) showFollowupModal(t);
+}
+function toggleThisWeek(id){
+  const t=state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.thisWeek=!t.thisWeek;
+  saveToStorage();
+  refreshView();
 }
 function cycleTaskState(id){
   const t=state.tasks.find(x=>x.id===id);
@@ -2119,6 +2332,7 @@ function cycleTaskState(id){
     t.partial=false;
     t.done=true;
     t.completedAt=new Date().toISOString();
+    _stampCalendarNow(t);
     saveToStorage();
     refreshView();
     showFollowupModal(t);
@@ -2127,6 +2341,7 @@ function cycleTaskState(id){
     t.done=false;
     t.partial=false;
     t.completedAt=null;
+    _unstampCalendar(t);
   }
   saveToStorage();
   refreshView();
@@ -2136,6 +2351,15 @@ function showFollowupModal(task){
   _followupTask=task;
   document.getElementById('followup-task-name').textContent=task.name;
   document.getElementById('followup-modal').classList.add('open');
+}
+function convertTaskToProject(id){
+  const t=state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  if(!confirm(`Convert "${t.name}" into a project? The action will be removed.`)) return;
+  state.tasks=state.tasks.filter(x=>x.id!==id);
+  saveToStorage();
+  refreshView();
+  openProjectModal(null,t.name,t.area||'');
 }
 function followupAction(type){
   const task=_followupTask;
@@ -2284,8 +2508,21 @@ function _populateProjectParentSelect(el, editId, areaId) {
   const prev = el.value;
   let candidates = state.projects.filter(p => !cannotParent.has(p.id));
   if (areaId) candidates = candidates.filter(p => p.area === areaId);
-  el.innerHTML = '<option value="">None (top-level)</option>' +
-    candidates.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  const candidateIds = new Set(candidates.map(p => p.id));
+  function renderOptions(parentId, depth) {
+    return candidates
+      .filter(p => (p.parentId || null) === parentId)
+      .map(p => {
+        const indent = '  '.repeat(depth * 2);
+        const prefix = depth > 0 ? '└ ' : '';
+        return `<option value="${p.id}">${indent}${prefix}${p.name}</option>` + renderOptions(p.id, depth + 1);
+      }).join('');
+  }
+  const rootOptions = candidates
+    .filter(p => !p.parentId || !candidateIds.has(p.parentId))
+    .map(p => `<option value="${p.id}">${p.name}</option>` + renderOptions(p.id, 1))
+    .join('');
+  el.innerHTML = '<option value="">None (top-level)</option>' + rootOptions;
   if (candidates.find(p => p.id === prev)) el.value = prev;
 }
 function _filterProjectParent() {
@@ -2293,7 +2530,7 @@ function _filterProjectParent() {
   const areaId = document.getElementById('project-area').value;
   _populateProjectParentSelect(document.getElementById('project-parent'), editId, areaId);
 }
-function openProjectModal(editId, prefillName){
+function openProjectModal(editId, prefillName, prefillArea, prefillParentId){
   _populateAreaSelect(document.getElementById('project-area'));
   if(editId){
     const p=state.projects.find(x=>x.id===editId); if(!p) return;
@@ -2306,18 +2543,22 @@ function openProjectModal(editId, prefillName){
     document.getElementById('project-parent').value=p.parentId||'';
     document.getElementById('project-start').value=p.start||'';
     document.getElementById('project-end').value=p.end||'';
+    document.getElementById('project-ongoing').checked=!!p.ongoing;
     selectedColor=p.color;
   } else {
     document.getElementById('project-modal-title').textContent='New Project';
     document.getElementById('project-edit-id').value='';
     document.getElementById('project-name').value=prefillName||'';
     document.getElementById('project-desc').value='';
-    document.getElementById('project-area').value='';
-    _populateProjectParentSelect(document.getElementById('project-parent'), null, '');
+    document.getElementById('project-area').value=prefillArea||'';
+    _populateProjectParentSelect(document.getElementById('project-parent'), null, prefillArea||'');
+    document.getElementById('project-parent').value=prefillParentId||'';
     document.getElementById('project-start').value='';
     document.getElementById('project-end').value='';
+    document.getElementById('project-ongoing').checked=false;
     selectedColor='#01696f';
   }
+  _toggleOngoingFields();
   document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s.dataset.color===selectedColor));
   document.getElementById('project-modal').classList.add('open');
   setTimeout(()=>document.getElementById('project-name').focus(),50);
@@ -2326,16 +2567,48 @@ function saveProject(){
   const name=document.getElementById('project-name').value.trim(); if(!name){document.getElementById('project-name').focus();return;}
   const desc=document.getElementById('project-desc').value.trim(); if(!desc){document.getElementById('project-desc').focus();return;}
   const editId=document.getElementById('project-edit-id').value;
-  const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:document.getElementById('project-end').value,completed:editId?(state.projects.find(p=>p.id===editId)?.completed||false):false,parentId:document.getElementById('project-parent').value||null};
+  const ongoing=document.getElementById('project-ongoing').checked;
+  const existing=editId?state.projects.find(p=>p.id===editId):null;
+  const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:ongoing?'':document.getElementById('project-end').value,ongoing,completed:ongoing?false:(existing?.completed||false),parentId:document.getElementById('project-parent').value||null};
   if(editId){const idx=state.projects.findIndex(p=>p.id===editId);if(idx!==-1)state.projects[idx]=proj;}else state.projects.push(proj);
   if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='project';}_pendingBucketId=null;}
   closeModal('project-modal'); saveToStorage(); refreshView();
 }
 function selectSwatch(el){ selectedColor=el.dataset.color; document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); el.classList.add('active'); }
+function _toggleOngoingFields(){
+  const ongoing=document.getElementById('project-ongoing').checked;
+  const endEl=document.getElementById('project-end');
+  endEl.disabled=ongoing;
+  if(ongoing) endEl.value='';
+  document.getElementById('project-dates-row').style.opacity=ongoing?'0.4':'1';
+}
 
+function _projectTasksSorted(projectId){
+  const tasks=state.tasks.filter(t=>t.project===projectId);
+  tasks.forEach((t,i)=>{if(t.sortOrder==null) t.sortOrder=i*10;});
+  return tasks.sort((a,b)=>a.sortOrder-b.sortOrder);
+}
+function moveTaskInProject(id,dir){
+  const t=state.tasks.find(x=>x.id===id); if(!t) return;
+  const sorted=_projectTasksSorted(t.project);
+  const idx=sorted.findIndex(x=>x.id===id);
+  const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=sorted.length) return;
+  const tmp=sorted[idx].sortOrder;
+  sorted[idx].sortOrder=sorted[swapIdx].sortOrder;
+  sorted[swapIdx].sortOrder=tmp;
+  saveToStorage(); refreshView();
+}
 function toggleProjectComplete(id){
   const p=state.projects.find(x=>x.id===id); if(!p) return;
   p.completed=!p.completed; saveToStorage(); refreshView();
+}
+function deleteProject(id){
+  const p=state.projects.find(x=>x.id===id); if(!p) return;
+  if(!confirm(`Delete project "${p.name}"? Its actions will become unassigned.`)) return;
+  state.projects=state.projects.filter(x=>x.id!==id);
+  state.tasks.forEach(t=>{if(t.project===id)t.project=null;});
+  saveToStorage(); refreshView();
 }
 
 function _populateAreaSelect(el) {
@@ -2356,6 +2629,16 @@ function _filterTaskProjects() {
   const projects = areaId ? state.projects.filter(p => p.area === areaId) : state.projects;
   pm.innerHTML = '<option value="">No Project</option>' + projects.map(p => `<option value="${p.id}">${_projectLabel(p)}</option>`).join('');
   if (projects.find(p => p.id === current)) pm.value = current;
+}
+function _onTaskProjectChange() {
+  const projId = document.getElementById('task-project').value;
+  if (!projId) return;
+  const proj = state.projects.find(p => p.id === projId);
+  if (!proj || !proj.area) return;
+  const areaEl = document.getElementById('task-area');
+  if (areaEl.value === proj.area) return;
+  areaEl.value = proj.area;
+  _filterTaskProjects();
 }
 
 function handleAreaSelect(el) {
@@ -2558,15 +2841,15 @@ function exportCSV(type) {
     const projMap = Object.fromEntries(state.projects.map(p=>[p.id,p.name]));
     const areaMap = Object.fromEntries((state.areas||[]).map(a=>[a.id,a.name]));
     csv = _toCSV(
-      ['id','name','area_id','area_name','project_id','project_name','priority','due','time','recur','recurEnd','notes','waiting','done','partial','completedAt','created'],
-      state.tasks.map(t => [t.id, t.name, t.area||'', areaMap[t.area]||'', t.project||'', projMap[t.project]||'', t.priority||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.waiting||'', t.done?'true':'false', t.partial?'true':'false', t.completedAt||'', t.created||''])
+      ['id','name','area_id','area_name','project_id','project_name','priority','duration','due','time','recur','recurEnd','notes','waiting','waitingFulfilled','scheduledSlots','sortOrder','thisWeek','done','partial','completedAt','created'],
+      state.tasks.map(t => [t.id, t.name, t.area||'', areaMap[t.area]||'', t.project||'', projMap[t.project]||'', t.priority||'', t.duration||'', t.due||'', t.time||'', t.recur||'', t.recurEnd||'', t.notes||'', t.waiting||'', t.waitingFulfilled?'true':'false', t.scheduledSlots?.length?JSON.stringify(t.scheduledSlots):'', t.sortOrder??'', t.thisWeek?'true':'false', t.done?'true':'false', t.partial?'true':'false', t.completedAt||'', t.created||''])
     );
     filename = 'taskcal-tasks.csv';
   } else if (type === 'projects') {
     const areaMap = Object.fromEntries((state.areas||[]).map(a=>[a.id,a.name]));
     csv = _toCSV(
-      ['id','name','desc','area_id','area_name','color','start','end','completed','parentId'],
-      state.projects.map(p => [p.id, p.name, p.desc||'', p.area||'', areaMap[p.area]||'', p.color||'', p.start||'', p.end||'', p.completed?'true':'false', p.parentId||''])
+      ['id','name','desc','area_id','area_name','color','start','end','completed','ongoing','parentId'],
+      state.projects.map(p => [p.id, p.name, p.desc||'', p.area||'', areaMap[p.area]||'', p.color||'', p.start||'', p.end||'', p.completed?'true':'false', p.ongoing?'true':'false', p.parentId||''])
     );
     filename = 'taskcal-projects.csv';
   } else if (type === 'bucket') {
@@ -2626,16 +2909,21 @@ function importCSV(type, input) {
           area:        r[col('area_id')]     || '',
           project:     r[col('project_id')]  || '',
           priority:    r[col('priority')]    || 'medium',
+          duration:    r[col('duration')]    || '',
+          thisWeek:    bool(r[col('thisWeek')]),
           due:         r[col('due')]         || '',
           time:        r[col('time')]        || '',
           recur:       r[col('recur')]       || 'none',
           recurEnd:    r[col('recurEnd')]    || '',
           notes:       r[col('notes')]       || '',
-          waiting:     r[col('waiting')]     || '',
-          done:        bool(r[col('done')]),
-          partial:     bool(r[col('partial')]),
-          completedAt: r[col('completedAt')] || null,
-          created:     r[col('created')]     || new Date().toISOString()
+          waiting:          r[col('waiting')]          || '',
+          waitingFulfilled: bool(r[col('waitingFulfilled')]),
+          scheduledSlots:   r[col('scheduledSlots')] ? JSON.parse(r[col('scheduledSlots')]) : [],
+          sortOrder:        r[col('sortOrder')]&&r[col('sortOrder')]!=='' ? Number(r[col('sortOrder')]) : null,
+          done:             bool(r[col('done')]),
+          partial:          bool(r[col('partial')]),
+          completedAt:      r[col('completedAt')]      || null,
+          created:          r[col('created')]          || new Date().toISOString()
         };
         const xi = state.tasks.findIndex(t => t.id === item.id);
         if (xi !== -1) { state.tasks[xi] = item; updated++; } else { state.tasks.push(item); added++; }
@@ -2651,6 +2939,7 @@ function importCSV(type, input) {
           start:     r[col('start')]     || '',
           end:       r[col('end')]       || '',
           completed: bool(r[col('completed')]),
+          ongoing:   bool(r[col('ongoing')]),
           parentId:  r[col('parentId')]  || null
         };
         if (!item.parentId) item.parentId = null;
@@ -2800,13 +3089,29 @@ function toggleNewDropdown(e){
   document.getElementById('new-dropdown').classList.toggle('hidden');
 }
 function closeNewDropdown(){ document.getElementById('new-dropdown').classList.add('hidden'); }
-document.addEventListener('click', () => closeNewDropdown());
+let _openProjectMenu=null;
+function toggleProjectAddMenu(id,e){
+  e.stopPropagation();
+  closeProjectAddMenu();
+  const menu=document.getElementById('proj-add-menu-'+id);
+  if(!menu||_openProjectMenu===id){_openProjectMenu=null;return;}
+  menu.classList.remove('hidden');
+  _openProjectMenu=id;
+}
+function closeProjectAddMenu(){
+  if(_openProjectMenu){
+    const m=document.getElementById('proj-add-menu-'+_openProjectMenu);
+    if(m) m.classList.add('hidden');
+    _openProjectMenu=null;
+  }
+}
+document.addEventListener('click', () => { closeNewDropdown(); closeProjectAddMenu(); });
 
 // ===== MEETING CRUD =====
 let selectedMeetingRecur = 'none';
 let meetingAttendees = [];
 
-function openMeetingModal(editId, prefillDate, prefillTime, prefillName, prefillArea) {
+function openMeetingModal(editId, prefillDate, prefillTime, prefillName, prefillArea, prefillProject) {
   _populateAreaSelect(document.getElementById('meeting-area'));
   const pSel = document.getElementById('meeting-project');
   pSel.innerHTML = '<option value="">No Project</option>' +
@@ -2838,6 +3143,7 @@ function openMeetingModal(editId, prefillDate, prefillTime, prefillName, prefill
     document.getElementById('meeting-notes').value = '';
     document.getElementById('meeting-recur-end').value = '';
     document.getElementById('meeting-area').value = prefillArea || '';
+    document.getElementById('meeting-project').value = prefillProject || '';
     selectedMeetingRecur = 'none';
   }
   document.querySelectorAll('[data-mrecur]').forEach(b => b.classList.toggle('active', b.dataset.mrecur === selectedMeetingRecur));

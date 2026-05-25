@@ -58,8 +58,8 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 
 | Entity | Key fields | Notes |
 |---|---|---|
-| Task | `id, name, area, project, priority, due, time, notes, waiting, done, partial, scheduledSlots, completedAt, created` | `area` is an ID reference to `state.areas`; `partial` is a boolean for in-progress state; `waiting` is a string for what the action is blocked on; `scheduledSlots` is an array of `{due, time}` for additional calendar slots beyond the primary `due`/`time`; `completedAt` is ISO timestamp |
-| Project | `id, name, desc, area, color, start, end, completed, parentId` | `parentId` is null for root-level projects or an ID of the parent project; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()` |
+| Task | `id, name, area, project, priority, duration, due, time, notes, waiting, waitingFulfilled, done, partial, thisWeek, scheduledSlots, sortOrder, completedAt, created` | `area` is an ID reference to `state.areas`; `partial` is a boolean for in-progress state; `waiting` is a string for what the action is blocked on; `waitingFulfilled` is a boolean; `duration` is one of `'under-10'`, `'under-30'`, `'under-60'`, `'project'` or `''`; `thisWeek` is a boolean flag for the This Week focus feature; `scheduledSlots` is an array of `{due, time}` for additional calendar slots beyond the primary `due`/`time`; `sortOrder` is an optional number for manual ordering within a project; `completedAt` is ISO timestamp |
+| Project | `id, name, desc, area, color, start, end, completed, ongoing, parentId` | `parentId` is null for root-level projects or an ID of the parent project; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()`; `ongoing` is a boolean — ongoing projects have no end date, never show a complete button, and are never marked completed |
 | Area | `id, name` | Stored in `state.areas`; defaults are Work, Life, University; user can add custom areas via the "＋ New area…" option in any Area dropdown |
 | Meeting | `id, name, date, startTime, endTime, location, area, project, recur, recurEnd, attendees, type:'meeting'` | `area` is an ID reference to `state.areas`; shares calendar rendering with tasks via `isMeeting` flag |
 | Bucket item | `id, text, created, completed, processed, processedAs, area?, project?` | `processedAs` is `task/project/meeting/idea` (internal values unchanged); `area` and `project` are optional IDs set when marking an item Done via the Done modal |
@@ -117,6 +117,25 @@ The **Schedule Action** button on the Calendar toolbar opens `#schedule-action-m
 `cycleTaskState(id)` cycles: none → partial → done (with follow-up modal) → none. The `partial` field is a boolean on the task object. Calendar pills show a small circle button via `_calCompleteBtn(t)` that calls `cycleTaskState`.
 
 `toggleTask(id)` (used on Next Actions cards) also triggers the follow-up modal when marking done.
+
+### Action Duration
+
+Tasks have an optional `duration` field set via a **Time Required** dropdown in the action modal. Values: `''` (not estimated), `'under-10'`, `'under-30'`, `'under-60'`, `'project'`. `durationBadge(d)` renders a colour-coded badge (green / blue / amber / red). The badge appears on Next Actions cards, project card task rows, and No Project card task rows. Duration is also a sort option (`'duration'` — shortest first) in the Next Actions sort dropdown.
+
+### This Week
+
+Tasks have an optional `thisWeek: boolean` field. A star button in the hover actions of every action card toggles it via `toggleThisWeek(id)`. When `true`:
+- The action appears in an amber-tinted **This Week** block at the top of its area column in Next Actions, separated from the remaining tasks by a divider.
+- The star icon renders filled/amber when active; hollow/muted when inactive.
+- Done actions are excluded from the This Week block even if still flagged.
+
+### Converting Actions to Projects
+
+`convertTaskToProject(id)` — confirms with the user, deletes the task from `state.tasks`, calls `refreshView()`, then opens the project modal pre-filled with the task's name and area. A **folder icon** button in the hover actions of every action card triggers this (Next Actions page, project card rows, No Project card rows).
+
+`saveTaskAsProject()` — triggered by the **Convert to Project** button in the task modal footer. Reads the current name, area, and notes from the open modal without saving a task. If `_pendingBucketId` is set (Collect processing flow), marks the bucket item `processedAs: 'project'`. Closes the task modal and opens the project modal pre-filled with name, area, and notes (notes → description via a 50 ms `setTimeout`).
+
+The task modal footer uses `justify-content: space-between` so Cancel, Convert to Project, and Save Action are evenly spaced.
 
 ### Waiting On
 
@@ -211,8 +230,8 @@ When a bucket item is processed as `'task'`, `'project'`, or `'meeting'`, the it
 
 All create/edit forms are full-page overlays (`.modal-overlay`) toggled with `.open`. They are opened via:
 - `openTaskModal(editId?, prefillName?, prefillArea?, prefillProject?)` — `prefillProject` pre-selects the Project dropdown on new items
-- `openProjectModal(editId?, prefillName?)` — also populates the Parent Project dropdown via `_populateProjectParentSelect`
-- `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?, prefillArea?)`
+- `openProjectModal(editId?, prefillName?, prefillArea?, prefillParentId?)` — also populates the Parent Project dropdown via `_populateProjectParentSelect`
+- `openMeetingModal(editId?, prefillDate?, prefillTime?, prefillName?, prefillArea?, prefillProject?)`
 
 Prefill parameters are only applied when `editId` is null/undefined (new items). Pressing Escape or clicking the backdrop closes any open modal.
 
@@ -249,7 +268,9 @@ The Next Actions page header displays two sections: left side shows KPI stats (*
 
 `renderTasks()` updates the action stats at the start, then renders the Next Actions page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add action" button. An "Other" column collects actions with no recognised area.
 
-`_sortTasks(tasks, sortBy)` handles all sorting — done tasks always sink to the bottom, then within each group sorts by: `'due'` (ascending, no-date last), `'priority'` (High→Low), `'created'` (oldest first), `'created-desc'` (newest first), or `'name'` (A-Z). The sort is chosen via `#task-sort-filter` select on the right side of the header.
+`_sortTasks(tasks, sortBy)` handles all sorting — done tasks always sink to the bottom, then within each group sorts by: `'due'` (ascending, no-date last), `'priority'` (High→Low), `'duration'` (shortest-first: under-10 → under-30 → under-60 → project, unset last), `'created'` (oldest first), `'created-desc'` (newest first), or `'name'` (A-Z). The sort is chosen via `#task-sort-filter` select on the right side of the header.
+
+Within each area column, tasks flagged `thisWeek: true` (and not done) are separated into an amber-tinted **This Week** block at the top of the column, above a divider and the remaining tasks.
 
 When an area filter is active (`af` is non-empty — set by the **All Areas** dropdown), only that area's column is shown. All area columns are shown when the filter is empty.
 
@@ -263,7 +284,18 @@ When an area filter is active (`af` is non-empty — set by the **All Areas** dr
 
 ### Projects page header
 
-The Projects page header displays a KPI card showing the **Projects** count on the left side, with a **New Project** button on the right side. `renderProjectsView()` updates the project count at the start of the function.
+The Projects page header displays three KPI cards on the left — **Incomplete**, **Ongoing**, and **Completed** — each with its own count, with a **New Project** button on the right. `renderProjectsView()` updates all three counts (`#project-stat-incomplete`, `#project-stat-ongoing`, `#project-stat-completed`) at the start of the function.
+
+Projects are grouped by area in the grid (area-based sections, each with a heading). Root projects whose `ongoing` flag is true show an **∞ Ongoing** badge and never show the complete-toggle button. `saveProject()` forces `completed: false` and clears the end date when `ongoing` is true.
+
+### Ongoing Projects
+
+Projects have an optional `ongoing: boolean` field. When checked in the project modal:
+- The End Date field is disabled and cleared
+- The complete-toggle button is hidden on the project card
+- An **∞ Ongoing** badge appears in the card's meta row
+- `completed` is forced to `false` on save and preserved as false through future edits
+- `_toggleOngoingFields()` handles the live disable/enable of the End Date input as the checkbox changes
 
 ### Excel (.xlsx) Import / Export
 
@@ -275,8 +307,8 @@ Sheet names and columns:
 
 | Sheet | Columns |
 |---|---|
-| `Actions` | `id, name, area_id, area_name, project_id, project_name, priority, due, time, recur, recurEnd, notes, waiting, scheduledSlots, done, partial, completedAt, created` |
-| `Projects` | `id, name, desc, area_id, area_name, color, start, end, completed, parentId` |
+| `Actions` | `id, name, area_id, area_name, project_id, project_name, priority, duration, due, time, recur, recurEnd, notes, waiting, waitingFulfilled, scheduledSlots, sortOrder, thisWeek, done, partial, completedAt, created` |
+| `Projects` | `id, name, desc, area_id, area_name, color, start, end, completed, ongoing, parentId` |
 | `Meetings` | `id, name, date, startTime, endTime, location, area_id, area_name, project_id, project_name, recur, recurEnd, attendees, notes` |
 | `Collect` | `id, text, created, completed, processed, processedAs, area_id, project_id` |
 | `Ideas` | `id, text, created, developed, processed, processedAs, folderId` |
@@ -293,8 +325,8 @@ Sheet names and columns:
 
 | Type | Columns |
 |---|---|
-| `tasks` | `id, name, area_id, area_name, project_id, project_name, priority, due, time, recur, recurEnd, notes, waiting, done, partial, completedAt, created` |
-| `projects` | `id, name, desc, area_id, area_name, color, start, end, completed, parentId` |
+| `tasks` | `id, name, area_id, area_name, project_id, project_name, priority, duration, due, time, recur, recurEnd, notes, waiting, waitingFulfilled, scheduledSlots, sortOrder, thisWeek, done, partial, completedAt, created` |
+| `projects` | `id, name, desc, area_id, area_name, color, start, end, completed, ongoing, parentId` |
 | `meetings` | `id, name, date, startTime, endTime, location, area_id, area_name, project_id, project_name, recur, recurEnd, attendees, notes` |
 | `bucket` | `id, text, created, completed, processed, processedAs, area_id, project_id` |
 | `ideas` | `id, text, created, developed, processed, processedAs, folderId` |

@@ -117,7 +117,7 @@ The Next Actions page displays a separate column for each area. Actions with no 
 
 The page header displays:
 - **Left side:** KPI stats showing **Incomplete Actions** and **Completed** count
-- **Right side:** Filters for **All Areas**, **All Status**, and **Sort** options (Due Date, Priority, Oldest First, Newest First, Name)
+- **Right side:** Filters for **All Areas**, **All Status**, and **Sort** options (Due Date, Priority, Duration, Oldest First, Newest First, Name)
 
 The sidebar badge for Next Actions shows the count of **incomplete** (not done) actions.
 
@@ -136,18 +136,27 @@ Click **New ▾ → Action**, or click any day on the calendar to open the actio
 | **Area** | Work / Life / University / custom |
 | **Project** | Optional — assign to an existing project |
 | **Priority** | Low / Medium / High |
+| **Time Required** | Under 10 mins / Under 30 mins / Under an hour / Should be turned into a project |
 | **Due Date** | Date picker |
 | **Due Time** | Optional time |
 | **Notes** | Free-text notes field |
 
-When a "waiting on" value is set, an amber **⏳** badge appears on the action card showing what the action is blocked on.
+When a "waiting on" value is set, an amber **⏳** badge appears on the action card showing what the action is blocked on. A **Time Required** badge appears in the matching colour (green / blue / amber / red) when a duration is set.
+
+The modal footer has three buttons: **Cancel**, **Convert to Project** (carries name, area, and notes into a new project form), and **Save Action**.
 
 ### Managing Actions
 
 - **Check** the circle on any action card to mark it done (strikethrough applied).
+- **Star** (⭐) — hover an action card to reveal a star button. Click it to add the action to the **This Week** focus block at the top of its area column. Click again to remove it.
+- **Convert to project** — hover an action card to reveal a folder icon. Click it to delete the action and open a new project form pre-filled with the action's name and area.
 - **Edit** (pencil icon) to reopen the action form.
 - **Delete** (bin icon) to remove the action permanently.
 - Completed actions remain visible but styled as done and sorted below uncompleted actions in each column.
+
+### This Week
+
+Mark any action as "This Week" using the star button in the action card's hover controls. Starred incomplete actions appear in an amber-highlighted block at the top of their area column, separated from the rest by a divider. The block shows the count of starred actions. Click the star again to remove an action from the block.
 
 ### Action States
 
@@ -189,13 +198,22 @@ Projects can be organised hierarchically. Assign a **Parent Project** when creat
 
 ### Projects Page
 
-The Projects page displays all root projects grouped by area in a card grid. The page header shows a **Projects** count KPI card on the left side, with a **New Project** button on the right.
+The Projects page displays all root projects grouped by area in a card grid. The page header shows three KPI cards — **Incomplete**, **Ongoing**, and **Completed** counts — on the left, with a **New Project** button on the right.
 
 Each project card has:
-- **+ button** — create a new action pre-assigned to that project
-- **Chevron** — expand to show sub-projects and actions inline
-- **Complete toggle** — mark the project done/active
-- **Edit button** — reopen the project form
+- **+ button** — create a new action, meeting, or sub-project pre-assigned to that project
+- **Chevron** — expand to show sub-projects, actions (with move up/down, schedule, convert to project, edit, delete buttons), and meetings inline
+- **Complete toggle** — mark the project done/active (hidden for Ongoing projects)
+- **Edit / Delete** buttons — revealed on hover below the card header
+
+### Ongoing Projects
+
+Mark a project as **Ongoing** when it is a continuous process with no defined end date (e.g. a recurring area of responsibility). In the project modal, check **Ongoing** to:
+- Disable and clear the End Date field
+- Hide the complete-toggle button on the card
+- Show an **∞ Ongoing** badge in the card meta row
+
+Ongoing projects count separately from Incomplete and Completed in the header KPIs.
 
 ### Project View
 
@@ -291,8 +309,8 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 
 | Sheet | Contents |
 |---|---|
-| **Actions** | All actions — area, project, priority, recurrence, notes, waiting-on, additional schedule slots, completion state, timestamps |
-| **Projects** | All projects with area, colour, dates, description, completion state, and parent project |
+| **Actions** | All actions — area, project, priority, duration, recurrence, notes, waiting-on, waiting-fulfilled, additional schedule slots, sort order, this-week flag, completion state, timestamps |
+| **Projects** | All projects with area, colour, dates, description, ongoing flag, completion state, and parent project |
 | **Meetings** | All meetings — date, times, area, location, attendees, recurrence, notes |
 | **Collect** | All Collect items with processing state, and any area/project assigned via Done modal |
 | **Ideas** | All Ideas items with development state and folder assignment |
@@ -309,8 +327,8 @@ Each data type can also be exported and imported independently as a `.csv` file:
 
 | Export file | Contents |
 |---|---|
-| `taskcal-tasks.csv` | Actions (with area, project, waiting-on, partial state) |
-| `taskcal-projects.csv` | Projects (with area, completion state, parent project) |
+| `taskcal-tasks.csv` | Actions (with area, project, priority, duration, waiting-on, this-week flag, partial state) |
+| `taskcal-projects.csv` | Projects (with area, ongoing flag, completion state, parent project) |
 | `taskcal-meetings.csv` | Meetings (with area, attendees as pipe-separated values) |
 | `taskcal-collect.csv` | Collect items (with area/project if set via Done modal) |
 | `taskcal-ideas.csv` | Ideas (with folder assignment) |
