@@ -111,6 +111,8 @@ a,button,[role="button"],input,textarea,select{transition:color var(--transition
 .project-children{margin-left:var(--space-6);margin-top:var(--space-3);padding-left:var(--space-4);border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:var(--space-3)}
 .project-card{background:var(--color-surface);border:1px solid oklch(from var(--color-text) l c h/.08);border-radius:var(--radius-xl);padding:var(--space-5);cursor:pointer;transition:box-shadow var(--transition-interactive),transform var(--transition-interactive)}
 .project-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.project-card.expanded{grid-column:span 2;animation:proj-card-expand .28s ease-out}
+@keyframes proj-card-expand{from{clip-path:inset(0 35% 0 0 round var(--radius-xl))}to{clip-path:inset(0 0% 0 0 round var(--radius-xl))}}
 .project-card.completed{opacity:.45;filter:grayscale(.4)}
 .project-card.completed .project-card-title{text-decoration:line-through}
 .project-card-header{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)}
@@ -770,9 +772,14 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
             <div class="kpi-label">Completed</div>
           </div>
         </div>
-        <button class="btn btn-primary" onclick="openProjectModal()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Project
-        </button>
+        <div style="display:flex;gap:var(--space-2)">
+          <button class="btn btn-ghost" onclick="openTemplateManagerModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>Manage Templates
+          </button>
+          <button class="btn btn-primary" onclick="openProjectModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Project
+          </button>
+        </div>
       </div>
       <div id="project-list-projects"></div>
     </div>
@@ -988,14 +995,51 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         <div class="form-group"><label>Start Date</label><input type="date" class="input" id="project-start"></div>
         <div class="form-group"><label>End Date</label><input type="date" class="input" id="project-end"></div>
       </div>
+      <div id="project-template-group" style="display:none">
+        <hr style="border:none;border-top:1px solid var(--color-border);margin:var(--space-3) 0 var(--space-4)">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Template <span style="font-weight:400;color:var(--color-text-muted);font-size:var(--text-sm)">(optional — creates initial actions)</span></label>
+          <div style="display:flex;gap:var(--space-2);align-items:center">
+            <select class="select" id="project-template-select" onchange="_onTemplateSelect()" style="flex:1"></select>
+            <button type="button" class="btn btn-ghost" style="padding:var(--space-2) var(--space-3);white-space:nowrap;flex-shrink:0" onclick="openTemplateManagerModal()">Manage</button>
+          </div>
+          <div id="project-template-preview" style="display:none;margin-top:var(--space-2);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3)"></div>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('project-modal')">Cancel</button>
+      <button class="btn btn-ghost" id="project-save-as-template-btn" style="display:none;color:var(--color-blue)" onclick="saveProjectAsTemplate()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        Save as Template
+      </button>
       <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
     </div>
   </div>
 </div>
 
+
+<!-- Project Template Manager Modal -->
+<div class="modal-overlay" id="template-manager-modal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <span class="modal-title">Project Templates</span>
+      <button class="btn-icon" onclick="closeModal('template-manager-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding:0;display:flex;min-height:340px">
+      <div style="width:210px;flex-shrink:0;border-right:1px solid var(--color-border);display:flex;flex-direction:column">
+        <div style="padding:var(--space-3);border-bottom:1px solid var(--color-border)">
+          <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="createProjectTemplate()">+ New Template</button>
+        </div>
+        <div id="template-list" style="flex:1;overflow-y:auto;padding:var(--space-2)"></div>
+      </div>
+      <div id="template-editor" style="flex:1;overflow-y:auto;padding:var(--space-4)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('template-manager-modal')">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- Meeting Modal -->
 <div class="modal-overlay" id="meeting-modal">
@@ -1059,7 +1103,8 @@ const DEFAULT_STATE = {
     { id:'work',       name:'Work' },
     { id:'life',       name:'Life' },
     { id:'university', name:'University' }
-  ]
+  ],
+  projectTemplates: []
 };
 
 // ── PERSISTENCE ──
@@ -1077,7 +1122,8 @@ function loadFromStorage() {
         bucket:       saved.bucket       || [],
         ideas:        saved.ideas        || [],
         areas:        saved.areas        || DEFAULT_STATE.areas,
-        ideaFolders:  saved.ideaFolders  || []
+        ideaFolders:       saved.ideaFolders       || [],
+        projectTemplates:  saved.projectTemplates  || []
       };
     }
   } catch(e) { console.warn('TaskCal: could not load saved data', e); }
@@ -1093,8 +1139,9 @@ function saveToStorage() {
       meetings:    state.meetings,
       bucket:      state.bucket,
       ideas:       state.ideas,
-      areas:       state.areas,
-      ideaFolders: state.ideaFolders
+      areas:            state.areas,
+      ideaFolders:      state.ideaFolders,
+      projectTemplates: state.projectTemplates
     }));
     const t=document.getElementById('save-toast');
     if(t){t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
@@ -1337,7 +1384,8 @@ const _persisted = loadFromStorage();
 // Older saves predate these fields; guard before any access.
 if (!Array.isArray(_persisted.bucket))      _persisted.bucket      = [];
 if (!Array.isArray(_persisted.ideas))       _persisted.ideas       = [];
-if (!Array.isArray(_persisted.ideaFolders)) _persisted.ideaFolders = [];
+if (!Array.isArray(_persisted.ideaFolders))       _persisted.ideaFolders       = [];
+if (!Array.isArray(_persisted.projectTemplates))  _persisted.projectTemplates  = [];
 
 let state = {
   projects:    _persisted.projects,
@@ -1346,7 +1394,8 @@ let state = {
   bucket:      _persisted.bucket,
   ideas:       _persisted.ideas,
   areas:       _persisted.areas || DEFAULT_STATE.areas,
-  ideaFolders: _persisted.ideaFolders,
+  ideaFolders:      _persisted.ideaFolders,
+  projectTemplates: _persisted.projectTemplates,
   calView:'month',
   calYear:TODAY.getFullYear(), calMonth:TODAY.getMonth(),
   calWeekStart: null,
@@ -1529,11 +1578,13 @@ function renderProjectsView(){
     projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
     return;
   }
+  const todayDs=dateStr(TODAY);
+  function _sortMeetings(arr){return arr.sort((a,b)=>{const ap=a.date&&a.date<todayDs?1:0,bp=b.date&&b.date<todayDs?1:0;return ap!==bp?ap-bp:(a.date||'').localeCompare(b.date||'');});}
   function cardHtml(p){
     const pt=_projectTasksSorted(p.id);
     const pd=pt.filter(t=>t.done).length;
     const pct=pt.length?Math.round(100*pd/pt.length):0;
-    const pmt=state.meetings.filter(m=>m.project===p.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    const pmt=_sortMeetings(state.meetings.filter(m=>m.project===p.id));
     const expanded=_expandedProjects.has(p.id);
     const doneIcon=p.completed
       ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
@@ -1546,8 +1597,9 @@ function renderProjectsView(){
         <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2)">Sub-projects</div>
         <div style="display:flex;flex-direction:column;gap:var(--space-3)">${children.map(cardHtml).join('')}</div>
       </div>`:'';
-      const taskSection=`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
-        pt.length?pt.map((t,i)=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isWaiting?';border-left:3px solid var(--color-warning);padding-left:var(--space-2);opacity:.8':';padding-left:var(--space-1)'}" onclick="event.stopPropagation()">
+      const taskSection=`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${(()=>{
+        if(!pt.length) return `<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`;
+        const rowHtml=(t,i)=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isWaiting?';border-left:3px solid var(--color-warning);padding-left:var(--space-2);opacity:.8':';padding-left:var(--space-1)'}" onclick="event.stopPropagation()">
           <div class="task-check ${t.done?'done':t.partial?'partial':''}" onclick="event.stopPropagation();toggleTask('${t.id}')" style="margin-top:2px"></div>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
             <div style="display:flex;align-items:baseline;gap:var(--space-2)">
@@ -1560,18 +1612,23 @@ function renderProjectsView(){
             <div class="proj-task-btns">
               <button class="btn-icon" onclick="event.stopPropagation();moveTaskInProject('${t.id}',-1)" title="Move up" ${i===0?'disabled style="opacity:.25"':''}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></button>
               <button class="btn-icon" onclick="event.stopPropagation();moveTaskInProject('${t.id}',1)" title="Move down" ${i===pt.length-1?'disabled style="opacity:.25"':''}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+              <button class="btn-icon" onclick="event.stopPropagation();toggleThisWeek('${t.id}')" title="${t.thisWeek?'Remove from This Week':'Add to This Week'}" style="color:${t.thisWeek?'var(--color-warning)':'var(--color-text-muted)'}"><svg width="11" height="11" viewBox="0 0 24 24" ${t.thisWeek?'fill="var(--color-warning)"':'fill="none"'} stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
               <button class="btn-icon" onclick="event.stopPropagation();scheduleActionNow('${t.id}')" title="Schedule now" style="color:var(--color-primary)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
               <button class="btn-icon" onclick="event.stopPropagation();convertTaskToProject('${t.id}')" title="Convert to project" style="color:var(--color-blue)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
               <button class="btn-icon" onclick="event.stopPropagation();openTaskModal('${t.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
               <button class="btn-icon" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
             </div>
           </div>
-        </div>`;}).join('')
-        :`<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`
-      }</div>`;
+        </div>`;};
+        const twTasks=pt.filter(t=>t.thisWeek&&!t.done);
+        const otherTasks=pt.filter(t=>!t.thisWeek||t.done);
+        const twHtml=twTasks.length?`<div style="background:var(--color-warning-highlight);border:1px solid oklch(from var(--color-warning) l c h/.25);border-radius:var(--radius-lg);padding:var(--space-2);margin-bottom:var(--space-2)"><div style="display:flex;align-items:center;gap:var(--space-1);margin-bottom:var(--space-2);padding:0 var(--space-1)"><svg width="11" height="11" viewBox="0 0 24 24" fill="var(--color-warning)" stroke="var(--color-warning)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span style="font-size:10px;font-weight:700;color:var(--color-warning);text-transform:uppercase;letter-spacing:.06em">This Week</span><span style="font-size:10px;font-weight:700;background:var(--color-warning);color:#fff;border-radius:var(--radius-full);padding:0 5px;min-width:16px;text-align:center">${twTasks.length}</span></div>${twTasks.map(tw=>rowHtml(tw,pt.findIndex(x=>x.id===tw.id))).join('')}</div>`:'';
+        const divider=twTasks.length&&otherTasks.length?`<div style="border-top:1px solid var(--color-divider);margin:var(--space-1) 0 var(--space-2)"></div>`:'';
+        return twHtml+divider+otherTasks.map(tw=>rowHtml(tw,pt.findIndex(x=>x.id===tw.id))).join('');
+      })()}</div>`;
       const meetingSection=pmt.length?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)" onclick="event.stopPropagation()">
         <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2)">Meetings</div>
-        ${pmt.map(m=>`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+        ${pmt.map(m=>{const isPast=m.date&&m.date<todayDs;return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isPast?';opacity:.4;filter:grayscale(.5)':''}" onclick="event.stopPropagation()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
             <span style="font-size:var(--text-sm)">${m.name}</span>
@@ -1581,24 +1638,25 @@ function renderProjectsView(){
               <button class="btn-icon" onclick="event.stopPropagation();deleteMeeting('${m.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
             </div>
           </div>
-        </div>`).join('')}
+        </div>`;}).join('')}
       </div>`:'';
       expandedContent=childrenSection+taskSection+meetingSection;
     }
-    return `<div class="project-card${p.completed?' completed':''}" onclick="navigateProject('${p.id}')">
+    return `<div class="project-card${p.completed?' completed':''}${expanded?' expanded':''}" onclick="navigateProject('${p.id}')">
       <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px;flex-shrink:0"></div><span class="project-card-title">${p.name}</span>
         <div style="position:relative;flex-shrink:0">
           <button class="btn-icon" style="opacity:.6" title="Add" onclick="toggleProjectAddMenu('${p.id}',event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
           <div class="new-dropdown hidden" id="proj-add-menu-${p.id}" style="min-width:170px">
-            <div class="new-dd-item" onclick="closeProjectAddMenu();openTaskModal(null,'','${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-primary-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="new-dd-label">New Action</div></div>
-            <div class="new-dd-item" onclick="closeProjectAddMenu();openMeetingModal(null,null,null,null,'${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-purple-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="new-dd-label">New Meeting</div></div>
-            <div class="new-dd-item" onclick="closeProjectAddMenu();openProjectModal(null,'','${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-blue-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-blue)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="new-dd-label">New Sub-project</div></div>
+            <div class="new-dd-item" onclick="event.stopPropagation();closeProjectAddMenu();openTaskModal(null,'','${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-primary-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="new-dd-label">New Action</div></div>
+            <div class="new-dd-item" onclick="event.stopPropagation();closeProjectAddMenu();openMeetingModal(null,null,null,null,'${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-purple-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="new-dd-label">New Meeting</div></div>
+            <div class="new-dd-item" onclick="event.stopPropagation();closeProjectAddMenu();openProjectModal(null,'','${p.area||''}','${p.id}')"><div class="new-dd-icon" style="background:var(--color-blue-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-blue)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="new-dd-label">New Sub-project</div></div>
           </div>
         </div>
         <button class="btn-icon" style="opacity:.6;flex-shrink:0" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${p.id}',event)">${chevron}</button>
         ${!p.ongoing?`<button class="btn-icon" style="opacity:.6;flex-shrink:0;color:${p.completed?'var(--color-success)':'var(--color-text-muted)'}" title="${p.completed?'Mark active':'Mark complete'}" onclick="event.stopPropagation();toggleProjectComplete('${p.id}')">${doneIcon}</button>`:''}
       </div>
       <div class="proj-card-actions">
+        ${(()=>{const lf=p.linkedFolderId&&(state.ideaFolders||[]).some(f=>f.id===p.linkedFolderId);return lf?`<button class="btn-icon" style="color:var(--color-gold)" title="Open Ideas Folder" onclick="event.stopPropagation();openProjectLinkedFolder('${p.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></button>`:`<button class="btn-icon" style="color:var(--color-text-muted)" title="Create Ideas Folder" onclick="event.stopPropagation();linkProjectToIdeaFolder('${p.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></button>`;})()}
         <button class="btn-icon" title="Edit" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="btn-icon" title="Delete" style="color:var(--color-error)" onclick="event.stopPropagation();deleteProject('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>
@@ -1612,15 +1670,13 @@ function renderProjectsView(){
     const expanded=_expandedProjects.has(uid);
     const chevron=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;transform:rotate(${expanded?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>`;
     const done=tasks.filter(t=>t.done).length;
-    const noProjectMeetings=areaId==='other'
-      ?state.meetings.filter(m=>!m.project&&(!m.area||!areaIds.has(m.area))).sort((a,b)=>(a.date||'').localeCompare(b.date||''))
-      :state.meetings.filter(m=>!m.project&&m.area===areaId).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    const noProjectMeetings=_sortMeetings(areaId==='other'
+      ?state.meetings.filter(m=>!m.project&&(!m.area||!areaIds.has(m.area)))
+      :state.meetings.filter(m=>!m.project&&m.area===areaId));
     const areaArg=areaId?`'${areaId}'`:'null';
-    const taskListHtml=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${
-      tasks.map(t=>{
-        const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);
-        const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);
-        return `<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+    const taskListHtml=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${(()=>{
+      if(!tasks.length) return '';
+      const rowHtml=t=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
         <div class="task-check ${t.done?'done':t.partial?'partial':''}" style="margin-top:2px" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="display:flex;align-items:baseline;gap:var(--space-2)">
@@ -1631,17 +1687,23 @@ function renderProjectsView(){
           ${isWaitingFulfilled?`<span style="font-size:var(--text-xs);background:var(--color-success-highlight,#f0fdf4);color:var(--color-success,#16a34a);border:1px solid var(--color-success,#16a34a);border-radius:4px;padding:1px 6px;align-self:flex-start">✓ ${t.waiting}</span>`:''}
           ${t.duration?durationBadge(t.duration):''}
           <div class="proj-task-btns">
+            <button class="btn-icon" onclick="event.stopPropagation();toggleThisWeek('${t.id}')" title="${t.thisWeek?'Remove from This Week':'Add to This Week'}" style="color:${t.thisWeek?'var(--color-warning)':'var(--color-text-muted)'}"><svg width="11" height="11" viewBox="0 0 24 24" ${t.thisWeek?'fill="var(--color-warning)"':'fill="none"'} stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
             <button class="btn-icon" onclick="event.stopPropagation();scheduleActionNow('${t.id}')" title="Schedule now" style="color:var(--color-primary)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
             <button class="btn-icon" onclick="event.stopPropagation();convertTaskToProject('${t.id}')" title="Convert to project" style="color:var(--color-blue)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
             <button class="btn-icon" onclick="event.stopPropagation();openTaskModal('${t.id}')" title="Edit"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
             <button class="btn-icon" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
           </div>
         </div>
-      </div>`;}).join('')
-    }</div>`:'';
+      </div>`;};
+      const twTasks=tasks.filter(t=>t.thisWeek&&!t.done);
+      const otherTasks=tasks.filter(t=>!t.thisWeek||t.done);
+      const twHtml=twTasks.length?`<div style="background:var(--color-warning-highlight);border:1px solid oklch(from var(--color-warning) l c h/.25);border-radius:var(--radius-lg);padding:var(--space-2);margin-bottom:var(--space-2)"><div style="display:flex;align-items:center;gap:var(--space-1);margin-bottom:var(--space-2);padding:0 var(--space-1)"><svg width="11" height="11" viewBox="0 0 24 24" fill="var(--color-warning)" stroke="var(--color-warning)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span style="font-size:10px;font-weight:700;color:var(--color-warning);text-transform:uppercase;letter-spacing:.06em">This Week</span><span style="font-size:10px;font-weight:700;background:var(--color-warning);color:#fff;border-radius:var(--radius-full);padding:0 5px;min-width:16px;text-align:center">${twTasks.length}</span></div>${twTasks.map(rowHtml).join('')}</div>`:'';
+      const divider=twTasks.length&&otherTasks.length?`<div style="border-top:1px solid var(--color-divider);margin:var(--space-1) 0 var(--space-2)"></div>`:'';
+      return twHtml+divider+otherTasks.map(rowHtml).join('');
+    })()}</div>`:'';
     const meetingListHtml=expanded&&noProjectMeetings.length?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)" onclick="event.stopPropagation()">
       <div style="font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2)">Meetings</div>
-      ${noProjectMeetings.map(m=>`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+      ${noProjectMeetings.map(m=>{const isPast=m.date&&m.date<todayDs;return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isPast?';opacity:.4;filter:grayscale(.5)':''}" onclick="event.stopPropagation()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
           <span style="font-size:var(--text-sm)">${m.name}</span>
@@ -1651,15 +1713,15 @@ function renderProjectsView(){
             <button class="btn-icon" onclick="event.stopPropagation();deleteMeeting('${m.id}')" title="Delete" style="color:var(--color-error)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
           </div>
         </div>
-      </div>`).join('')}
+      </div>`;}).join('')}
     </div>`:'';
     return `<div class="project-card" style="border-style:dashed">
       <div class="project-card-header"><span class="project-card-title" style="color:var(--color-text-muted)">No Project</span>
         <div style="position:relative;flex-shrink:0;margin-left:auto">
           <button class="btn-icon" style="opacity:.6" title="Add" onclick="toggleProjectAddMenu('${uid}',event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
           <div class="new-dropdown hidden" id="proj-add-menu-${uid}" style="min-width:170px">
-            <div class="new-dd-item" onclick="closeProjectAddMenu();_expandedProjects.add('${uid}');openTaskModal(null,null,${areaArg})"><div class="new-dd-icon" style="background:var(--color-primary-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="new-dd-label">New Action</div></div>
-            <div class="new-dd-item" onclick="closeProjectAddMenu();_expandedProjects.add('${uid}');openMeetingModal(null,null,null,null,${areaArg})"><div class="new-dd-icon" style="background:var(--color-purple-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="new-dd-label">New Meeting</div></div>
+            <div class="new-dd-item" onclick="event.stopPropagation();closeProjectAddMenu();_expandedProjects.add('${uid}');openTaskModal(null,null,${areaArg})"><div class="new-dd-icon" style="background:var(--color-primary-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="new-dd-label">New Action</div></div>
+            <div class="new-dd-item" onclick="event.stopPropagation();closeProjectAddMenu();_expandedProjects.add('${uid}');openMeetingModal(null,null,null,null,${areaArg})"><div class="new-dd-icon" style="background:var(--color-purple-highlight)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="new-dd-label">New Meeting</div></div>
           </div>
         </div>
         <button class="btn-icon" style="opacity:.6;flex-shrink:0" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
@@ -1672,12 +1734,13 @@ function renderProjectsView(){
   const areaIds=new Set(areas.map(a=>a.id));
   const projectIds=new Set(state.projects.map(p=>p.id));
   function isRoot(p){return !p.parentId||!projectIds.has(p.parentId);}
+  function _sortProjects(arr){return arr.sort((a,b)=>(b.ongoing?2:b.completed?0:1)-(a.ongoing?2:a.completed?0:1));}
   const sections=areas.map(a=>{
-    const projects=state.projects.filter(p=>p.area===a.id&&isRoot(p));
+    const projects=_sortProjects(state.projects.filter(p=>p.area===a.id&&isRoot(p)));
     const loose=state.tasks.filter(t=>t.area===a.id&&!t.project);
     return {name:a.name,areaId:a.id,projects,loose};
   }).filter(s=>s.projects.length||s.loose.length);
-  const unassignedProjects=state.projects.filter(p=>(!p.area||!areaIds.has(p.area))&&isRoot(p));
+  const unassignedProjects=_sortProjects(state.projects.filter(p=>(!p.area||!areaIds.has(p.area))&&isRoot(p)));
   const unassignedLoose=state.tasks.filter(t=>(!t.area||!areaIds.has(t.area))&&!t.project);
   if(unassignedProjects.length||unassignedLoose.length) sections.push({name:'Other',areaId:'other',projects:unassignedProjects,loose:unassignedLoose});
   projDiv.innerHTML=sections.map(s=>`
@@ -1746,14 +1809,15 @@ function renderTasks(){
     return `<div class="task-column">
     <div class="task-column-header">
       <span class="task-column-title">${col.name}</span>
-      <span class="task-column-count">${col.tasks.length}</span>
+      <span class="task-column-count">${col.tasks.filter(t=>!t.done).length} open</span>
+      <span class="task-column-count" style="background:var(--color-success-highlight);color:var(--color-success)">${col.tasks.filter(t=>t.done).length} done</span>
     </div>
-    <div class="task-column-body" style="padding-top:${colThisWeek.length?'var(--space-1)':'var(--space-2)'}">
-      ${thisWeekSection}
-      ${colOther.map(t=>renderTaskItem(t,pm)).join('')}
+    <div class="task-column-body" style="padding-top:var(--space-1)">
       <div class="task-column-add" onclick="openTaskModalForArea('${col.id}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add action
       </div>
+      ${thisWeekSection}
+      ${colOther.map(t=>renderTaskItem(t,pm)).join('')}
     </div>
   </div>`}).join('')}</div>`;
 }
@@ -1808,7 +1872,7 @@ function renderTaskItem(t,pm){
       <div class="task-title ${t.done?'done':''}">${t.name}${t.recur&&t.recur!=='none'?' <span style="color:var(--color-primary);font-size:10px">↻</span>':''}</div>
       <div class="task-meta">
         ${instanceDate?`<span class="task-date" ${isOverdue?'style="color:var(--color-error)"':''}>${formatDate(instanceDate)}${t.time?' '+t.time:''}</span>`:''}
-        ${proj?`<span class="badge" style="background:${proj.color}22;color:${proj.color}">${proj.name}</span>`:''}
+        ${proj?`<span style="display:inline-flex;align-items:center;background:${proj.color}33;color:${proj.color};font-weight:600;font-size:var(--text-xs);padding:1px 7px;border-radius:var(--radius-full);border:1px solid ${proj.color}99">${proj.name}</span>`:''}
         ${priorityBadge(t.priority)}
         ${durationBadge(t.duration)}
         ${t.recur&&t.recur!=='none'?`<span class="task-recur">${recurLabel(t.recur)}</span>`:''}
@@ -2350,8 +2414,15 @@ let _followupTask=null;
 function showFollowupModal(task){
   _followupTask=task;
   document.getElementById('followup-task-name').textContent=task.name;
+  document.getElementById('followup-notes').value=task.notes||'';
   document.getElementById('followup-modal').classList.add('open');
 }
+function _saveFollowupNotes(){
+  if(!_followupTask) return;
+  const notes=document.getElementById('followup-notes').value;
+  if(notes!==(_followupTask.notes||'')){_followupTask.notes=notes;saveToStorage();}
+}
+function closeFollowupModal(){_saveFollowupNotes();closeModal('followup-modal');}
 function convertTaskToProject(id){
   const t=state.tasks.find(x=>x.id===id);
   if(!t) return;
@@ -2362,12 +2433,13 @@ function convertTaskToProject(id){
   openProjectModal(null,t.name,t.area||'');
 }
 function followupAction(type){
+  _saveFollowupNotes();
   const task=_followupTask;
   closeModal('followup-modal');
   if(!task) return;
-  if(type==='task') openTaskModal(null,'',task.area||'');
-  else if(type==='meeting') openMeetingModal(null,null,null,task.name,task.area||'');
-  else if(type==='project') openProjectModal(null,task.name);
+  if(type==='task') openTaskModal(null,'',task.area||'',task.project||'');
+  else if(type==='meeting') openMeetingModal(null,null,null,'',task.area||'',task.project||'');
+  else if(type==='project') openProjectModal(null,task.name,task.area||'');
 }
 // ===== SCHEDULE ACTION MODAL =====
 let _schedFilter={search:'',area:'',status:'pending',sort:'priority'};
@@ -2557,7 +2629,11 @@ function openProjectModal(editId, prefillName, prefillArea, prefillParentId){
     document.getElementById('project-end').value='';
     document.getElementById('project-ongoing').checked=false;
     selectedColor='#01696f';
+    document.getElementById('project-template-group').style.display='block';
+    _populateTemplateSelect();
   }
+  if(editId) document.getElementById('project-template-group').style.display='none';
+  document.getElementById('project-save-as-template-btn').style.display=editId?'':'none';
   _toggleOngoingFields();
   document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('active',s.dataset.color===selectedColor));
   document.getElementById('project-modal').classList.add('open');
@@ -2571,6 +2647,16 @@ function saveProject(){
   const existing=editId?state.projects.find(p=>p.id===editId):null;
   const proj={id:editId||'p'+Date.now(),name,desc:document.getElementById('project-desc').value.trim(),area:document.getElementById('project-area').value||'',color:selectedColor,start:document.getElementById('project-start').value,end:ongoing?'':document.getElementById('project-end').value,ongoing,completed:ongoing?false:(existing?.completed||false),parentId:document.getElementById('project-parent').value||null};
   if(editId){const idx=state.projects.findIndex(p=>p.id===editId);if(idx!==-1)state.projects[idx]=proj;}else state.projects.push(proj);
+  if(!editId){
+    const tmplId=document.getElementById('project-template-select')?.value;
+    const tmpl=tmplId?(state.projectTemplates||[]).find(t=>t.id===tmplId):null;
+    if(tmpl){
+      const now=new Date().toISOString();
+      tmpl.actions.filter(a=>a.name.trim()).forEach((a,i)=>{
+        state.tasks.push({id:'t'+Date.now()+i,name:a.name.trim(),area:proj.area||'',project:proj.id,priority:a.priority||'',duration:a.duration||'',due:'',time:'',recur:'none',recurEnd:'',notes:'',waiting:'',waitingFulfilled:false,thisWeek:false,done:false,partial:false,completedAt:null,created:now,sortOrder:i*10,scheduledSlots:[]});
+      });
+    }
+  }
   if(_pendingBucketId){const bi=state.bucket.find(b=>b.id===_pendingBucketId);if(bi){bi.processed=true;bi.processedAs='project';}_pendingBucketId=null;}
   closeModal('project-modal'); saveToStorage(); refreshView();
 }
@@ -2581,6 +2667,128 @@ function _toggleOngoingFields(){
   endEl.disabled=ongoing;
   if(ongoing) endEl.value='';
   document.getElementById('project-dates-row').style.opacity=ongoing?'0.4':'1';
+}
+
+// ===== PROJECT TEMPLATES =====
+function _h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let _selectedTemplateId=null;
+
+function openTemplateManagerModal(){
+  if(!_selectedTemplateId&&(state.projectTemplates||[]).length) _selectedTemplateId=state.projectTemplates[0].id;
+  _renderTemplateList();_renderTemplateEditor();
+  document.getElementById('template-manager-modal').classList.add('open');
+}
+function _renderTemplateList(){
+  const el=document.getElementById('template-list'); if(!el) return;
+  const ts=state.projectTemplates||[];
+  if(!ts.length){el.innerHTML=`<div style="padding:var(--space-3);color:var(--color-text-muted);font-size:var(--text-sm);text-align:center">No templates yet</div>`;return;}
+  el.innerHTML=ts.map(t=>{const active=t.id===_selectedTemplateId;return`<div onclick="selectTemplate('${t.id}')" style="padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);cursor:pointer;margin-bottom:2px;${active?'background:var(--color-primary-highlight);':''}">
+    <div style="font-size:var(--text-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${active?'color:var(--color-primary);font-weight:500':''}">${_h(t.name)}</div>
+    <div style="font-size:var(--text-xs);color:${active?'var(--color-primary)':'var(--color-text-muted)'}">${t.actions.length} action${t.actions.length!==1?'s':''}</div>
+  </div>`;}).join('');
+}
+function selectTemplate(id){_selectedTemplateId=id;_renderTemplateList();_renderTemplateEditor();}
+function _renderTemplateEditor(){
+  const el=document.getElementById('template-editor'); if(!el) return;
+  const t=_selectedTemplateId?(state.projectTemplates||[]).find(x=>x.id===_selectedTemplateId):null;
+  if(!t){el.innerHTML=`<div style="color:var(--color-text-muted);font-size:var(--text-sm)">${(state.projectTemplates||[]).length?'Select a template to edit':'Click "+ New Template" to create one'}</div>`;return;}
+  el.innerHTML=`
+    <div class="form-group">
+      <label>Template Name</label>
+      <input type="text" class="input" id="tmpl-name-input" value="${_h(t.name)}" oninput="updateTemplateName('${t.id}',this.value)">
+    </div>
+    <div class="form-group">
+      <label>Initial Actions</label>
+      <div id="tmpl-actions-list" style="display:flex;flex-direction:column;gap:var(--space-2)">
+        ${t.actions.map((a,i)=>`<div style="display:flex;gap:var(--space-2);align-items:center">
+          <div style="display:flex;flex-direction:column;gap:1px;flex-shrink:0">
+            <button class="btn-icon" style="padding:1px;color:var(--color-text-muted);${i===0?'opacity:.25;pointer-events:none':''}" onclick="moveTemplateAction('${t.id}',${i},-1)" title="Move up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></button>
+            <button class="btn-icon" style="padding:1px;color:var(--color-text-muted);${i===t.actions.length-1?'opacity:.25;pointer-events:none':''}" onclick="moveTemplateAction('${t.id}',${i},1)" title="Move down"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
+          <input type="text" class="input" style="flex:1;min-width:0" placeholder="Action name…" value="${_h(a.name)}" oninput="updateTemplateAction('${t.id}',${i},'name',this.value)">
+          <select class="select" style="width:100px;flex-shrink:0" onchange="updateTemplateAction('${t.id}',${i},'priority',this.value)">
+            <option value="">Priority</option>
+            <option value="Low"${a.priority==='Low'?' selected':''}>Low</option>
+            <option value="Medium"${a.priority==='Medium'?' selected':''}>Medium</option>
+            <option value="High"${a.priority==='High'?' selected':''}>High</option>
+          </select>
+          <select class="select" style="width:115px;flex-shrink:0" onchange="updateTemplateAction('${t.id}',${i},'duration',this.value)">
+            <option value="">Duration</option>
+            <option value="under-10"${a.duration==='under-10'?' selected':''}>Under 10 min</option>
+            <option value="under-30"${a.duration==='under-30'?' selected':''}>Under 30 min</option>
+            <option value="under-60"${a.duration==='under-60'?' selected':''}>Under 1 hr</option>
+            <option value="project"${a.duration==='project'?' selected':''}>Project-size</option>
+          </select>
+          <button class="btn-icon" style="flex-shrink:0;color:var(--color-text-muted)" onclick="removeTemplateAction('${t.id}',${i})" title="Remove"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-ghost" style="margin-top:var(--space-2)" onclick="addTemplateAction('${t.id}')">+ Add action</button>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--color-border);margin:var(--space-3) 0">
+    <button class="btn btn-ghost" style="color:var(--color-error)" onclick="deleteProjectTemplate('${t.id}')">Delete template</button>`;
+}
+function createProjectTemplate(){
+  if(!state.projectTemplates) state.projectTemplates=[];
+  const t={id:'pt'+Date.now(),name:'New Template',actions:[]};
+  state.projectTemplates.push(t);_selectedTemplateId=t.id;
+  saveToStorage();_renderTemplateList();_renderTemplateEditor();_populateTemplateSelect();
+  setTimeout(()=>{const n=document.getElementById('tmpl-name-input');if(n){n.select();}},50);
+}
+function deleteProjectTemplate(id){
+  if(!confirm('Delete this template?')) return;
+  state.projectTemplates=(state.projectTemplates||[]).filter(t=>t.id!==id);
+  if(_selectedTemplateId===id) _selectedTemplateId=(state.projectTemplates||[])[0]?.id??null;
+  saveToStorage();_renderTemplateList();_renderTemplateEditor();_populateTemplateSelect();
+}
+function updateTemplateName(id,name){
+  const t=(state.projectTemplates||[]).find(x=>x.id===id);if(!t) return;
+  t.name=name;saveToStorage();_renderTemplateList();_populateTemplateSelect();
+}
+function addTemplateAction(templateId){
+  const t=(state.projectTemplates||[]).find(x=>x.id===templateId);if(!t) return;
+  t.actions.push({name:'',priority:'',duration:''});saveToStorage();_renderTemplateEditor();
+}
+function removeTemplateAction(templateId,idx){
+  const t=(state.projectTemplates||[]).find(x=>x.id===templateId);if(!t) return;
+  t.actions.splice(idx,1);saveToStorage();_renderTemplateEditor();
+}
+function moveTemplateAction(templateId,idx,dir){
+  const t=(state.projectTemplates||[]).find(x=>x.id===templateId);if(!t) return;
+  const swap=idx+dir;
+  if(swap<0||swap>=t.actions.length) return;
+  [t.actions[idx],t.actions[swap]]=[t.actions[swap],t.actions[idx]];
+  saveToStorage();_renderTemplateEditor();
+}
+function updateTemplateAction(templateId,idx,field,value){
+  const t=(state.projectTemplates||[]).find(x=>x.id===templateId);if(!t||!t.actions[idx]) return;
+  t.actions[idx][field]=value;saveToStorage();
+}
+function saveProjectAsTemplate(){
+  const projId=document.getElementById('project-edit-id').value; if(!projId) return;
+  const proj=state.projects.find(p=>p.id===projId); if(!proj) return;
+  const actions=state.tasks.filter(t=>t.project===projId&&!t.done).map(t=>({name:t.name,priority:t.priority||'',duration:t.duration||''}));
+  if(!state.projectTemplates) state.projectTemplates=[];
+  state.projectTemplates.push({id:'pt'+Date.now(),name:proj.name,actions});
+  saveToStorage();
+  const toast=document.getElementById('save-toast');
+  if(toast){const orig=toast.textContent;toast.textContent='✓ Template saved';toast.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{toast.classList.remove('show');toast.textContent=orig;},2000);}
+}
+function _populateTemplateSelect(){
+  const el=document.getElementById('project-template-select');if(!el) return;
+  const prev=el.value;
+  el.innerHTML='<option value="">No template</option>'+(state.projectTemplates||[]).map(t=>`<option value="${t.id}">${_h(t.name)}</option>`).join('');
+  if((state.projectTemplates||[]).find(t=>t.id===prev)) el.value=prev;
+  _onTemplateSelect();
+}
+function _onTemplateSelect(){
+  const id=document.getElementById('project-template-select')?.value;
+  const preview=document.getElementById('project-template-preview');if(!preview) return;
+  const t=id?(state.projectTemplates||[]).find(x=>x.id===id):null;
+  const actions=t?(t.actions.filter(a=>a.name.trim())):[];
+  if(!actions.length){preview.style.display='none';preview.innerHTML='';return;}
+  preview.style.display='block';
+  preview.innerHTML=`<div style="font-size:var(--text-xs);font-weight:500;color:var(--color-text-muted);margin-bottom:var(--space-1)">Creates ${actions.length} initial action${actions.length!==1?'s':''}:</div>`+
+    actions.map(a=>`<div style="font-size:var(--text-xs);color:var(--color-text-muted);padding:1px 0">· ${_h(a.name)}</div>`).join('');
 }
 
 function _projectTasksSorted(projectId){
@@ -2606,6 +2814,7 @@ function toggleProjectComplete(id){
 function deleteProject(id){
   const p=state.projects.find(x=>x.id===id); if(!p) return;
   if(!confirm(`Delete project "${p.name}"? Its actions will become unassigned.`)) return;
+  if(p.linkedFolderId){const lf=(state.ideaFolders||[]).find(f=>f.id===p.linkedFolderId);if(lf) delete lf.linkedProjectId;}
   state.projects=state.projects.filter(x=>x.id!==id);
   state.tasks.forEach(t=>{if(t.project===id)t.project=null;});
   saveToStorage(); refreshView();
@@ -2659,8 +2868,8 @@ function openTaskModalForArea(areaId) {
 // ===== UTILS =====
 // Clearing _pendingBucketId here covers every cancel path (Escape, backdrop, Cancel button).
 function closeModal(id){ document.getElementById(id).classList.remove('open'); _pendingBucketId=null; }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));});
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>{if(m.id==='followup-modal')closeFollowupModal();else closeModal(m.id);});});
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){if(m.id==='followup-modal')closeFollowupModal();else closeModal(m.id);}}));
 function refreshView(){
   const _bp = (state.bucket||[]).filter(b=>!b.processed&&!b.completed).length;
   const _bb = document.getElementById('bucket-badge');
@@ -3298,9 +3507,21 @@ function saveBucketDone() {
   item.completed = true;
   item.area = document.getElementById('bucket-done-area').value || undefined;
   item.project = document.getElementById('bucket-done-project').value || undefined;
+  const now = new Date().toISOString();
+  const task = {
+    id: 't' + Date.now(), name: item.text,
+    area: item.area || '', project: item.project || '',
+    priority: '', duration: '', due: '', time: '', recur: 'none', recurEnd: '',
+    notes: '', waiting: '', waitingFulfilled: false,
+    thisWeek: false, done: true, partial: false,
+    completedAt: now, created: item.created || now,
+    sortOrder: null, scheduledSlots: []
+  };
+  state.tasks.push(task);
   closeModal('bucket-done-modal');
   saveToStorage();
   renderBucketView();
+  showFollowupModal(task);
 }
 
 function toggleBucketComplete(id) {
@@ -3770,8 +3991,10 @@ function renderIdeaFolderTree() {
             <span style="cursor:pointer;display:flex;align-items:center" onclick="event.stopPropagation();toggleIdeaFolderExpand('${f.id}')">${_feTriangle(isExpanded)}</span>
             <span>${f.name}</span>
             ${itemCount>0?`<span style="font-size:var(--text-xs);color:var(--color-text-muted)">(${itemCount})</span>`:''}
+            ${f.linkedProjectId&&state.projects.some(p=>p.id===f.linkedProjectId)?`<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2" title="Linked to project"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`:''}
           </div>
           <div style="display:flex;gap:var(--space-1);opacity:0;transition:opacity var(--transition-interactive)" class="folder-actions">
+            ${f.linkedProjectId&&state.projects.some(p=>p.id===f.linkedProjectId)?`<button class="btn-icon" style="padding:var(--space-1);color:var(--color-blue)" title="Go to linked project" onclick="event.stopPropagation();openFolderLinkedProject('${f.linkedProjectId}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>`:''}
             <button class="btn-icon" style="padding:var(--space-1);font-size:10px" title="New subfolder" onclick="event.stopPropagation();createIdeaFolder('${f.id}')">+</button>
             <button class="btn-icon" style="padding:var(--space-1);font-size:10px" title="Rename" onclick="event.stopPropagation();renameIdeaFolder('${f.id}')">✎</button>
             <button class="btn-icon" style="padding:var(--space-1);font-size:10px;color:var(--color-error)" title="Delete" onclick="event.stopPropagation();deleteIdeaFolder('${f.id}')">✕</button>
@@ -3824,7 +4047,14 @@ function renderIdeaFolderItems() {
     items = state.ideas.filter(i => i.folderId === _selectedIdeaFolderForView && !i.processed).sort((a, b) => new Date(a.created) - new Date(b.created));
   }
 
-  headerContainer.innerHTML = `<h3 style="margin:0;font-size:var(--text-lg);font-weight:700">${headerText}</h3>`;
+  const _isFolderView = _selectedIdeaFolderForView && _selectedIdeaFolderForView !== 'all';
+  headerContainer.innerHTML = `<h3 style="margin:0;font-size:var(--text-lg);font-weight:700">${headerText}</h3>
+    <div class="capture-bar" style="margin-top:var(--space-4)">
+      <div class="capture-input-wrap">
+        <textarea class="capture-input" id="folder-idea-input" rows="1" onkeydown="captureFolderIdeaKeydown(event)" placeholder="New idea… (Enter to add, Shift+Enter for new line)"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="captureFolderIdea()" style="align-self:flex-start;margin-top:1px;background:var(--color-gold);border-color:var(--color-gold)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Capture</button>
+    </div>`;
 
   if (items.length === 0) {
     itemsContainer.innerHTML = '<div style="color:var(--color-text-muted);text-align:center;padding:var(--space-8)">No ideas yet</div>';
@@ -3923,6 +4153,38 @@ function createIdeaFolder(parentId) {
   if (_ideaTab === 'fileexplorer') renderIdeaFolderContent();
 }
 
+function linkProjectToIdeaFolder(projectId) {
+  const p = state.projects.find(x => x.id === projectId);
+  if (!p) return;
+  if (p.linkedFolderId && (state.ideaFolders||[]).some(f => f.id === p.linkedFolderId)) {
+    openProjectLinkedFolder(projectId);
+    return;
+  }
+  if (!state.ideaFolders) state.ideaFolders = [];
+  const folder = { id: 'if'+Date.now(), name: p.name, parentId: null, linkedProjectId: projectId };
+  state.ideaFolders.push(folder);
+  p.linkedFolderId = folder.id;
+  saveToStorage();
+  refreshView();
+}
+
+function openProjectLinkedFolder(projectId) {
+  const p = state.projects.find(x => x.id === projectId);
+  if (!p || !p.linkedFolderId) return;
+  const folder = (state.ideaFolders||[]).find(f => f.id === p.linkedFolderId);
+  if (!folder) return;
+  _selectedIdeaFolderForView = p.linkedFolderId;
+  let cur = folder;
+  while (cur && cur.parentId) { _expandedIdeaFolders.add(cur.parentId); cur = (state.ideaFolders||[]).find(f => f.id === cur.parentId); }
+  navigate('ideas');
+  if (_ideaTab !== 'fileexplorer') switchIdeaTab('fileexplorer');
+  else renderIdeaFolderContent();
+}
+
+function openFolderLinkedProject(projectId) {
+  navigate('projects');
+}
+
 function renameIdeaFolder(id) {
   const f = (state.ideaFolders||[]).find(f => f.id === id);
   if (!f) return;
@@ -3940,6 +4202,11 @@ function deleteIdeaFolder(id) {
     return [fid, ...kids.flatMap(k => descendants(k))];
   }
   const toDelete = new Set(descendants(id));
+  // Clear linkedFolderId from any projects linked to folders being deleted.
+  (state.ideaFolders||[]).filter(f => toDelete.has(f.id) && f.linkedProjectId).forEach(f => {
+    const proj = state.projects.find(p => p.id === f.linkedProjectId);
+    if (proj) delete proj.linkedFolderId;
+  });
   state.ideas.forEach(i => { if (toDelete.has(i.folderId)) i.folderId = null; });
   state.ideaFolders = (state.ideaFolders||[]).filter(f => !toDelete.has(f.id));
   if (_selectedIdeaFolder === id || toDelete.has(_selectedIdeaFolder)) _selectedIdeaFolder = null;
@@ -4040,6 +4307,24 @@ function captureIdea() {
 
 function captureIdeaKeydown(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); captureIdea(); }
+}
+
+function captureFolderIdea() {
+  const inp = document.getElementById('folder-idea-input');
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  const folderId = (_selectedIdeaFolderForView && _selectedIdeaFolderForView !== 'all' && _selectedIdeaFolderForView !== 'unfiled')
+    ? _selectedIdeaFolderForView : null;
+  state.ideas.unshift({ id:'i'+Date.now(), text, created:new Date().toISOString(), developed:false, processed:false, processedAs:null, folderId });
+  inp.value = '';
+  inp.style.height = '';
+  inp.focus();
+  saveToStorage();
+  renderIdeaFolderItems();
+}
+function captureFolderIdeaKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); captureFolderIdea(); }
 }
 
 function setIdeaFilter(el, tag) {
@@ -4397,10 +4682,14 @@ setTimeout(() => _initFileStorage(), 1500);
   <div class="modal" style="max-width:400px">
     <div class="modal-header">
       <span class="modal-title">Action complete 🎉</span>
-      <button class="btn-icon" onclick="closeModal('followup-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="btn-icon" onclick="closeFollowupModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <p style="margin-bottom:var(--space-4);color:var(--color-text-muted);font-size:var(--text-sm)">Did completing <strong id="followup-task-name" style="color:var(--color-text)"></strong> create a new action?</p>
+      <p style="margin-bottom:var(--space-3);color:var(--color-text-muted);font-size:var(--text-sm)">Did completing <strong id="followup-task-name" style="color:var(--color-text)"></strong> create a new action?</p>
+      <div class="form-group" style="margin-bottom:var(--space-4)">
+        <label style="font-size:var(--text-xs);font-weight:500;color:var(--color-text-muted);display:block;margin-bottom:var(--space-1)">Notes</label>
+        <textarea class="textarea" id="followup-notes" rows="3" placeholder="Add any completion notes…" style="min-height:60px"></textarea>
+      </div>
       <div style="display:flex;flex-direction:column;gap:var(--space-2)">
         <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('task')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>New Action
@@ -4411,7 +4700,7 @@ setTimeout(() => _initFileStorage(), 1500);
         <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3)" onclick="followupAction('project')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Turn into Project
         </button>
-        <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3);color:var(--color-text-faint)" onclick="closeModal('followup-modal')">
+        <button class="btn btn-ghost" style="justify-content:flex-start;gap:var(--space-3);color:var(--color-text-faint)" onclick="closeFollowupModal()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Nothing, I'm done
         </button>
       </div>

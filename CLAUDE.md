@@ -59,12 +59,12 @@ Each view has a `render*()` function that rebuilds its DOM from scratch using `i
 | Entity | Key fields | Notes |
 |---|---|---|
 | Task | `id, name, area, project, priority, duration, due, time, notes, waiting, waitingFulfilled, done, partial, thisWeek, scheduledSlots, sortOrder, completedAt, created` | `area` is an ID reference to `state.areas`; `partial` is a boolean for in-progress state; `waiting` is a string for what the action is blocked on; `waitingFulfilled` is a boolean; `duration` is one of `'under-10'`, `'under-30'`, `'under-60'`, `'project'` or `''`; `thisWeek` is a boolean flag for the This Week focus feature; `scheduledSlots` is an array of `{due, time}` for additional calendar slots beyond the primary `due`/`time`; `sortOrder` is an optional number for manual ordering within a project; `completedAt` is ISO timestamp |
-| Project | `id, name, desc, area, color, start, end, completed, ongoing, parentId` | `parentId` is null for root-level projects or an ID of the parent project; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()`; `ongoing` is a boolean — ongoing projects have no end date, never show a complete button, and are never marked completed |
+| Project | `id, name, desc, area, color, start, end, completed, ongoing, parentId, linkedFolderId` | `parentId` is null for root-level projects or an ID of the parent project; `color` is a hex string; `completed` is a boolean toggled by `toggleProjectComplete()`; `ongoing` is a boolean — ongoing projects have no end date, never show a complete button, and are never marked completed; `linkedFolderId` is an optional ID of a linked idea folder |
 | Area | `id, name` | Stored in `state.areas`; defaults are Work, Life, University; user can add custom areas via the "＋ New area…" option in any Area dropdown |
 | Meeting | `id, name, date, startTime, endTime, location, area, project, recur, recurEnd, attendees, type:'meeting'` | `area` is an ID reference to `state.areas`; shares calendar rendering with tasks via `isMeeting` flag |
 | Bucket item | `id, text, created, completed, processed, processedAs, area?, project?` | `processedAs` is `task/project/meeting/idea` (internal values unchanged); `area` and `project` are optional IDs set when marking an item Done via the Done modal |
-| Idea item | `id, text, created, developed, processed, processedAs, folderId?` | Mirror of bucket; `developed` ≡ bucket's `completed`; `folderId` optional reference to `state.ideaFolders` |
-| Idea folder | `id, name, parentId` | Forms a tree structure; `parentId` is null for root-level folders |
+| Idea item | `id, text, created, developed, processed, processedAs, processedAt?, folderId?` | Mirror of bucket; `developed` ≡ bucket's `completed`; `processedAt` is an ISO timestamp set when the idea is processed; `folderId` optional reference to `state.ideaFolders` |
+| Idea folder | `id, name, parentId, linkedProjectId?` | Forms a tree structure; `parentId` is null for root-level folders; `linkedProjectId` is an optional ID of a linked project |
 
 ### Recurring Events
 
@@ -139,11 +139,19 @@ The task modal footer uses `justify-content: space-between` so Cancel, Convert t
 
 ### Waiting On
 
-Tasks have an optional `waiting` string field. The action modal shows "Is this action waiting on anything?" checkbox; checking it reveals a text input for what the action is blocked on. When set, an amber `⏳ [text]` badge appears on the task card in the meta row.
+Tasks have an optional `waiting` string field and a `waitingFulfilled` boolean. The action modal shows "Is this action waiting on anything?" checkbox; checking it reveals a text input for what the action is blocked on.
+
+When `waiting` is set and `waitingFulfilled` is false, an amber `⏳ [text]` badge appears on the task card with an inline ✓ button. Clicking ✓ calls `fulfillWaiting(id)`, setting `waitingFulfilled: true`. The badge then switches to a green `✓ [text]` style indicating the blocker has been resolved but the task hasn't been marked done yet. The fulfilled state is preserved across edits as long as the waiting text is unchanged.
 
 ### Collect Done with Area / Project
 
-Clicking **Done** on a bucket item opens `#bucket-done-modal` via `openBucketDoneModal(id)`. The modal shows the item text (read-only) plus optional Area and Project dropdowns. The Project dropdown is filtered by the selected area via `_filterBucketDoneProjects()` — the same pattern as the task modal. On confirm, `saveBucketDone()` writes `area` and `project` onto the bucket item, sets `item.completed = true`, and calls `saveToStorage()` + `renderBucketView()`. Completed items with an area/project assigned display those as colour-coded badges in their meta row.
+Clicking **Done** on a bucket item opens `#bucket-done-modal` via `openBucketDoneModal(id)`. The modal shows the item text (read-only) plus optional Area and Project dropdowns. The Project dropdown is filtered by the selected area via `_filterBucketDoneProjects()` — the same pattern as the task modal. On confirm, `saveBucketDone()`:
+
+1. Sets `item.completed = true`, `item.area`, and `item.project` on the bucket item.
+2. Creates a new **completed task** (`done: true`, `completedAt: now`) assigned to the selected area and project, pushing it into `state.tasks`. This makes the item visible in the relevant project marked as done.
+3. Opens the follow-up modal against the newly created task (so the user can create follow-on actions).
+
+Completed bucket items with an area/project assigned display those as colour-coded badges in their meta row.
 
 ### Collect → Ideas Transfer
 
@@ -237,7 +245,14 @@ Prefill parameters are only applied when `editId` is null/undefined (new items).
 
 ### Task completion follow-up
 
-`toggleTask(id)` shows `#followup-modal` whenever a task is marked done. The modal asks if completing the action created something new — options are **New Action**, **New Meeting**, **Turn into Project**, or **Nothing**. `_followupTask` holds the completed task object. `followupAction(type)` closes the modal and opens the relevant create modal: `openTaskModal(null,'',task.area)`, `openMeetingModal(null,null,null,task.name,task.area)`, or `openProjectModal(null,task.name)`.
+`toggleTask(id)` shows `#followup-modal` whenever a task is marked done. The modal contains:
+
+- A **Notes textarea** (`#followup-notes`) pre-populated with the task's existing notes. Any edits are saved back to `task.notes` on close via `_saveFollowupNotes()`.
+- Four buttons: **New Action**, **New Meeting**, **Turn into Project**, **Nothing, I'm done**.
+
+`_followupTask` holds the completed task object. `followupAction(type)` calls `_saveFollowupNotes()` then `closeModal('followup-modal')`, and opens the relevant create modal: `openTaskModal(null,'',task.area)`, `openMeetingModal(null,null,null,'',task.area,task.project)`, or `openProjectModal(null,task.name,task.area)`.
+
+All close paths (X button, Escape, backdrop click, "Nothing" button) go through `closeFollowupModal()` which calls `_saveFollowupNotes()` before dismissing, ensuring notes are never lost.
 
 ### Theming
 
@@ -284,7 +299,7 @@ When an area filter is active (`af` is non-empty — set by the **All Areas** dr
 
 ### Projects page header
 
-The Projects page header displays three KPI cards on the left — **Incomplete**, **Ongoing**, and **Completed** — each with its own count, with a **New Project** button on the right. `renderProjectsView()` updates all three counts (`#project-stat-incomplete`, `#project-stat-ongoing`, `#project-stat-completed`) at the start of the function.
+The Projects page header displays three KPI cards on the left — **Incomplete**, **Ongoing**, and **Completed** — each with its own count, with a **Manage Templates** button and a **New Project** button on the right (both in a flex row). `renderProjectsView()` updates all three counts (`#project-stat-incomplete`, `#project-stat-ongoing`, `#project-stat-completed`) at the start of the function.
 
 Projects are grouped by area in the grid (area-based sections, each with a heading). Root projects whose `ongoing` flag is true show an **∞ Ongoing** badge and never show the complete-toggle button. `saveProject()` forces `completed: false` and clears the end date when `ongoing` is true.
 
@@ -296,6 +311,37 @@ Projects have an optional `ongoing: boolean` field. When checked in the project 
 - An **∞ Ongoing** badge appears in the card's meta row
 - `completed` is forced to `false` on save and preserved as false through future edits
 - `_toggleOngoingFields()` handles the live disable/enable of the End Date input as the checkbox changes
+
+### Project Templates
+
+`state.projectTemplates` is an array of `{id, name, actions: [{name, priority, duration}]}` objects. Templates are persisted in `localStorage` alongside all other state and saved/loaded in `saveToStorage()` / `loadFromStorage()`.
+
+**Template manager** (`#template-manager-modal`) — opened via `openTemplateManagerModal()`, triggered from either the **Manage Templates** button on the Projects page header or the **Manage** button in the New Project form. Two-panel layout:
+- Left: template list rendered by `_renderTemplateList()`; clicking an item calls `selectTemplate(id)` which sets `_selectedTemplateId` and re-renders both panels.
+- Right: template editor rendered by `_renderTemplateEditor()` — shows a name input and an editable action list (name, priority, duration per action, and ↑/↓ reorder buttons). All edits are saved immediately to state on `oninput`/`onchange` via `updateTemplateName()` and `updateTemplateAction()`.
+
+Key functions: `createProjectTemplate()`, `deleteProjectTemplate(id)`, `addTemplateAction(templateId)`, `removeTemplateAction(templateId, idx)`, `moveTemplateAction(templateId, idx, dir)` — swaps the action at `idx` with the one at `idx+dir`, saves, and re-renders the editor. The ↑ button is disabled (opacity 0.25, `pointer-events:none`) on the first action; ↓ is disabled on the last.
+
+**Save as Template** — when editing an existing project, a **Save as Template** button appears in the project modal footer (hidden for new projects). `saveProjectAsTemplate()` reads the project's non-done tasks, builds a template `{id, name, actions:[{name,priority,duration}]}` from them, pushes it to `state.projectTemplates`, saves, and shows a "✓ Template saved" toast (temporarily overriding the default "✓ Saved" text).
+
+**Project modal integration** — the template section (`#project-template-group`) is only shown for new projects (hidden when editing). `openProjectModal` calls `_populateTemplateSelect()` to fill the dropdown, and `_onTemplateSelect()` renders a read-only preview list of the template's named actions below the dropdown.
+
+**Applying a template** — `saveProject()` checks `#project-template-select` when saving a new project. If a template is selected, it pushes one pending task into `state.tasks` per action in the template (skipping blank names), all assigned to the new project's ID and area, with `sortOrder` values preserving template order.
+
+`_h(s)` — HTML-escaping utility (`&`, `<`, `>`, `"`) used throughout the template manager rendering to prevent XSS from user-entered template/action names.
+
+### Project-Idea Folder Linking
+
+Projects and idea folders can be linked bidirectionally. Each project card in the Projects view shows a lightbulb icon button:
+
+- If the project has **no linked folder**: clicking the button calls `linkProjectToIdeaFolder(projectId)`, which creates a new root-level idea folder named after the project, sets `folder.linkedProjectId = projectId` and `project.linkedFolderId = folder.id`, saves, and refreshes the view.
+- If the project **already has a linked folder**: clicking the button calls `openProjectLinkedFolder(projectId)`, which navigates to the Ideas page > File Explorer tab with the linked folder selected and expanded.
+
+From the folder side, a linked folder shows a gold lightbulb indicator icon in the folder tree and a blue folder button; clicking the folder button calls `openFolderLinkedProject(projectId)`, navigating to the Projects page.
+
+When a project is deleted, its `linkedFolderId` is cleared from the folder. When a folder is deleted, `linkedFolderId` is cleared from the linked project.
+
+**Export caveat**: `linkedFolderId` and `linkedProjectId` are **not included** in XLSX or CSV exports. Links are lost on a full export-then-reimport round-trip.
 
 ### Excel (.xlsx) Import / Export
 

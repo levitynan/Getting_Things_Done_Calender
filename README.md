@@ -54,7 +54,7 @@ The Collect page is a frictionless capture inbox — dump anything here without 
 
 - Type in the text area and press **Enter** to capture. Use **Shift+Enter** for a new line.
 - Each captured item can be processed into an **Action**, **Project**, **Meeting**, or **Idea** using the action buttons on the card.
-- Clicking **Done** opens a small modal where you can optionally assign an **Area** and **Project** before marking the item complete. Completed items display the assigned area and project as colour-coded badges.
+- Clicking **Done** opens a small modal where you can optionally assign an **Area** and **Project** before marking the item complete. On confirm, a completed action is automatically created and assigned to the selected project, so the item appears in the project's action list marked as done. Completed items in Collect also display the assigned area and project as colour-coded badges.
 - Sending an item to **Idea** transfers it silently to the Ideas page — no form opens, and the card is marked "→ Ideas".
 - Converted items show an **Undo** button — clicking it reverses the conversion. For items sent to Ideas, the corresponding idea is also removed.
 - Filter the list by: **All · To Process · Completed · Converted**
@@ -141,7 +141,7 @@ Click **New ▾ → Action**, or click any day on the calendar to open the actio
 | **Due Time** | Optional time |
 | **Notes** | Free-text notes field |
 
-When a "waiting on" value is set, an amber **⏳** badge appears on the action card showing what the action is blocked on. A **Time Required** badge appears in the matching colour (green / blue / amber / red) when a duration is set.
+When a "waiting on" value is set, an amber **⏳** badge appears on the action card showing what the action is blocked on. The badge contains an inline **✓** button — clicking it marks the waiting condition as fulfilled without marking the action done. The badge turns green to show the blocker is resolved. A **Time Required** badge appears in the matching colour (green / blue / amber / red) when a duration is set.
 
 The modal footer has three buttons: **Cancel**, **Convert to Project** (carries name, area, and notes into a new project form), and **Save Action**.
 
@@ -167,6 +167,13 @@ Actions support three states, cycled via the circle button on calendar pills:
 | **Pending** | Empty circle |
 | **In Progress** | Amber fill with `~` |
 | **Done** | Filled circle with `✓` |
+
+### Action Complete modal
+
+When an action is marked done, an **Action complete** modal appears. It provides:
+
+- A **Notes** field pre-filled with the action's existing notes. Any changes are saved back to the action when the modal is dismissed (via any button, Escape, or clicking outside).
+- Four next-step buttons: **New Action**, **New Meeting**, **Turn into Project**, or **Nothing, I'm done**. Choosing one closes the modal and opens the relevant creation form, pre-filled with the same area and project as the completed action.
 
 ---
 
@@ -206,6 +213,17 @@ Each project card has:
 - **Complete toggle** — mark the project done/active (hidden for Ongoing projects)
 - **Edit / Delete** buttons — revealed on hover below the card header
 
+### Linked Ideas Folder
+
+Every project card has a lightbulb icon button that links the project to an idea folder:
+
+- **No folder yet** — clicking the button automatically creates a new root idea folder named after the project and links the two together. The folder is immediately visible in the Ideas > File Explorer tab.
+- **Already linked** — clicking the button navigates directly to the Ideas > File Explorer tab with that folder selected.
+
+From the folder side, a linked folder shows a gold lightbulb indicator in the folder tree. A blue folder button next to it navigates back to the Projects page.
+
+Links are bidirectional but are **not preserved** when exporting and re-importing via XLSX or CSV — they must be recreated manually after a full data round-trip.
+
 ### Ongoing Projects
 
 Mark a project as **Ongoing** when it is a continuous process with no defined end date (e.g. a recurring area of responsibility). In the project modal, check **Ongoing** to:
@@ -214,6 +232,19 @@ Mark a project as **Ongoing** when it is a continuous process with no defined en
 - Show an **∞ Ongoing** badge in the card meta row
 
 Ongoing projects count separately from Incomplete and Completed in the header KPIs.
+
+### Project Templates
+
+Templates let you pre-define a list of initial actions that are automatically created whenever a new project is started from that template.
+
+**Managing templates** — open the template manager from either the **Manage Templates** button on the Projects page header, or the **Manage** button next to the Template dropdown in the New Project form. The template manager is a two-panel modal:
+- **Left panel** — lists all saved templates. Click one to select it.
+- **Right panel** — edit the template name and its action list. Each action has a name, optional priority, and optional duration. Use the **↑ / ↓** buttons on the left of each row to reorder actions. Use **+ Add action** to append a row and **×** to remove one. Changes save immediately.
+- Use **+ New Template** to create a blank template, and **Delete template** to remove the selected one.
+
+**Save existing project as template** — when editing a project, a **Save as Template** button appears in the modal footer. Clicking it creates a new template named after the project, pre-populated with all of the project's non-done actions (preserving their priority and duration).
+
+**Using a template** — the Template dropdown appears in the New Project form (not shown when editing an existing project). Select a template to see a preview of its actions. On save, each named action in the template is created as a pending action assigned to the new project, in the order defined in the template.
 
 ### Project View
 
@@ -355,7 +386,7 @@ Click **Reset All Data** at the bottom of the sidebar to wipe all actions, proje
 
 ## Data Storage
 
-All data is stored in your browser's `localStorage` under the key `taskcal-v1`. Because this is browser-local storage:
+All data is stored in your browser's `localStorage` under the key `taskcal_data`. Because this is browser-local storage:
 
 - Data does not sync across devices or browsers.
 - Clearing browser site data will delete everything.
