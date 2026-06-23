@@ -499,6 +499,30 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
 .startup-recent-item{display:flex;gap:var(--space-3);align-items:baseline;padding:var(--space-2) 0;border-bottom:1px solid var(--color-divider);font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.5}
 .startup-recent-item:last-child{border-bottom:none}
 .startup-recent-dot{color:var(--color-primary);flex-shrink:0;font-size:10px}
+.startup-digest{width:100%;margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--color-divider)}
+.startup-digest-label{font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:var(--space-4)}
+.startup-digest-row{display:flex;gap:var(--space-6);flex-wrap:wrap}
+.startup-digest-stat{display:flex;flex-direction:column;gap:3px}
+.startup-digest-num{font-size:var(--text-2xl);font-weight:800;line-height:1}
+.startup-digest-sublabel{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em}
+/* TASK DRAG BETWEEN PROJECTS */
+.proj-task-row{position:relative}
+.proj-task-row[draggable]{cursor:grab;user-select:none}
+.proj-task-row[draggable] button,.proj-task-row[draggable] input{cursor:pointer}
+.proj-task-row.proj-dragging{opacity:.3}
+.proj-task-row.drag-insert-before::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--color-primary);transform:translateY(-50%);z-index:1;border-radius:1px}
+.proj-task-row.drag-insert-after::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--color-primary);transform:translateY(50%);z-index:1;border-radius:1px}
+.project-card.proj-drag-target{outline:2px dashed var(--color-primary);outline-offset:2px;background:var(--color-primary-highlight)}
+/* IN-APP REMINDER NOTIFICATIONS */
+#reminder-notif-container{position:fixed;bottom:calc(var(--space-6) + 36px);right:var(--space-6);z-index:998;display:flex;flex-direction:column;gap:var(--space-2);align-items:flex-end;pointer-events:none}
+.reminder-notif{background:var(--color-surface);border:1px solid var(--color-divider);border-left:3px solid var(--color-primary);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4);box-shadow:var(--shadow-lg);min-width:220px;max-width:300px;pointer-events:all;display:flex;align-items:flex-start;gap:var(--space-3);animation:notif-in .2s ease;transition:opacity .3s ease,transform .3s ease}
+.reminder-notif.removing{opacity:0;transform:translateX(12px)}
+.reminder-notif-content{flex:1;min-width:0}
+.reminder-notif-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-primary);margin-bottom:2px}
+.reminder-notif-body{font-size:var(--text-sm);color:var(--color-text);word-break:break-word}
+.reminder-notif-dismiss{flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--color-text-muted);padding:0;font-size:16px;line-height:1;margin-top:-1px}
+.reminder-notif-dismiss:hover{color:var(--color-text)}
+@keyframes notif-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
 </style>
 </head>
 <body>
@@ -531,6 +555,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
       to open app
     </div>
     <div class="startup-recents" id="startup-recents"></div>
+    <div class="startup-digest" id="startup-digest" style="display:none"></div>
   </div>
 </div>
 
@@ -575,12 +600,13 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="nav-item" onclick="showStartup()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>Quick Capture
     </div>
+    <div class="nav-item" id="reminder-nav-item" onclick="openReminderModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="reminder-nav-label">Daily Reminders</span>
+    </div>
     <div class="nav-item" onclick="toggleTheme()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Toggle Theme
     </div>
-    <div class="nav-item" onclick="clearAllData()" style="color:var(--color-error)" title="Wipe all saved data and reset to defaults">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Reset All Data
-    </div>
+
   </div>
 </aside>
 
@@ -639,7 +665,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
     <div class="bucket-stats">
       <div class="bucket-stat"><div class="bucket-stat-num" id="bstat-total">0</div><div class="bucket-stat-label">captured</div></div>
       <div class="bucket-stat"><div class="bucket-stat-num" id="bstat-pending">0</div><div class="bucket-stat-label">to process</div></div>
-      <div class="bucket-stat"><div class="bucket-stat-num" id="bstat-completed">0</div><div class="bucket-stat-label">completed</div></div>
+      <div class="bucket-stat"><div class="bucket-stat-num" id="bstat-completed">0</div><div class="bucket-stat-label">done</div></div>
       <div class="bucket-stat"><div class="bucket-stat-num" id="bstat-done">0</div><div class="bucket-stat-label">converted</div></div>
     </div>
   </div>
@@ -769,7 +795,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
           </div>
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-success)" id="project-stat-completed">0</div>
-            <div class="kpi-label">Completed</div>
+            <div class="kpi-label">Complete</div>
           </div>
         </div>
         <div style="display:flex;gap:var(--space-2)">
@@ -818,11 +844,11 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
         <div class="tasks-stats">
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-primary)" id="task-stat-total">0</div>
-            <div class="kpi-label">Incomplete Actions</div>
+            <div class="kpi-label">Pending Actions</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-value" style="color:var(--color-success)" id="task-stat-completed">0</div>
-            <div class="kpi-label">Completed</div>
+            <div class="kpi-label">Done</div>
           </div>
         </div>
         <div class="tasks-filters">
@@ -944,7 +970,7 @@ label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(-
           <option value="">Not estimated</option>
           <option value="under-10">Under 10 mins</option>
           <option value="under-30">Under 30 mins</option>
-          <option value="under-60">Under an hour</option>
+          <option value="under-60">Under 1 hour</option>
           <option value="project">Should be turned into a project</option>
         </select>
       </div>
@@ -1104,7 +1130,8 @@ const DEFAULT_STATE = {
     { id:'life',       name:'Life' },
     { id:'university', name:'University' }
   ],
-  projectTemplates: []
+  projectTemplates: [],
+  reminders: []
 };
 
 // ── PERSISTENCE ──
@@ -1123,11 +1150,12 @@ function loadFromStorage() {
         ideas:        saved.ideas        || [],
         areas:        saved.areas        || DEFAULT_STATE.areas,
         ideaFolders:       saved.ideaFolders       || [],
-        projectTemplates:  saved.projectTemplates  || []
+        projectTemplates:  saved.projectTemplates  || [],
+        reminders:         saved.reminders         || []
       };
     }
   } catch(e) { console.warn('TaskCal: could not load saved data', e); }
-  return { ...DEFAULT_STATE, meetings: [], bucket: [], ideas: [], areas: DEFAULT_STATE.areas, ideaFolders: [] };
+  return { ...DEFAULT_STATE, meetings: [], bucket: [], ideas: [], areas: DEFAULT_STATE.areas, ideaFolders: [], reminders: [] };
 }
 
 let _toastTimer=null;
@@ -1141,7 +1169,8 @@ function saveToStorage() {
       ideas:       state.ideas,
       areas:            state.areas,
       ideaFolders:      state.ideaFolders,
-      projectTemplates: state.projectTemplates
+      projectTemplates: state.projectTemplates,
+      reminders:        state.reminders
     }));
     const t=document.getElementById('save-toast');
     if(t){t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
@@ -1214,6 +1243,8 @@ function _buildXLSXWorkbook() {
   }))),'Meetings');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((state.areas||[]).map(a=>({id:a.id,name:a.name}))),'Areas');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((state.ideaFolders||[]).map(f=>({id:f.id,name:f.name,parentId:f.parentId||''}))),'IdeaFolders');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((state.projectTemplates||[]).map(t=>({id:t.id,name:t.name,actions:t.actions?.length?JSON.stringify(t.actions):''}))),'ProjectTemplates');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((state.reminders||[]).map(r=>({id:r.id,text:r.text||'',time:r.time||'08:00',enabled:r.enabled?'true':'false'}))),'Reminders');
   return wb;
 }
 
@@ -1265,21 +1296,34 @@ function _parseXLSXWorkbook(wb) {
       id:String(r.id||'if'+Date.now()+Math.random()),name:String(r.name||''),
       parentId:r.parentId?String(r.parentId):null
     }));
+  if (wb.SheetNames.includes('ProjectTemplates'))
+    parsed.projectTemplates = XLSX.utils.sheet_to_json(wb.Sheets['ProjectTemplates']).filter(r=>r.name).map(r=>({
+      id:String(r.id||'pt'+Date.now()+Math.random()),name:String(r.name||''),
+      actions:r.actions?JSON.parse(r.actions):[]
+    }));
+  if (wb.SheetNames.includes('Reminders'))
+    parsed.reminders = XLSX.utils.sheet_to_json(wb.Sheets['Reminders']).filter(r=>r.text).map(r=>({
+      id:String(r.id||'rem'+Date.now()+Math.random()),text:String(r.text||''),
+      time:String(r.time||'08:00'),enabled:bool(r.enabled)
+    }));
   return parsed;
 }
 
 // Apply a parsed state object onto the live state and persist.
 function _applyParsedState(parsed) {
-  if (parsed.tasks)       state.tasks       = parsed.tasks;
-  if (parsed.projects)    state.projects    = parsed.projects;
-  if (parsed.bucket)      state.bucket      = parsed.bucket;
-  if (parsed.ideas)       state.ideas       = parsed.ideas;
-  if (parsed.meetings)    state.meetings    = parsed.meetings;
-  if (parsed.areas)       state.areas       = parsed.areas;
-  if (parsed.ideaFolders) state.ideaFolders = parsed.ideaFolders;
+  if (parsed.tasks)            state.tasks            = parsed.tasks;
+  if (parsed.projects)         state.projects         = parsed.projects;
+  if (parsed.bucket)           state.bucket           = parsed.bucket;
+  if (parsed.ideas)            state.ideas            = parsed.ideas;
+  if (parsed.meetings)         state.meetings         = parsed.meetings;
+  if (parsed.areas)            state.areas            = parsed.areas;
+  if (parsed.ideaFolders)      state.ideaFolders      = parsed.ideaFolders;
+  if (parsed.projectTemplates) state.projectTemplates = parsed.projectTemplates;
+  if (parsed.reminders)        state.reminders        = parsed.reminders;
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     projects:state.projects,tasks:state.tasks,meetings:state.meetings,
-    bucket:state.bucket,ideas:state.ideas,areas:state.areas,ideaFolders:state.ideaFolders
+    bucket:state.bucket,ideas:state.ideas,areas:state.areas,ideaFolders:state.ideaFolders,
+    projectTemplates:state.projectTemplates,reminders:state.reminders
   }));
 }
 
@@ -1386,6 +1430,7 @@ if (!Array.isArray(_persisted.bucket))      _persisted.bucket      = [];
 if (!Array.isArray(_persisted.ideas))       _persisted.ideas       = [];
 if (!Array.isArray(_persisted.ideaFolders))       _persisted.ideaFolders       = [];
 if (!Array.isArray(_persisted.projectTemplates))  _persisted.projectTemplates  = [];
+if (!Array.isArray(_persisted.reminders))         _persisted.reminders         = [];
 
 let state = {
   projects:    _persisted.projects,
@@ -1396,6 +1441,7 @@ let state = {
   areas:       _persisted.areas || DEFAULT_STATE.areas,
   ideaFolders:      _persisted.ideaFolders,
   projectTemplates: _persisted.projectTemplates,
+  reminders:        _persisted.reminders,
   calView:'month',
   calYear:TODAY.getFullYear(), calMonth:TODAY.getMonth(),
   calWeekStart: null,
@@ -1529,7 +1575,7 @@ function renderDashboard(){
   document.getElementById('kpi-row').innerHTML=`
     <div class="kpi-card"><div class="kpi-value" style="color:#a855f7">${state.projects.length}</div><div class="kpi-label">Projects</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-primary)">${total}</div><div class="kpi-label">Total Actions</div></div>
-    <div class="kpi-card"><div class="kpi-value" style="color:var(--color-success)">${done}</div><div class="kpi-label">Completed</div></div>
+    <div class="kpi-card"><div class="kpi-value" style="color:var(--color-success)">${done}</div><div class="kpi-label">Done</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-error)">${overdue}</div><div class="kpi-label">Overdue</div></div>
     <div class="kpi-card"><div class="kpi-value" style="color:var(--color-warning)">${upcoming7.length}</div><div class="kpi-label">Next 7 Days</div></div>`;
   const projDiv=document.getElementById('project-list-dashboard');
@@ -1537,9 +1583,9 @@ function renderDashboard(){
     projDiv.innerHTML=`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
   } else {
     projDiv.innerHTML=`<div class="projects-grid">${state.projects.map(p=>{
-      const pt=state.tasks.filter(t=>t.project===p.id);
-      const pd=pt.filter(t=>t.done).length;
-      const pct=pt.length?Math.round(100*pd/pt.length):0;
+      const ptAll=state.tasks.filter(t=>_getProjectAndDescendantIds(p.id).has(t.project));
+      const pd=ptAll.filter(t=>t.done).length;
+      const pct=ptAll.length?Math.round(100*pd/ptAll.length):0;
       const doneIcon=p.completed
         ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
         :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
@@ -1551,9 +1597,10 @@ function renderDashboard(){
           <button class="btn-icon" title="Edit" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
           <button class="btn-icon" title="Delete" style="color:var(--color-error)" onclick="event.stopPropagation();deleteProject('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
         </div>
+        ${p.ongoing?`<div style="margin-bottom:var(--space-1)"><span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">∞ Ongoing</span></div>`:''}
         <div class="project-card-desc">${p.desc||'No description'}</div>
-        <div class="project-meta">${p.ongoing?`<span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">∞ Ongoing</span>`:''}<span class="badge badge-teal">${pt.length} actions</span><span class="badge badge-success">${pd} done</span>${!p.ongoing&&p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
-        <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
+        <div class="project-meta"><span class="badge" style="background:var(--color-primary);color:#fff">${ptAll.length-pd} pending</span><span class="badge badge-success">${pd} done</span>${!p.ongoing&&p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+        <div style="margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--color-divider)">${ptAll.length?`<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--space-2)"><span style="font-size:var(--text-xs);color:var(--color-text-muted)">${pd} / ${ptAll.length} actions done</span><span style="font-size:var(--text-sm);font-weight:800;color:${pct===100?'var(--color-success)':'var(--color-text)'}">${pct}%</span></div>`:''}<div style="background:var(--color-surface-offset);border-radius:var(--radius-full);height:10px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${pct===100?'var(--color-success)':p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div></div>
       </div>`;}).join('')}</div>`;
   }
   const upcomingDiv=document.getElementById('upcoming-tasks-list');
@@ -1563,9 +1610,15 @@ function renderDashboard(){
 
 // ===== PROJECTS VIEW =====
 const _expandedProjects=new Set();
+const _expandedAreas=new Set();
 function toggleProjectExpand(id,e){
   e.stopPropagation();
   _expandedProjects.has(id)?_expandedProjects.delete(id):_expandedProjects.add(id);
+  renderProjectsView();
+}
+function toggleAreaExpand(areaId,e){
+  e.stopPropagation();
+  _expandedAreas.has(areaId)?_expandedAreas.delete(areaId):_expandedAreas.add(areaId);
   renderProjectsView();
 }
 function renderProjectsView(){
@@ -1582,8 +1635,9 @@ function renderProjectsView(){
   function _sortMeetings(arr){return arr.sort((a,b)=>{const ap=a.date&&a.date<todayDs?1:0,bp=b.date&&b.date<todayDs?1:0;return ap!==bp?ap-bp:(a.date||'').localeCompare(b.date||'');});}
   function cardHtml(p){
     const pt=_projectTasksSorted(p.id);
-    const pd=pt.filter(t=>t.done).length;
-    const pct=pt.length?Math.round(100*pd/pt.length):0;
+    const ptAll=state.tasks.filter(t=>_getProjectAndDescendantIds(p.id).has(t.project));
+    const pd=ptAll.filter(t=>t.done).length;
+    const pct=ptAll.length?Math.round(100*pd/ptAll.length):0;
     const pmt=_sortMeetings(state.meetings.filter(m=>m.project===p.id));
     const expanded=_expandedProjects.has(p.id);
     const doneIcon=p.completed
@@ -1599,7 +1653,7 @@ function renderProjectsView(){
       </div>`:'';
       const taskSection=`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${(()=>{
         if(!pt.length) return `<div style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1) 0">No actions yet</div>`;
-        const rowHtml=(t,i)=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isWaiting?';border-left:3px solid var(--color-warning);padding-left:var(--space-2);opacity:.8':';padding-left:var(--space-1)'}" onclick="event.stopPropagation()">
+        const rowHtml=(t,i)=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" data-task-id="${t.id}" draggable="true" ondragstart="onTaskDragStart('${t.id}','${p.id}',event)" ondragend="onTaskDragEnd(event)" ondragover="onTaskRowDragOver('${t.id}',event)" ondragleave="onTaskRowDragLeave(event)" ondrop="onTaskRowDrop('${t.id}','${p.id}',event)" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0${isWaiting?';border-left:3px solid var(--color-warning);padding-left:var(--space-2);opacity:.8':';padding-left:var(--space-1)'}" onclick="event.stopPropagation()">
           <div class="task-check ${t.done?'done':t.partial?'partial':''}" onclick="event.stopPropagation();toggleTask('${t.id}')" style="margin-top:2px"></div>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
             <div style="display:flex;align-items:baseline;gap:var(--space-2)">
@@ -1642,7 +1696,7 @@ function renderProjectsView(){
       </div>`:'';
       expandedContent=childrenSection+taskSection+meetingSection;
     }
-    return `<div class="project-card${p.completed?' completed':''}${expanded?' expanded':''}" onclick="navigateProject('${p.id}')">
+    return `<div class="project-card${p.completed?' completed':''}${expanded?' expanded':''}" data-project-id="${p.id}" ondragover="onProjectDragOver('${p.id}',event)" ondragleave="onProjectDragLeave(event)" ondrop="onProjectDrop('${p.id}',event)" onclick="navigateProject('${p.id}')">
       <div class="project-card-header"><div class="project-dot" style="background:${p.color};width:14px;height:14px;flex-shrink:0"></div><span class="project-card-title">${p.name}</span>
         <div style="position:relative;flex-shrink:0">
           <button class="btn-icon" style="opacity:.6" title="Add" onclick="toggleProjectAddMenu('${p.id}',event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -1660,9 +1714,10 @@ function renderProjectsView(){
         <button class="btn-icon" title="Edit" onclick="event.stopPropagation();openProjectModal('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="btn-icon" title="Delete" style="color:var(--color-error)" onclick="event.stopPropagation();deleteProject('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>
+      ${p.ongoing?`<div style="margin-bottom:var(--space-1)"><span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">∞ Ongoing</span></div>`:''}
       <div class="project-card-desc">${p.desc||'No description'}</div>
-      <div class="project-meta">${p.ongoing?`<span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">∞ Ongoing</span>`:''}<span class="badge badge-teal">${pt.length} action${pt.length!==1?'s':''}</span><span class="badge badge-success">${pd} done</span>${pmt.length?`<span class="badge" style="background:var(--color-purple-highlight);color:var(--color-purple)">${pmt.length} meeting${pmt.length!==1?'s':''}</span>`:''}${children.length?`<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">${children.length} sub-project${children.length>1?'s':''}</span>`:''} ${!p.ongoing&&p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
-      <div style="margin-top:var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-full);height:4px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div>
+      <div class="project-meta"><span class="badge" style="background:var(--color-primary);color:#fff">${ptAll.length-pd} pending</span><span class="badge badge-success">${pd} done</span>${pmt.length?`<span class="badge" style="background:var(--color-purple-highlight);color:var(--color-purple)">${pmt.length} meeting${pmt.length!==1?'s':''}</span>`:''}${children.length?`<span class="badge" style="background:var(--color-surface-offset);color:var(--color-text-muted)">${children.length} sub-project${children.length>1?'s':''}</span>`:''} ${!p.ongoing&&p.end?`<span class="badge badge-orange">Due ${p.end}</span>`:''}</div>
+      <div style="margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--color-divider)">${ptAll.length?`<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--space-2)"><span style="font-size:var(--text-xs);color:var(--color-text-muted)">${pd} / ${ptAll.length} actions done</span><span style="font-size:var(--text-sm);font-weight:800;color:${pct===100?'var(--color-success)':'var(--color-text)'}">${pct}%</span></div>`:''}<div style="background:var(--color-surface-offset);border-radius:var(--radius-full);height:10px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${pct===100?'var(--color-success)':p.color};border-radius:var(--radius-full);transition:width .5s ease"></div></div></div>
       ${expandedContent}
     </div>`;
   }
@@ -1676,7 +1731,7 @@ function renderProjectsView(){
     const areaArg=areaId?`'${areaId}'`:'null';
     const taskListHtml=expanded?`<div style="margin-top:var(--space-3);border-top:1px solid var(--color-border);padding-top:var(--space-3)">${(()=>{
       if(!tasks.length) return '';
-      const rowHtml=t=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
+      const rowHtml=t=>{const isWaiting=!!(t.waiting&&!t.done&&!t.waitingFulfilled);const isWaitingFulfilled=!!(t.waiting&&!t.done&&t.waitingFulfilled);return`<div class="proj-task-row" data-task-id="${t.id}" draggable="true" ondragstart="onTaskDragStart('${t.id}',null,event)" ondragend="onTaskDragEnd(event)" style="display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-1) 0" onclick="event.stopPropagation()">
         <div class="task-check ${t.done?'done':t.partial?'partial':''}" style="margin-top:2px" onclick="event.stopPropagation();toggleTask('${t.id}')"></div>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="display:flex;align-items:baseline;gap:var(--space-2)">
@@ -1727,6 +1782,7 @@ function renderProjectsView(){
         <button class="btn-icon" style="opacity:.6;flex-shrink:0" title="${expanded?'Collapse':'Expand'}" onclick="toggleProjectExpand('${uid}',event)">${chevron}</button>
       </div>
       <div class="project-meta"><span class="badge badge-teal">${tasks.length} action${tasks.length!==1?'s':''}</span><span class="badge badge-success">${done} done</span>${noProjectMeetings.length?`<span class="badge" style="background:var(--color-purple-highlight);color:var(--color-purple)">${noProjectMeetings.length} meeting${noProjectMeetings.length!==1?'s':''}</span>`:''}</div>
+      ${(()=>{const pct=tasks.length?Math.round(100*done/tasks.length):0;return`<div style="margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--color-divider)">${tasks.length?`<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--space-2)"><span style="font-size:var(--text-xs);color:var(--color-text-muted)">${done} / ${tasks.length} actions done</span><span style="font-size:var(--text-sm);font-weight:800;color:${pct===100?'var(--color-success)':'var(--color-text)'}">${pct}%</span></div>`:''}<div style="background:var(--color-surface-offset);border-radius:var(--radius-full);height:10px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${pct===100?'var(--color-success)':'var(--color-text-muted)'};border-radius:var(--radius-full);transition:width .5s ease"></div></div></div>`;})()}
       ${taskListHtml}${meetingListHtml}
     </div>`;
   }
@@ -1743,11 +1799,28 @@ function renderProjectsView(){
   const unassignedProjects=_sortProjects(state.projects.filter(p=>(!p.area||!areaIds.has(p.area))&&isRoot(p)));
   const unassignedLoose=state.tasks.filter(t=>(!t.area||!areaIds.has(t.area))&&!t.project);
   if(unassignedProjects.length||unassignedLoose.length) sections.push({name:'Other',areaId:'other',projects:unassignedProjects,loose:unassignedLoose});
-  projDiv.innerHTML=sections.map(s=>`
-    <div style="margin-bottom:var(--space-6)">
-      <h2 class="section-heading">${s.name}</h2>
-      <div class="projects-grid">${s.loose.length?unassignedCardHtml('unassigned-'+s.areaId,s.loose,s.areaId):''}${s.projects.map(cardHtml).join('')}</div>
-    </div>`).join('')||`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
+  projDiv.innerHTML=sections.map(s=>{
+    const ap=s.areaId==='other'?state.projects.filter(p=>!p.area||!areaIds.has(p.area)):state.projects.filter(p=>p.area===s.areaId);
+    const aPending=ap.filter(p=>!p.completed&&!p.ongoing).length;
+    const aDone=ap.filter(p=>p.completed).length;
+    const aOngoing=ap.filter(p=>p.ongoing).length;
+    const apIds=new Set(ap.map(p=>p.id));
+    const aTasksDone=state.tasks.filter(t=>apIds.has(t.project)&&t.done).length+s.loose.filter(t=>t.done).length;
+    const aTasksTotal=state.tasks.filter(t=>apIds.has(t.project)).length+s.loose.length;
+    const aPct=aTasksTotal?Math.round(100*aTasksDone/aTasksTotal):0;
+    const aExpanded=_expandedAreas.has(s.areaId);
+    const aChevron=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;transform:rotate(${aExpanded?'0':'-90'}deg);flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>`;
+    return `<div style="margin-bottom:var(--space-4)">
+      <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3);cursor:pointer;user-select:none" onclick="toggleAreaExpand('${s.areaId}',event)">
+        ${aChevron}
+        <h2 class="section-heading" style="margin-bottom:0">${s.name}</h2>
+        ${aPending?`<span class="badge" style="background:var(--color-primary);color:#fff">${aPending} incomplete</span>`:''}
+        ${aDone?`<span class="badge badge-success">${aDone} complete</span>`:''}
+        ${aOngoing?`<span class="badge" style="background:var(--color-blue-highlight);color:var(--color-blue)">${aOngoing} ongoing</span>`:''}
+      </div>
+      ${aTasksTotal?`<div style="margin-bottom:var(--space-3);background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);cursor:pointer" onclick="toggleAreaExpand('${s.areaId}',event)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)"><div><div style="font-size:var(--text-2xl);font-weight:800;line-height:1;color:${aPct===100?'var(--color-success)':'var(--color-text)'}">${aPct}%</div><div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px">area complete</div></div><div style="display:flex;gap:var(--space-4);text-align:right"><div><div style="font-size:var(--text-base);font-weight:700;color:var(--color-text)">${aTasksDone}<span style="color:var(--color-text-muted);font-weight:400"> / ${aTasksTotal}</span></div><div style="font-size:var(--text-xs);color:var(--color-text-muted)">actions done</div></div><div><div style="font-size:var(--text-base);font-weight:700;color:var(--color-text)">${ap.length}</div><div style="font-size:var(--text-xs);color:var(--color-text-muted)">project${ap.length!==1?'s':''}</div></div></div></div><div style="background:var(--color-surface-offset);border-radius:var(--radius-full);height:24px;overflow:hidden"><div style="width:${aPct}%;height:100%;background:${aPct===100?'var(--color-success)':'var(--color-primary)'};border-radius:var(--radius-full);transition:width .5s ease"></div></div></div>`:''}
+      ${aExpanded?`<div class="projects-grid" style="margin-top:var(--space-2)">${s.loose.length?unassignedCardHtml('unassigned-'+s.areaId,s.loose,s.areaId):''}${s.projects.map(cardHtml).join('')}</div>`:''}
+    </div>`;}).join('')||`<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><h3>No projects yet</h3><p>Create your first project to organise your actions.</p><button class="btn btn-primary" onclick="openProjectModal()">Create Project</button></div>`;
 }
 
 // ===== TASK LIST =====
@@ -2426,10 +2499,9 @@ function closeFollowupModal(){_saveFollowupNotes();closeModal('followup-modal');
 function convertTaskToProject(id){
   const t=state.tasks.find(x=>x.id===id);
   if(!t) return;
-  if(!confirm(`Convert "${t.name}" into a project? The action will be removed.`)) return;
-  state.tasks=state.tasks.filter(x=>x.id!==id);
-  saveToStorage();
-  refreshView();
+  if(!confirm(`Convert "${t.name}" into a project?`)) return;
+  t.done=true; t.duration='project';
+  saveToStorage(); refreshView();
   openProjectModal(null,t.name,t.area||'');
 }
 function followupAction(type){
@@ -2714,9 +2786,9 @@ function _renderTemplateEditor(){
           </select>
           <select class="select" style="width:115px;flex-shrink:0" onchange="updateTemplateAction('${t.id}',${i},'duration',this.value)">
             <option value="">Duration</option>
-            <option value="under-10"${a.duration==='under-10'?' selected':''}>Under 10 min</option>
-            <option value="under-30"${a.duration==='under-30'?' selected':''}>Under 30 min</option>
-            <option value="under-60"${a.duration==='under-60'?' selected':''}>Under 1 hr</option>
+            <option value="under-10"${a.duration==='under-10'?' selected':''}>Under 10 mins</option>
+            <option value="under-30"${a.duration==='under-30'?' selected':''}>Under 30 mins</option>
+            <option value="under-60"${a.duration==='under-60'?' selected':''}>Under 1 hour</option>
             <option value="project"${a.duration==='project'?' selected':''}>Project-size</option>
           </select>
           <button class="btn-icon" style="flex-shrink:0;color:var(--color-text-muted)" onclick="removeTemplateAction('${t.id}',${i})" title="Remove"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -2811,6 +2883,88 @@ function toggleProjectComplete(id){
   const p=state.projects.find(x=>x.id===id); if(!p) return;
   p.completed=!p.completed; saveToStorage(); refreshView();
 }
+
+// ===== TASK DRAG BETWEEN PROJECTS =====
+let _draggedTaskId=null, _draggedFromProjectId=null;
+function _clearDragIndicators(){
+  document.querySelectorAll('.project-card.proj-drag-target').forEach(el=>el.classList.remove('proj-drag-target'));
+  document.querySelectorAll('.proj-task-row.drag-insert-before,.proj-task-row.drag-insert-after').forEach(el=>el.classList.remove('drag-insert-before','drag-insert-after'));
+}
+function onTaskDragStart(taskId,fromProjectId,event){
+  if(event.target.closest('button,input,select')){event.preventDefault();return;}
+  _draggedTaskId=taskId; _draggedFromProjectId=fromProjectId||null;
+  event.dataTransfer.effectAllowed='move';
+  event.dataTransfer.setData('text/plain',taskId);
+  setTimeout(()=>{const r=document.querySelector(`.proj-task-row[data-task-id="${taskId}"]`);if(r)r.classList.add('proj-dragging');},0);
+}
+function onTaskDragEnd(event){
+  if(_draggedTaskId){const r=document.querySelector(`.proj-task-row[data-task-id="${_draggedTaskId}"]`);if(r)r.classList.remove('proj-dragging');}
+  _clearDragIndicators();
+  _draggedTaskId=null; _draggedFromProjectId=null;
+}
+// Row-level handlers (take priority via stopPropagation)
+function onTaskRowDragOver(targetTaskId,event){
+  if(!_draggedTaskId||_draggedTaskId===targetTaskId)return;
+  event.preventDefault(); event.stopPropagation();
+  event.dataTransfer.dropEffect='move';
+  _clearDragIndicators();
+  const rect=event.currentTarget.getBoundingClientRect();
+  event.currentTarget.classList.add(event.clientY<rect.top+rect.height/2?'drag-insert-before':'drag-insert-after');
+}
+function onTaskRowDragLeave(event){
+  if(!event.currentTarget.contains(event.relatedTarget))
+    event.currentTarget.classList.remove('drag-insert-before','drag-insert-after');
+}
+function onTaskRowDrop(targetTaskId,targetProjectId,event){
+  event.preventDefault(); event.stopPropagation();
+  const rect=event.currentTarget.getBoundingClientRect();
+  const insertBefore=event.clientY<rect.top+rect.height/2;
+  event.currentTarget.classList.remove('drag-insert-before','drag-insert-after');
+  if(!_draggedTaskId||_draggedTaskId===targetTaskId){_draggedTaskId=null;return;}
+  const task=state.tasks.find(t=>t.id===_draggedTaskId); if(!task){_draggedTaskId=null;return;}
+  if(targetProjectId===_draggedFromProjectId){
+    // Reorder within the same project
+    const sorted=_projectTasksSorted(targetProjectId);
+    sorted.splice(sorted.findIndex(t=>t.id===_draggedTaskId),1);
+    let ins=sorted.findIndex(t=>t.id===targetTaskId); if(!insertBefore)ins++;
+    sorted.splice(ins,0,task);
+    sorted.forEach((t,i)=>{t.sortOrder=i;});
+  } else {
+    // Move to different project and insert at position
+    const sorted=_projectTasksSorted(targetProjectId);
+    task.project=targetProjectId;
+    let ins=sorted.findIndex(t=>t.id===targetTaskId); if(!insertBefore)ins++;
+    sorted.splice(ins,0,task);
+    sorted.forEach((t,i)=>{t.sortOrder=i;});
+    const target=state.projects.find(p=>p.id===targetProjectId);
+    _showToast(`✓ Moved to ${target?target.name:'project'}`);
+  }
+  saveToStorage(); refreshView();
+  _draggedTaskId=null; _draggedFromProjectId=null;
+}
+// Card-level handlers (fire when dragging over header/meta, not over a row)
+function onProjectDragOver(projectId,event){
+  if(!_draggedTaskId||projectId===_draggedFromProjectId)return;
+  event.preventDefault(); event.dataTransfer.dropEffect='move';
+  event.currentTarget.classList.add('proj-drag-target');
+}
+function onProjectDragLeave(event){
+  if(!event.currentTarget.contains(event.relatedTarget))event.currentTarget.classList.remove('proj-drag-target');
+}
+function onProjectDrop(projectId,event){
+  event.preventDefault(); event.stopPropagation();
+  event.currentTarget.classList.remove('proj-drag-target');
+  if(!_draggedTaskId||projectId===_draggedFromProjectId){_draggedTaskId=null;return;}
+  const task=state.tasks.find(t=>t.id===_draggedTaskId); if(!task){_draggedTaskId=null;return;}
+  // Append to end of target project
+  const sorted=_projectTasksSorted(projectId);
+  task.project=projectId;
+  task.sortOrder=sorted.length?sorted[sorted.length-1].sortOrder+1:0;
+  const target=state.projects.find(p=>p.id===projectId);
+  saveToStorage(); refreshView();
+  _showToast(`✓ Moved to ${target?target.name:'project'}`);
+  _draggedTaskId=null; _draggedFromProjectId=null;
+}
 function deleteProject(id){
   const p=state.projects.find(x=>x.id===id); if(!p) return;
   if(!confirm(`Delete project "${p.name}"? Its actions will become unassigned.`)) return;
@@ -2895,8 +3049,8 @@ function refreshView(){
 }
 
 // ===== THEME =====
-function toggleTheme(){ const h=document.documentElement; const c=h.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'); h.setAttribute('data-theme',c==='dark'?'light':'dark'); }
-(function(){const d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',d);})();
+function toggleTheme(){ const h=document.documentElement; const c=h.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'); const next=c==='dark'?'light':'dark'; h.setAttribute('data-theme',next); localStorage.setItem('taskcal_theme',next); }
+(function(){const saved=localStorage.getItem('taskcal_theme');const d=saved||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',d);})();
 
 // ===== ICS EXPORT =====
 function exportICS(){
@@ -2926,13 +3080,15 @@ function escICS(s){return(s||'').replace(/,/g,'\\,').replace(/;/g,'\\;').replace
 // ===== CSV IMPORT / EXPORT =====
 function openDataModal() {
   const counts = {
-    tasks:       state.tasks.length,
-    projects:    state.projects.length,
-    bucket:      state.bucket.length,
-    ideas:       state.ideas.length,
-    meetings:    (state.meetings||[]).length,
-    areas:       (state.areas||[]).length,
-    ideaFolders: (state.ideaFolders||[]).length
+    tasks:            state.tasks.length,
+    projects:         state.projects.length,
+    bucket:           state.bucket.length,
+    ideas:            state.ideas.length,
+    meetings:         (state.meetings||[]).length,
+    areas:            (state.areas||[]).length,
+    ideaFolders:      (state.ideaFolders||[]).length,
+    projectTemplates: (state.projectTemplates||[]).length,
+    reminders:        (state.reminders||[]).length
   };
   const plural = (n, word) => `${n} ${word}${n !== 1 ? 's' : ''}`;
   const rows = [
@@ -2956,7 +3112,13 @@ function openDataModal() {
       icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>' },
     { type:'ideaFolders', label:'Idea Folders', sub: plural(counts.ideaFolders,'folder'),
       bg:'var(--color-surface-offset)', fg:'var(--color-text-muted)',
-      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' }
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' },
+    { type:'projectTemplates', label:'Project Templates', sub: plural(counts.projectTemplates,'template'),
+      bg:'var(--color-blue-highlight)', fg:'var(--color-blue)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' },
+    { type:'reminders', label:'Reminders', sub: plural(counts.reminders,'reminder'),
+      bg:'var(--color-surface-offset)', fg:'var(--color-text-muted)',
+      icon:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' }
   ];
   document.getElementById('data-modal-body').innerHTML = `
     <div class="data-section-heading">Excel (.xlsx) — all sheets in one file</div>
@@ -2967,7 +3129,7 @@ function openDataModal() {
         </div>
         <div>
           <div class="data-row-name">All data</div>
-          <div class="data-row-count">Actions · Projects · Meetings · Collect · Ideas · Areas · Folders</div>
+          <div class="data-row-count">Actions · Projects · Meetings · Collect · Ideas · Areas · Folders · Templates · Reminders</div>
         </div>
       </div>
       <div class="data-row-actions">
@@ -3093,6 +3255,18 @@ function exportCSV(type) {
       (state.ideaFolders||[]).map(f => [f.id, f.name, f.parentId||''])
     );
     filename = 'taskcal-idea-folders.csv';
+  } else if (type === 'projectTemplates') {
+    csv = _toCSV(
+      ['id','name','actions'],
+      (state.projectTemplates||[]).map(t => [t.id, t.name, t.actions?.length?JSON.stringify(t.actions):''])
+    );
+    filename = 'taskcal-project-templates.csv';
+  } else if (type === 'reminders') {
+    csv = _toCSV(
+      ['id','text','time','enabled'],
+      (state.reminders||[]).map(r => [r.id, r.text||'', r.time||'08:00', r.enabled?'true':'false'])
+    );
+    filename = 'taskcal-reminders.csv';
   }
   _downloadCSV(filename, csv);
 }
@@ -3230,6 +3404,28 @@ function importCSV(type, input) {
         if (!state.ideaFolders) state.ideaFolders = [];
         const xi = state.ideaFolders.findIndex(f => f.id === item.id);
         if (xi !== -1) { state.ideaFolders[xi] = item; updated++; } else { state.ideaFolders.push(item); added++; }
+
+      } else if (type === 'projectTemplates') {
+        if (!r[col('name')]) return;
+        const item = {
+          id:      r[col('id')]   || 'pt'+Date.now()+Math.floor(Math.random()*9999),
+          name:    r[col('name')] || '',
+          actions: r[col('actions')] ? JSON.parse(r[col('actions')]) : []
+        };
+        if (!state.projectTemplates) state.projectTemplates = [];
+        const xi = state.projectTemplates.findIndex(t => t.id === item.id);
+        if (xi !== -1) { state.projectTemplates[xi] = item; updated++; } else { state.projectTemplates.push(item); added++; }
+      } else if (type === 'reminders') {
+        if (!r[col('text')]) return;
+        const item = {
+          id:      r[col('id')]   || 'rem'+Date.now()+Math.floor(Math.random()*9999),
+          text:    r[col('text')] || '',
+          time:    r[col('time')] || '08:00',
+          enabled: bool(r[col('enabled')])
+        };
+        if (!state.reminders) state.reminders = [];
+        const xi = state.reminders.findIndex(rem => rem.id === item.id);
+        if (xi !== -1) { state.reminders[xi] = item; updated++; } else { state.reminders.push(item); added++; }
       }
     });
 
@@ -3269,13 +3465,15 @@ function importXLSX(input) {
       const xi = arr.findIndex(x => x[key] === item[key]);
       if (xi !== -1) { arr[xi] = item; updated++; } else { arr.push(item); added++; }
     });
-    if (parsed.tasks)       upsert(state.tasks,       parsed.tasks);
-    if (parsed.projects)    upsert(state.projects,    parsed.projects);
-    if (parsed.bucket)      upsert(state.bucket,      parsed.bucket);
-    if (parsed.ideas)       upsert(state.ideas,       parsed.ideas);
-    if (parsed.meetings)    upsert(state.meetings,    parsed.meetings);
-    if (parsed.areas)       upsert(state.areas,       parsed.areas);
-    if (parsed.ideaFolders) upsert(state.ideaFolders, parsed.ideaFolders);
+    if (parsed.tasks)            upsert(state.tasks,            parsed.tasks);
+    if (parsed.projects)         upsert(state.projects,         parsed.projects);
+    if (parsed.bucket)           upsert(state.bucket,           parsed.bucket);
+    if (parsed.ideas)            upsert(state.ideas,            parsed.ideas);
+    if (parsed.meetings)         upsert(state.meetings,         parsed.meetings);
+    if (parsed.areas)            upsert(state.areas,            parsed.areas);
+    if (parsed.ideaFolders)      upsert(state.ideaFolders,      parsed.ideaFolders);
+    if (parsed.projectTemplates) upsert(state.projectTemplates, parsed.projectTemplates);
+    if (parsed.reminders)        upsert(state.reminders=(state.reminders||[]), parsed.reminders);
     saveToStorage(); refreshView();
     input.value = '';
     openDataModal();
@@ -3773,7 +3971,7 @@ function renderReviewStep() {
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-primary)">${sum.task}</div><div class="review-done-stat-label">Actions</div></div>
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-blue)">${sum.project}</div><div class="review-done-stat-label">Projects</div></div>
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-purple)">${sum.meeting}</div><div class="review-done-stat-label">Meetings</div></div>
-          <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-success)">${sum.completed}</div><div class="review-done-stat-label">Completed</div></div>
+          <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-success)">${sum.completed}</div><div class="review-done-stat-label">Done</div></div>
           <div class="review-done-stat"><div class="review-done-stat-num" style="color:var(--color-text-muted)">${sum.skipped}</div><div class="review-done-stat-label">Skipped</div></div>
         </div>
         <button class="btn btn-primary" onclick="closeReviewModal()">Done</button>
@@ -4618,7 +4816,200 @@ function showStartup() {
   s.offsetHeight; // force reflow so transition plays
   s.classList.remove('exit');
   renderStartupRecents();
+  renderStartupDigest();
   setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
+}
+
+// ===== DAILY REMINDERS =====
+function _showInAppNotif(body) {
+  const container = document.getElementById('reminder-notif-container');
+  if (!container) return;
+  const card = document.createElement('div');
+  card.className = 'reminder-notif';
+  card.innerHTML = `<div class="reminder-notif-content"><div class="reminder-notif-label">Reminder</div><div class="reminder-notif-body">${_h(body)}</div></div><button class="reminder-notif-dismiss" onclick="this.closest('.reminder-notif').remove()" title="Dismiss">×</button>`;
+  container.appendChild(card);
+  setTimeout(() => {
+    card.classList.add('removing');
+    setTimeout(() => card.remove(), 320);
+  }, 20000);
+}
+
+function renderStartupDigest() {
+  const el = document.getElementById('startup-digest');
+  if (!el) return;
+  const today = dateStr(TODAY);
+  const pending = state.tasks.filter(t => !t.done);
+  const overdue = pending.filter(t => t.due && t.due < today).length;
+  const dueToday = pending.filter(t => t.due === today).length;
+  const thisWeekCount = pending.filter(t => t.thisWeek && (!t.due || t.due > today)).length;
+  const activeReminders = (state.reminders || []).filter(r => r.enabled && r.text);
+  if (!overdue && !dueToday && !thisWeekCount && !activeReminders.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  const stat = (n, label, color) => n ? `<div class="startup-digest-stat"><span class="startup-digest-num" style="color:${color}">${n}</span><span class="startup-digest-sublabel">${label}</span></div>` : '';
+  let fired = [];
+  try { const f = JSON.parse(localStorage.getItem('taskcal_notif_fired') || 'null'); if (f && f.date === today) fired = f.ids; } catch(e) {}
+  const digestHtml = (overdue || dueToday || thisWeekCount) ? `
+    <div class="startup-digest-label">Today</div>
+    <div class="startup-digest-row">${stat(overdue,'overdue','var(--color-error)')}${stat(dueToday,'due today','var(--color-warning)')}${stat(thisWeekCount,'this week','var(--color-primary)')}</div>` : '';
+  const remindersHtml = activeReminders.length ? `
+    <div class="startup-digest-label" style="margin-top:${digestHtml?'var(--space-5)':'0'}">Reminders</div>
+    ${activeReminders.sort((a,b)=>a.time.localeCompare(b.time)).map(r => {
+      const done = fired.includes(r.id);
+      return `<div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-1) 0;font-size:var(--text-sm);color:${done?'var(--color-text-muted)':'var(--color-text)'}">
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-faint);flex-shrink:0">${r.time}</span>
+        <span style="${done?'text-decoration:line-through':''}">${_h(r.text)}</span>
+        ${done?`<span style="font-size:10px;color:var(--color-success);margin-left:auto">✓ shown</span>`:''}
+      </div>`;
+    }).join('')}` : '';
+  el.style.display = '';
+  el.innerHTML = digestHtml + remindersHtml;
+}
+
+function _updateReminderNavLabel() {
+  const el = document.getElementById('reminder-nav-label');
+  if (!el) return;
+  const digestOn = localStorage.getItem('taskcal_reminder_enabled') === 'true';
+  const customOn = (state.reminders || []).some(r => r.enabled);
+  el.textContent = (digestOn || customOn) ? 'Reminders on' : 'Daily Reminders';
+}
+
+function renderReminderModal() {
+  const body = document.getElementById('reminder-modal-body');
+  if (!body) return;
+  const digestEnabled = localStorage.getItem('taskcal_reminder_enabled') === 'true';
+  const digestTime = localStorage.getItem('taskcal_reminder_time') || '08:00';
+  const reminders = state.reminders || [];
+  const checkSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const circleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
+  const trashSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+  const sectionLabel = txt => `<div style="font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:var(--space-3)">${txt}</div>`;
+  const reminderRows = reminders.map(r => `
+    <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2)">
+      <input type="time" class="input" value="${r.time}" onchange="updateReminder('${r.id}','time',this.value)" style="width:112px;flex-shrink:0;font-size:var(--text-sm)">
+      <input type="text" class="input" value="${_h(r.text)}" placeholder="Reminder text…" oninput="updateReminder('${r.id}','text',this.value)" style="flex:1;min-width:0;font-size:var(--text-sm)">
+      <button class="btn-icon" title="${r.enabled?'Disable':'Enable'}" onclick="toggleReminder('${r.id}')" style="color:${r.enabled?'var(--color-success)':'var(--color-text-muted)'}">${r.enabled?checkSvg:circleSvg}</button>
+      <button class="btn-icon" style="color:var(--color-error)" onclick="deleteReminder('${r.id}')" title="Delete">${trashSvg}</button>
+    </div>`).join('');
+  body.innerHTML = `
+    <div style="padding:var(--space-4) var(--space-5)">
+      ${sectionLabel('Action Summary')}
+      <label style="display:flex;align-items:center;gap:var(--space-3);cursor:pointer;margin-bottom:var(--space-3)">
+        <input type="checkbox" id="reminder-digest-enabled" style="width:15px;height:15px;cursor:pointer" onchange="_saveDigestSetting()" ${digestEnabled?'checked':''}>
+        <span style="font-size:var(--text-sm)">Show daily action summary (overdue · due today · this week)</span>
+      </label>
+      <div style="display:flex;align-items:center;gap:var(--space-3)">
+        <span style="font-size:var(--text-sm);color:var(--color-text-muted)">at</span>
+        <input type="time" class="input" id="reminder-digest-time" value="${digestTime}" onchange="_saveDigestSetting()" style="width:130px">
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--color-divider);padding:var(--space-4) var(--space-5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+        ${sectionLabel('Custom Reminders')}
+        <button class="btn btn-ghost" style="font-size:var(--text-xs);padding:var(--space-1) var(--space-3);margin-top:-4px" onclick="addReminder()">+ Add</button>
+      </div>
+      <div id="reminder-list">${reminderRows}</div>
+      ${!reminders.length ? `<p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:var(--space-2) 0 0">No custom reminders yet — click + Add to create one.</p>` : ''}
+    </div>
+    <div style="padding:var(--space-3) var(--space-5);background:var(--color-surface-offset);font-size:var(--text-xs);color:var(--color-text-muted)">Reminders appear as in-app cards while TaskCal is open. Each fires once per day.</div>`;
+}
+
+function openReminderModal() {
+  renderReminderModal();
+  document.getElementById('reminder-modal').classList.add('open');
+}
+
+function _saveDigestSetting() {
+  const enabled = document.getElementById('reminder-digest-enabled')?.checked ?? false;
+  const time = document.getElementById('reminder-digest-time')?.value || '08:00';
+  localStorage.setItem('taskcal_reminder_enabled', enabled ? 'true' : 'false');
+  localStorage.setItem('taskcal_reminder_time', time);
+  _updateReminderNavLabel();
+}
+
+function addReminder() {
+  if (!state.reminders) state.reminders = [];
+  state.reminders.push({ id: 'r' + Date.now(), text: '', time: '08:00', enabled: true });
+  saveToStorage();
+  renderReminderModal();
+  _updateReminderNavLabel();
+}
+
+function deleteReminder(id) {
+  state.reminders = (state.reminders || []).filter(r => r.id !== id);
+  saveToStorage();
+  renderReminderModal();
+  _updateReminderNavLabel();
+}
+
+function updateReminder(id, field, value) {
+  const r = (state.reminders || []).find(r => r.id === id);
+  if (!r) return;
+  r[field] = value;
+  saveToStorage();
+  if (field !== 'text') { renderReminderModal(); _updateReminderNavLabel(); }
+}
+
+function toggleReminder(id) {
+  const r = (state.reminders || []).find(r => r.id === id);
+  if (!r) return;
+  r.enabled = !r.enabled;
+  saveToStorage();
+  renderReminderModal();
+  _updateReminderNavLabel();
+}
+
+function testReminder() {
+  _fireDigestAlert(true);
+  (state.reminders || []).filter(r => r.enabled && r.text).forEach(r => _showInAppNotif(r.text));
+}
+
+function _fireDigestAlert(force) {
+  const today = dateStr(TODAY);
+  const pending = state.tasks.filter(t => !t.done);
+  const overdue = pending.filter(t => t.due && t.due < today).length;
+  const dueToday = pending.filter(t => t.due === today).length;
+  const thisWeekCount = pending.filter(t => t.thisWeek).length;
+  const parts = [overdue && `${overdue} overdue`, dueToday && `${dueToday} due today`, thisWeekCount && `${thisWeekCount} this week`].filter(Boolean);
+  if (!parts.length && !force) return;
+  _showInAppNotif(parts.length ? parts.join(' · ') : 'No actions due today — all clear!');
+}
+
+function _startReminderScheduler() {
+  setInterval(() => {
+    const today = dateStr(new Date());
+    let fired;
+    try { fired = JSON.parse(localStorage.getItem('taskcal_notif_fired') || 'null'); } catch(e) { fired = null; }
+    if (!fired || fired.date !== today) fired = { date: today, ids: [] };
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    // Action summary digest
+    if (localStorage.getItem('taskcal_reminder_enabled') === 'true' && !fired.ids.includes('digest')) {
+      const [h, m] = (localStorage.getItem('taskcal_reminder_time') || '08:00').split(':').map(Number);
+      if (nowMins >= h * 60 + m) {
+        _fireDigestAlert(false);
+        fired.ids.push('digest');
+        localStorage.setItem('taskcal_notif_fired', JSON.stringify(fired));
+      }
+    }
+    // Custom reminders
+    (state.reminders || []).filter(r => r.enabled && r.text).forEach(r => {
+      if (fired.ids.includes(r.id)) return;
+      const [h, m] = (r.time || '08:00').split(':').map(Number);
+      if (nowMins >= h * 60 + m) {
+        _showInAppNotif(r.text);
+        fired.ids.push(r.id);
+        localStorage.setItem('taskcal_notif_fired', JSON.stringify(fired));
+      }
+    });
+  }, 60000);
+}
+
+function _showToast(msg, duration=2500) {
+  const t = document.getElementById('save-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { t.classList.remove('show'); t.textContent = '✓ Saved'; }, duration);
 }
 
 // ===== INIT =====
@@ -4626,11 +5017,15 @@ renderDashboard();
 // seed initial badges
 refreshView();
 renderStartupRecents();
+renderStartupDigest();
+_updateReminderNavLabel();
+_startReminderScheduler();
 setTimeout(() => document.getElementById('startup-textarea')?.focus(), 80);
 // Restore linked XLSX file after SheetJS has had time to load from CDN.
 setTimeout(() => _initFileStorage(), 1500);
 </script>
 <div class="save-toast" id="save-toast">✓ Saved</div>
+<div id="reminder-notif-container"></div>
 <div class="undo-toast" id="sched-undo-toast">
   <span id="sched-undo-label">Scheduled</span>
   <button class="undo-toast-btn" onclick="_undoScheduleAction()">Undo</button>
@@ -4704,6 +5099,21 @@ setTimeout(() => _initFileStorage(), 1500);
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Nothing, I'm done
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DAILY REMINDERS MODAL ===== -->
+<div class="modal-overlay" id="reminder-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title">Daily Reminders</span>
+      <button class="btn-icon" onclick="closeModal('reminder-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="reminder-modal-body" style="display:flex;flex-direction:column;gap:0;max-height:70vh;overflow-y:auto"></div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn btn-ghost" onclick="testReminder()">Send test</button>
+      <button class="btn btn-primary" onclick="closeModal('reminder-modal')">Done</button>
     </div>
   </div>
 </div>

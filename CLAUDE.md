@@ -21,10 +21,11 @@ state = {
   projects: [...],
   tasks:    [...],
   meetings: [...],
-  bucket:   [...],  // Collect page items
-  ideas:    [...],  // Ideas page items
+  bucket:   [...],      // Collect page items
+  ideas:    [...],      // Ideas page items
+  reminders:[...],      // In-app reminder cards
   calView, calYear, calMonth, calWeekStart, calDay,
-  currentView       // active page name string
+  currentView           // active page name string
 }
 ```
 
@@ -131,7 +132,7 @@ Tasks have an optional `thisWeek: boolean` field. A star button in the hover act
 
 ### Converting Actions to Projects
 
-`convertTaskToProject(id)` — confirms with the user, deletes the task from `state.tasks`, calls `refreshView()`, then opens the project modal pre-filled with the task's name and area. A **folder icon** button in the hover actions of every action card triggers this (Next Actions page, project card rows, No Project card rows).
+`convertTaskToProject(id)` — confirms with the user, marks the task `done: true` and sets `duration: 'project'` (showing the red "→ Needs a project" badge), saves, calls `refreshView()`, then opens the project modal pre-filled with the task's name and area. The original action remains in the list as a completed item. A **folder icon** button in the hover actions of every action card triggers this (Next Actions page, project card rows, No Project card rows).
 
 `saveTaskAsProject()` — triggered by the **Convert to Project** button in the task modal footer. Reads the current name, area, and notes from the open modal without saving a task. If `_pendingBucketId` is set (Collect processing flow), marks the bucket item `processedAs: 'project'`. Closes the task modal and opens the project modal pre-filled with name, area, and notes (notes → description via a 50 ms `setTimeout`).
 
@@ -269,9 +270,78 @@ On every page load a full-screen overlay (`#startup-screen`, `z-index:400`) is s
 - `startupCapture()` — creates a bucket item and calls `renderStartupRecents()` to update the live list; does not call `renderBucketView()` (that happens after the screen is dismissed)
 - `closeStartup()` — adds the `.exit` class (CSS fade+slide), waits 270 ms, hides the element, then calls `navigate('bucket')`
 - `renderStartupRecents()` — renders the last 7 bucket items below the textarea; called on init and after each capture
+- `renderStartupDigest()` — renders a **Today** digest below the recents showing counts of overdue, due-today, and this-week (starred) pending actions in colour-coded stat blocks; hidden when all counts are zero; called on init and from `showStartup()`
 - Keyboard: `Enter` captures, `Shift+Enter` newline, `Esc` dismisses
 
-The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
+The overlay is dismissed for the rest of the session via `closeStartup()` (sets `display:none`). `showStartup()` reverses this — it restores `display:flex`, forces a reflow, removes the `.exit` class so the CSS transition replays, calls `renderStartupRecents()` and `renderStartupDigest()`, and re-focuses the textarea. It is triggered by the **Quick Capture** button in the sidebar footer.
+
+### Daily Reminders
+
+In-app notification cards (no browser permission required) that fire once per day. Two types of reminders exist:
+
+**Digest reminder** — a single daily summary of overdue / due-today / this-week counts. Settings stored in `localStorage` (separate from `taskcal_data`):
+
+| Key | Values |
+|---|---|
+| `taskcal_reminder_enabled` | `'true'` / `'false'` |
+| `taskcal_reminder_time` | `'HH:MM'` (default `'08:00'`) |
+
+**Custom reminders** — `state.reminders` is an array of `{id, text, time, enabled}` objects. Each fires its own in-app card once per day at its configured time.
+
+**Deduplication** — `taskcal_notif_fired` JSON in `localStorage` tracks `{date, ids:[]}`. On each scheduler tick the fired IDs for today are checked before firing. The digest uses the sentinel ID `'digest'`; custom reminders use their `r.id`.
+
+**`_startReminderScheduler()`** — called once at init; runs `setInterval` every 60 seconds. On each tick it reads `taskcal_notif_fired`, checks the digest settings, then iterates `state.reminders` for any enabled reminders whose time has passed and haven't fired today.
+
+**`_fireDigestAlert(force)`** — builds a notification body from overdue / due-today / this-week counts and calls `_showInAppNotif(body)`. When `force` is false it marks the digest as fired in `taskcal_notif_fired` to prevent re-firing.
+
+**`_showInAppNotif(body)`** — creates a floating `.reminder-notif` card in `#reminder-notif-container` (bottom-right, `z-index:998`). The card auto-dismisses after 20 seconds and has a × button for manual dismissal. Uses CSS animation `notif-in` for slide-in. The startup screen also shows `#reminder-notif-container` so notifications are visible before the app is fully opened.
+
+**`openReminderModal()`** — opens `#reminder-modal`. Renders the digest enable checkbox + time picker, then a list of custom reminders each with text, time, enable toggle, and delete button. **Add Reminder** appends a new `{id, text:'', time:'08:00', enabled:true}` to `state.reminders`.
+
+**`saveReminderSettings()`** — saves the digest enabled/time settings to `localStorage` and the custom reminders array to `state`. Updates the sidebar label via `_updateReminderNavLabel()`.
+
+**`_updateReminderNavLabel()`** — sets the text of `#reminder-nav-label` to `'Reminders on'` when digest is enabled or any custom reminder is enabled, `'Daily Reminders'` otherwise.
+
+**`_showToast(msg, duration?)`** — shared helper that sets the save-toast text, adds `.show`, and resets after `duration` ms (default 2500). Used by the reminder flow and available for any future one-off toast.
+
+### Drag-and-Drop Task Reordering / Moving
+
+Tasks in project card rows support HTML5 drag-and-drop for both reordering within a project and moving to a different project.
+
+**State variables:** `_draggedTaskId` and `_draggedFromProjectId` track the in-flight drag.
+
+**Row-level handlers** (set on each `.proj-task-row` via `draggable="true"`):
+- `onTaskDragStart(taskId, fromProjectId, event)` — stores the dragged IDs in `_draggedTaskId` / `_draggedFromProjectId` and `dataTransfer`.
+- `onTaskDragEnd(event)` — clears dragging class and all insertion indicators.
+- `onTaskRowDragOver(targetTaskId, event)` — calls `stopPropagation()` to prevent the card-level handler firing; adds `drag-insert-before` or `drag-insert-after` CSS class based on cursor position within the row.
+- `onTaskRowDragLeave(event)` — removes insertion indicator classes.
+- `onTaskRowDrop(targetTaskId, targetProjectId, event)` — same project: uses `_projectTasksSorted(projectId)` to get the current order, splices the dragged task out and in at the target position, then reassigns `sortOrder` values (multiples of 10). Different project: moves `task.project` to the target project and inserts at the target row position.
+
+**Card-level handlers** (set on `.project-card` outer div) — fire only when dropping on empty card space (not on a row, since rows call `stopPropagation`):
+- `onProjectDragOver(projectId, event)` — adds `proj-drag-target` outline to the card.
+- `onProjectDragLeave(event)` — removes the outline.
+- `onProjectDrop(projectId, event)` — moves the dragged task to the target project, appending it after all existing tasks (highest `sortOrder + 10`).
+
+**CSS indicators:** `.drag-insert-before::before` and `.drag-insert-after::after` render a 2px primary-coloured horizontal line at the top/bottom of the row. `.project-card.proj-drag-target` shows a dashed primary-coloured outline.
+
+`_projectTasksSorted(projectId)` — returns tasks for a project sorted by `sortOrder` (nulls last), used to determine current insertion positions.
+
+### Progress Bars
+
+**Project cards** (both Dashboard and Projects view): each card renders a progress bar section below the task list showing `pd / ptAll.length actions done`, the percentage, and a coloured bar using `p.color` (green when 100%).
+
+**No Project card**: same structure using `var(--color-text-muted)` for the bar colour.
+
+**Area sections** (Projects view): each collapsible area section renders a large summary panel showing the area's overall percentage, total done / total task counts across all projects in the area (including loose tasks), and a 24px-tall bar.
+
+### Collapsible Area Sections
+
+The Projects view groups projects by area. Each area section is collapsible:
+
+- `_expandedAreas` — a `Set` of area IDs currently expanded. Areas start collapsed by default.
+- `toggleAreaExpand(areaId, e)` — toggles the area's ID in `_expandedAreas` and calls `renderProjectsView()`. Called from the chevron button or clicking the area progress card.
+- When collapsed, only the area heading and progress card are shown; the project grid is hidden.
+- When expanded, the full project grid renders below the progress card.
 
 ### Task age tint
 
@@ -279,7 +349,7 @@ The overlay is dismissed for the rest of the session via `closeStartup()` (sets 
 
 ### renderTasks sorting and layout
 
-The Next Actions page header displays two sections: left side shows KPI stats (**Incomplete Actions**, **Completed**), right side shows filters (**All Areas**, **All Status**, and **Sort**).
+The Next Actions page header displays two sections: left side shows KPI stats (**Pending Actions**, **Done**), right side shows filters (**All Areas**, **All Status**, and **Sort**).
 
 `renderTasks()` updates the action stats at the start, then renders the Next Actions page as a horizontal column per area (`task-columns` / `task-column`), each with an inline "Add action" button. An "Other" column collects actions with no recognised area.
 
@@ -299,16 +369,16 @@ When an area filter is active (`af` is non-empty — set by the **All Areas** dr
 
 ### Projects page header
 
-The Projects page header displays three KPI cards on the left — **Incomplete**, **Ongoing**, and **Completed** — each with its own count, with a **Manage Templates** button and a **New Project** button on the right (both in a flex row). `renderProjectsView()` updates all three counts (`#project-stat-incomplete`, `#project-stat-ongoing`, `#project-stat-completed`) at the start of the function.
+The Projects page header displays three KPI cards on the left — **Incomplete**, **Ongoing**, and **Complete** — each with its own count, with a **Manage Templates** button and a **New Project** button on the right (both in a flex row). `renderProjectsView()` updates all three counts (`#project-stat-incomplete`, `#project-stat-ongoing`, `#project-stat-completed`) at the start of the function.
 
-Projects are grouped by area in the grid (area-based sections, each with a heading). Root projects whose `ongoing` flag is true show an **∞ Ongoing** badge and never show the complete-toggle button. `saveProject()` forces `completed: false` and clears the end date when `ongoing` is true.
+Projects are grouped by area in the grid (area-based sections). Each area heading displays the area name alongside inline count badges: **incomplete** (primary colour), **complete** (green), and **ongoing** (blue) — badges are omitted when the count is zero. Root projects whose `ongoing` flag is true show an **∞ Ongoing** badge just below the card title and never show the complete-toggle button. `saveProject()` forces `completed: false` and clears the end date when `ongoing` is true.
 
 ### Ongoing Projects
 
 Projects have an optional `ongoing: boolean` field. When checked in the project modal:
 - The End Date field is disabled and cleared
 - The complete-toggle button is hidden on the project card
-- An **∞ Ongoing** badge appears in the card's meta row
+- An **∞ Ongoing** badge appears just below the card title
 - `completed` is forced to `false` on save and preserved as false through future edits
 - `_toggleOngoingFields()` handles the live disable/enable of the End Date input as the checkbox changes
 
@@ -360,8 +430,10 @@ Sheet names and columns:
 | `Ideas` | `id, text, created, developed, processed, processedAs, folderId` |
 | `Areas` | `id, name` |
 | `IdeaFolders` | `id, name, parentId` |
+| `ProjectTemplates` | `id, name, actions` |
+| `Reminders` | `id, text, time, enabled` |
 
-`area_name` and `project_name` columns are derived at export time and ignored on import — the `area_id` / `project_id` columns drive the join. `scheduledSlots` is serialised as a JSON string. Both export and import guard against `XLSX` being undefined (CDN not loaded) and alert the user.
+`area_name` and `project_name` columns are derived at export time and ignored on import — the `area_id` / `project_id` columns drive the join. `scheduledSlots` and `actions` (project template actions array) are serialised as JSON strings. Both export and import guard against `XLSX` being undefined (CDN not loaded) and alert the user.
 
 ### CSV Import / Export
 
@@ -378,6 +450,8 @@ Sheet names and columns:
 | `ideas` | `id, text, created, developed, processed, processedAs, folderId` |
 | `areas` | `id, name` |
 | `ideaFolders` | `id, name, parentId` |
+| `projectTemplates` | `id, name, actions` |
+| `reminders` | `id, text, time, enabled` |
 
 `attendees` is serialised as a pipe-separated string (`Alice|Bob|Carol`) in both CSV and xlsx; on import it is split back into an array.
 

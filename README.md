@@ -42,9 +42,33 @@ When the app loads, a full-screen minimalist capture screen appears before anyth
 - Type anything and press **Enter** to capture it — the item goes straight into Collect.
 - **Shift+Enter** adds a new line within the same item.
 - Captured items appear in a "Just captured" list below the input as you add them.
+- A **Today** digest appears below the recents showing colour-coded counts of overdue, due-today, and starred (This Week) actions — hidden automatically when there is nothing to surface.
 - Press **Esc** or click **Open full app →** to dismiss the screen and go to the Collect page.
 
 The startup screen appears on every page load and is dismissed for the rest of that session once closed. You can return to it at any time using the **Quick Capture** button at the bottom of the sidebar.
+
+---
+
+## Daily Reminders
+
+TaskCal shows in-app notification cards (no browser permission required) for two types of reminders:
+
+**Daily digest** — a summary card showing your overdue, due-today, and This Week action counts.
+
+- Click **Daily Reminders** in the sidebar footer to open the reminders settings.
+- Check **Enable daily digest** and set a time (default 08:00).
+- Click **Save** — the digest card will appear once per day at or after the configured time.
+- Click **Send test** to fire an immediate test card without waiting.
+
+**Custom reminders** — add any number of personal reminders, each with its own message and time.
+
+- Click **Add Reminder** in the reminders modal to create a new reminder.
+- Each reminder has a message text, a time, and an enable/disable toggle.
+- Each fires its own notification card once per day at the configured time.
+
+Notification cards appear in the bottom-right corner of the screen, auto-dismiss after 20 seconds, and have a × button for immediate dismissal. They are also visible on the startup capture screen.
+
+When any reminder is active, the sidebar item shows **Reminders on**.
 
 ---
 
@@ -116,7 +140,7 @@ Actions and projects can be assigned to an **area**: **Work**, **Life**, or **Un
 The Next Actions page displays a separate column for each area. Actions with no area (or an unrecognised area) appear in an **Other** column, which is only shown when such actions exist. Click **Add action** inside any column to open the action form with that area pre-filled.
 
 The page header displays:
-- **Left side:** KPI stats showing **Incomplete Actions** and **Completed** count
+- **Left side:** KPI stats showing **Pending Actions** and **Done** count
 - **Right side:** Filters for **All Areas**, **All Status**, and **Sort** options (Due Date, Priority, Duration, Oldest First, Newest First, Name)
 
 The sidebar badge for Next Actions shows the count of **incomplete** (not done) actions.
@@ -136,7 +160,7 @@ Click **New ▾ → Action**, or click any day on the calendar to open the actio
 | **Area** | Work / Life / University / custom |
 | **Project** | Optional — assign to an existing project |
 | **Priority** | Low / Medium / High |
-| **Time Required** | Under 10 mins / Under 30 mins / Under an hour / Should be turned into a project |
+| **Time Required** | Under 10 mins / Under 30 mins / Under 1 hour / Should be turned into a project |
 | **Due Date** | Date picker |
 | **Due Time** | Optional time |
 | **Notes** | Free-text notes field |
@@ -149,7 +173,7 @@ The modal footer has three buttons: **Cancel**, **Convert to Project** (carries 
 
 - **Check** the circle on any action card to mark it done (strikethrough applied).
 - **Star** (⭐) — hover an action card to reveal a star button. Click it to add the action to the **This Week** focus block at the top of its area column. Click again to remove it.
-- **Convert to project** — hover an action card to reveal a folder icon. Click it to delete the action and open a new project form pre-filled with the action's name and area.
+- **Convert to project** — hover an action card to reveal a folder icon. Click it to mark the action done (with a red "Needs a project" badge) and open a new project form pre-filled with the action's name and area. The original action remains in the list as a completed item.
 - **Edit** (pencil icon) to reopen the action form.
 - **Delete** (bin icon) to remove the action permanently.
 - Completed actions remain visible but styled as done and sorted below uncompleted actions in each column.
@@ -205,13 +229,25 @@ Projects can be organised hierarchically. Assign a **Parent Project** when creat
 
 ### Projects Page
 
-The Projects page displays all root projects grouped by area in a card grid. The page header shows three KPI cards — **Incomplete**, **Ongoing**, and **Completed** counts — on the left, with a **New Project** button on the right.
+The Projects page displays all root projects grouped by area in a card grid. The page header shows three KPI cards — **Incomplete**, **Ongoing**, and **Complete** counts — on the left, with a **Manage Templates** button and a **New Project** button on the right. Each area section heading displays the area name with inline count badges showing how many of its projects are incomplete, complete, and ongoing.
 
 Each project card has:
 - **+ button** — create a new action, meeting, or sub-project pre-assigned to that project
 - **Chevron** — expand to show sub-projects, actions (with move up/down, schedule, convert to project, edit, delete buttons), and meetings inline
+- **Progress bar** — shows completed / total actions and percentage; turns green at 100%
 - **Complete toggle** — mark the project done/active (hidden for Ongoing projects)
 - **Edit / Delete** buttons — revealed on hover below the card header
+
+### Drag-and-Drop
+
+Action rows inside expanded project cards can be dragged to reorder or move between projects:
+
+- **Reorder** — drag an action row up or down within the same project card. A blue insertion line shows where it will land.
+- **Move** — drag an action row and drop it onto a different project card to reassign it. Drop on an empty area of the card to append it at the end, or drop on a specific row to insert at that position.
+
+### Area Sections
+
+Projects are grouped by area in collapsible sections. Each area section shows a summary panel with the area's overall progress (done / total actions across all projects) and a percentage bar. Click the progress panel or the chevron to expand/collapse the area and reveal the project cards.
 
 ### Linked Ideas Folder
 
@@ -229,7 +265,7 @@ Links are bidirectional but are **not preserved** when exporting and re-importin
 Mark a project as **Ongoing** when it is a continuous process with no defined end date (e.g. a recurring area of responsibility). In the project modal, check **Ongoing** to:
 - Disable and clear the End Date field
 - Hide the complete-toggle button on the card
-- Show an **∞ Ongoing** badge in the card meta row
+- Show an **∞ Ongoing** badge just below the card title
 
 Ongoing projects count separately from Incomplete and Completed in the header KPIs.
 
@@ -313,7 +349,7 @@ Click **Schedule Action** in the calendar toolbar to open a searchable list of y
 
 The Dashboard shows:
 
-- **KPI cards** — Total projects, total actions, completed actions, overdue actions, actions due in the next 7 days.
+- **KPI cards** — Total projects, total actions, done actions, overdue actions, actions due in the next 7 days.
 - **Project cards** — Each project with a progress bar (completed / total actions), description, and date range.
 - **Upcoming Actions** — A panel listing all actions due in the next 14 days, grouped by date, with project colour coding.
 
@@ -347,6 +383,8 @@ Export or import all data in a single `.xlsx` file. Each data type lives on its 
 | **Ideas** | All Ideas items with development state and folder assignment |
 | **Areas** | All areas (including custom user-created areas) |
 | **IdeaFolders** | All idea folder definitions with parent–child relationships |
+| **ProjectTemplates** | All project templates with their action lists (name, priority, duration per action) |
+| **Reminders** | All custom reminders (text, time, enabled state) |
 
 The exported file (`taskcal-data.xlsx`) can be opened and edited directly in Excel or Google Sheets. Re-importing merges by ID — existing rows are updated, new rows are appended.
 
@@ -365,6 +403,8 @@ Each data type can also be exported and imported independently as a `.csv` file:
 | `taskcal-ideas.csv` | Ideas (with folder assignment) |
 | `taskcal-areas.csv` | Areas (including custom areas) |
 | `taskcal-idea-folders.csv` | Idea folders (with parent–child structure) |
+| `taskcal-project-templates.csv` | Project templates with their action lists (serialised as JSON in the `actions` column) |
+| `taskcal-reminders.csv` | Custom reminders (text, time, enabled state) |
 
 **Importing** merges by ID — rows whose ID already exists are updated in place; new IDs are appended. Re-importing an export will not create duplicates. A toast notification confirms how many rows were added and updated.
 
@@ -375,12 +415,6 @@ CSV files can be opened and edited in Excel, Google Sheets, or any text editor b
 ## Light / Dark Mode
 
 Click **Toggle Theme** at the bottom of the sidebar to switch between light and dark mode. The app also respects your system preference by default.
-
----
-
-## Resetting Data
-
-Click **Reset All Data** at the bottom of the sidebar to wipe all actions, projects, meetings, and collected items and restore the built-in sample data. **This operation cannot be undone.**
 
 ---
 
